@@ -8,7 +8,6 @@ import { connectDB, disconnectDB } from './config/db.ts';
 import { initSocketServer } from './sockets/socket.ts';
 import apiRoutes from './routes/index.ts';
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
