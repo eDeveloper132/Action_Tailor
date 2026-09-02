@@ -138,9 +138,11 @@
   </div>
 
   <script src="/global.js"></script>
-  <script>
+  <script type="module">
+    import { showToast, setButtonLoading } from '/ui_components/index.ts';
+
     const form = document.getElementById('signinForm');
-    const msgBox = document.getElementById('authMessage');
+    const submitBtn = form.querySelector('button[type="submit"]');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -148,8 +150,7 @@
       const password = document.getElementById('password').value;
 
       try {
-        msgBox.className = 'auth-message success';
-        msgBox.textContent = 'Signing in...';
+        setButtonLoading(submitBtn, true, 'Signing in...');
 
         const res = await window.ActionTailor.apiFetch('/api/auth/signin', {
           method: 'POST',
@@ -161,7 +162,7 @@
           localStorage.setItem('user', JSON.stringify(res.data.user));
         }
 
-        msgBox.textContent = 'Success! Redirecting to dashboard...';
+        showToast('Signed in successfully! Redirecting...', 'success', { title: 'Welcome Back' });
 
         const urlParams = new URLSearchParams(window.location.search);
         const redirect = urlParams.get('redirect') || '/dashboard';
@@ -169,8 +170,8 @@
           window.location.href = redirect;
         }, 800);
       } catch (err) {
-        msgBox.className = 'auth-message error';
-        msgBox.textContent = err.message || 'Invalid email or password';
+        setButtonLoading(submitBtn, false);
+        showToast(err.message || 'Invalid email or password', 'error', { title: 'Authentication Failed' });
       }
     });
   </script>

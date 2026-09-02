@@ -80,87 +80,135 @@
   </style>
 </head>
 <body>
-  <nav class="navbar">
-    <div class="brand">
-      <span>⚡</span> Action Tailor
-    </div>
-    <div class="nav-actions">
-      <span class="badge">Protected Area</span>
-      <button id="logoutBtn" class="btn btn-secondary">Sign Out</button>
-    </div>
-  </nav>
+  <div id="navbarMount"></div>
 
   <div class="container">
-    <div class="dashboard-header">
-      <h1>Protected Dashboard</h1>
-      <p>Welcome to your secure Action Tailor workspace.</p>
-    </div>
-
-    <div class="grid">
-      <div class="card stat-card">
-        <h3>Server Status</h3>
-        <div id="serverStatus" class="value">Checking...</div>
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">Protected Dashboard</h1>
+        <p style="color: var(--text-secondary);">Welcome to your secure Action Tailor workspace.</p>
       </div>
-      <div class="card stat-card">
-        <h3>System Uptime</h3>
-        <div id="serverUptime" class="value">--</div>
-      </div>
-      <div class="card stat-card">
-        <h3>Environment</h3>
-        <div class="value" style="color: var(--primary-color);">Production-Ready</div>
+      <div>
+        <button id="systemInfoBtn" class="btn" style="background-color: var(--surface-color); border: 1px solid var(--border-color); color: #cbd5e1;">
+          View System Modal
+        </button>
       </div>
     </div>
 
-    <div class="card">
-      <h2 style="margin-bottom: 1rem; font-size: 1.25rem;">Live Health Telemetry</h2>
+    <!-- UI Components Grid Container -->
+    <div id="statCardsGrid" class="grid" style="margin-top: 2rem;"></div>
+
+    <div class="card" style="margin-top: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 style="font-size: 1.25rem; margin: 0;">Live Health Telemetry</h2>
+        <span style="font-size: 0.75rem; color: #64748b;">Auto-refreshing every 5s</span>
+      </div>
       <pre id="telemetryData" style="background: #090d16; padding: 1rem; border-radius: 0.5rem; color: #a5f3fc; overflow-x: auto; font-size: 0.875rem;">Loading telemetry...</pre>
     </div>
   </div>
 
   <script src="/global.js"></script>
-  <script>
-    // Live telemetry update
+  <script type="module">
+    import {
+      renderNavbar,
+      createStatCard,
+      updateStatCard,
+      showToast,
+      showModal,
+    } from '/ui_components/index.ts';
+
+    // 1. Mount Navigation Bar Component
+    renderNavbar('navbarMount', {
+      brandName: 'Action Tailor',
+      logoIcon: '⚡',
+      activeLink: 'dashboard',
+      showAuthButton: true,
+    });
+
+    // 2. Render Stat Cards Components
+    const grid = document.getElementById('statCardsGrid');
+
+    const cardStatus = createStatCard({
+      id: 'cardStatus',
+      title: 'Server Status',
+      value: 'CHECKING...',
+      subtitle: 'Monitoring HTTP & WebSocket',
+      color: 'primary',
+    });
+
+    const cardUptime = createStatCard({
+      id: 'cardUptime',
+      title: 'System Uptime',
+      value: '0s',
+      subtitle: 'Continuous uptime',
+      color: 'success',
+    });
+
+    const cardEnv = createStatCard({
+      id: 'cardEnv',
+      title: 'Architecture',
+      value: 'Full-Stack TS',
+      subtitle: 'Express 5 • JWT • Sockets',
+      color: 'primary',
+    });
+
+    grid.appendChild(cardStatus);
+    grid.appendChild(cardUptime);
+    grid.appendChild(cardEnv);
+
+    // 3. Telemetry Update Function
     async function loadTelemetry() {
       try {
         const data = await window.ActionTailor.apiFetch('/health');
-        document.getElementById('serverStatus').textContent = data.status.toUpperCase();
-        document.getElementById('serverStatus').style.color = 'var(--success-color)';
-        document.getElementById('serverUptime').textContent = Math.floor(data.uptime) + 's';
+        updateStatCard('cardStatus', data.status.toUpperCase(), 'All systems operational');
+        updateStatCard('cardUptime', Math.floor(data.uptime) + 's', 'Active server process');
         document.getElementById('telemetryData').textContent = JSON.stringify(data, null, 2);
       } catch (err) {
-        document.getElementById('serverStatus').textContent = 'OFFLINE';
-        document.getElementById('serverStatus').style.color = 'var(--error-color)';
+        updateStatCard('cardStatus', 'OFFLINE', 'Connection error');
         document.getElementById('telemetryData').textContent = 'Error fetching telemetry: ' + err.message;
+        showToast('Failed to refresh system telemetry', 'error', { title: 'Network Notice' });
       }
     }
 
-    // Fetch authenticated user info
+    // 4. Authenticated User Profile
     async function loadUser() {
       try {
         const res = await window.ActionTailor.apiFetch('/api/auth/me');
         if (res.data) {
           const user = res.data;
           document.querySelector('.dashboard-header h1').textContent = `Welcome, ${user.name || user.email}!`;
-          document.querySelector('.dashboard-header p').textContent = `Signed in as ${user.email} (Role: ${user.role || 'user'})`;
+          document.querySelector('.dashboard-header p').textContent = `Authenticated as ${user.email} (Role: ${user.role || 'user'})`;
+          showToast(`Signed in as ${user.email}`, 'info', { title: 'Session Active', duration: 3000 });
         }
       } catch (_err) {
-        // Handled by middleware or cookies
+        // Handled by auth middleware
       }
     }
+
+    // 5. System Modal Trigger
+    document.getElementById('systemInfoBtn').addEventListener('click', () => {
+      showModal({
+        title: 'Action Tailor System Details',
+        content: `
+          <p style="margin-bottom: 0.75rem;">This dashboard is powered by custom modular TypeScript UI components:</p>
+          <ul style="padding-left: 1.25rem; line-height: 1.6; color: #94a3b8; font-size: 0.875rem;">
+            <li><strong>Navbar:</strong> Sticky, responsive, authentication-aware</li>
+            <li><strong>StatCard:</strong> Live reactive metrics with color presets</li>
+            <li><strong>Toast:</strong> Floating notification queue with auto-dismiss</li>
+            <li><strong>Modal:</strong> Accessible dialog overlays with animations</li>
+          </ul>
+        `,
+        confirmText: 'Awesome!',
+        cancelText: 'Close',
+        onConfirm: () => {
+          showToast('Modal confirmed!', 'success');
+        },
+      });
+    });
 
     loadUser();
     loadTelemetry();
     setInterval(loadTelemetry, 5000);
-
-    // Logout handling
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      try {
-        await window.ActionTailor.apiFetch('/api/auth/signout', { method: 'POST' });
-      } catch (_e) {}
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/signin';
-    });
   </script>
 </body>
 </html>

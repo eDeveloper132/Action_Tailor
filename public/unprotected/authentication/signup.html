@@ -128,9 +128,11 @@
   </div>
 
   <script src="/global.js"></script>
-  <script>
+  <script type="module">
+    import { showToast, setButtonLoading } from '/ui_components/index.ts';
+
     const form = document.getElementById('signupForm');
-    const msgBox = document.getElementById('authMessage');
+    const submitBtn = form.querySelector('button[type="submit"]');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -138,8 +140,7 @@
       const confirmPass = document.getElementById('confirmPassword').value;
 
       if (pass !== confirmPass) {
-        msgBox.className = 'auth-message error';
-        msgBox.textContent = 'Passwords do not match!';
+        showToast('Passwords do not match! Please check and try again.', 'warning', { title: 'Validation Error' });
         return;
       }
 
@@ -147,8 +148,7 @@
       const email = document.getElementById('email').value;
 
       try {
-        msgBox.className = 'auth-message success';
-        msgBox.textContent = 'Creating your account...';
+        setButtonLoading(submitBtn, true, 'Creating Account...');
 
         const res = await window.ActionTailor.apiFetch('/api/auth/signup', {
           method: 'POST',
@@ -160,13 +160,13 @@
           localStorage.setItem('user', JSON.stringify(res.data.user));
         }
 
-        msgBox.textContent = 'Account created! Redirecting to dashboard...';
+        showToast('Account created successfully! Redirecting...', 'success', { title: 'Welcome to Action Tailor' });
         setTimeout(() => {
           window.location.href = '/dashboard';
         }, 1000);
       } catch (err) {
-        msgBox.className = 'auth-message error';
-        msgBox.textContent = err.message || 'Failed to create account';
+        setButtonLoading(submitBtn, false);
+        showToast(err.message || 'Failed to create account', 'error', { title: 'Registration Error' });
       }
     });
   </script>

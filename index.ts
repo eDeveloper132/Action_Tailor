@@ -10,7 +10,7 @@ import { initSocketServer } from './sockets/socket.ts';
 import apiRoutes from './routes/index.ts';
 import viewRoutes from './routes/views.routes.ts';
 import authRoutes from './routes/auth.routes.ts';
-import { requestLogger, notFoundHandler, errorHandler } from './middlewares/index.ts';
+import { requestLogger, notFoundHandler, errorHandler, tsTranspiler } from './middlewares/index.ts';
 
 dotenv.config();
 
@@ -25,6 +25,7 @@ app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(tsTranspiler);
 app.use(express.static('public'));
 
 // Request Logger
