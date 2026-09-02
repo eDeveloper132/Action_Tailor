@@ -1,34 +1,228 @@
 /* ==========================================
-   Action Tailor - Dashboard Custom Stylesheet
-   Augmenting Tailwind CSS with glassmorphism & telemetry styles
+   Action Tailor - Pakistani Tailor Shop Management Dashboard
+   Custom Stylesheet: Bilingual Accents, Steppers, Status Badges & Print Receipts
    ========================================== */
 
-.dashboard-telemetry-container {
-  background: radial-gradient(circle at top left, #111827, #030712);
-  border: 1px solid rgba(51, 65, 85, 0.6);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+/* Bilingual Urdu Typography Enhancement */
+.lang-ur {
+  font-family: 'Noto Nastaliq Urdu', 'Urdu Typesetting', 'Jameel Noori Nastaleeq', 'Segoe UI', system-ui, sans-serif;
+  direction: rtl;
 }
 
-.dashboard-card-glow {
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+.bilingual-label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
 }
 
-.dashboard-card-glow:hover {
-  transform: translateY(-2px);
+.bilingual-label .ur {
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-width: 1px;
+}
+
+.status-pending {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.status-confirmed {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.status-cutting {
+  background-color: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+.status-stitching {
+  background-color: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.status-quality_check {
+  background-color: rgba(236, 72, 153, 0.15);
+  color: #f472b6;
+  border-color: rgba(236, 72, 153, 0.3);
+}
+
+.status-ready {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+}
+
+.status-delivered {
+  background-color: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+  border-color: rgba(100, 116, 139, 0.3);
+}
+
+.status-cancelled {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Payment Badges */
+.payment-paid {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.payment-partial {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.payment-unpaid {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Operational Stepper Progress for Customer & Admin */
+.workflow-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.workflow-stepper::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #334155;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.step-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-circle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background-color: #1e293b;
+  border: 2px solid #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+
+.step-node.completed .step-circle {
+  background-color: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.step-node.active .step-circle {
+  background-color: #6366f1;
+  border-color: #818cf8;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+}
+
+.step-label {
+  font-size: 0.7rem;
+  margin-top: 0.35rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.step-node.completed .step-label,
+.step-node.active .step-label {
+  color: #f8fafc;
+  font-weight: 600;
+}
+
+/* Interactive Card Glows */
+.tailor-card {
+  background-color: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.tailor-card:hover {
   border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1);
 }
 
-.pulse-indicator {
-  animation: pulseAnimation 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* Pulse animation for live order notifications */
+.pulse-dot {
+  animation: pulseDot 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@keyframes pulseAnimation {
+@keyframes pulseDot {
   0%, 100% {
     opacity: 1;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.4;
+    opacity: 0.3;
+    transform: scale(0.85);
   }
 }
 
+/* ==========================================
+   Printable Tailor Receipt Slip (@media print)
+   ========================================== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #printableSlipArea,
+  #printableSlipArea * {
+    visibility: visible;
+  }
+
+  #printableSlipArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 1.5cm;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

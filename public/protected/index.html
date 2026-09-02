@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Action Tailor (Protected)</title>
+  <title>Action Tailor - پاکستانی درزی شاپ مینجمنٹ</title>
 
   <!-- Tailwind CSS CDN & Configuration -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/js/tailwind-config.js"></script>
+
+  <!-- Socket.IO Client CDN for Real-time Tailoring Updates -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
   <!-- Centralized & View-Specific Custom CSS -->
   <link rel="stylesheet" href="/global.css">
@@ -15,49 +18,397 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
   <!-- Dynamic Mount for Navigation Bar UI Component -->
-  <div id="navbarMount"></div>
+  <div id="navbarMount" class="no-print"></div>
 
   <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 no-print">
     
-    <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-slate-800">
+    <!-- Top Action Banner & Branding -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-800">
       <div>
-        <h1 id="userGreeting" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          Protected Dashboard
-        </h1>
-        <p id="userSub" class="text-sm text-slate-400 mt-1">
-          Welcome to your secure Action Tailor workspace.
+        <div class="flex items-center gap-3">
+          <h1 id="userGreeting" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Action Tailor / ایکشن ٹیلرز
+          </h1>
+          <span id="roleBadge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-600/20 text-brand-400 border border-brand-500/30">
+            Tailor Shop Desk
+          </span>
+        </div>
+        <p id="userSub" class="text-xs sm:text-sm text-slate-400 mt-1">
+          Smart Pakistani Tailoring Management Software • جدید سلائی نظام
         </p>
       </div>
-      <div>
+
+      <!-- Quick Action Buttons for Shop Staff -->
+      <div id="adminQuickActions" class="flex flex-wrap items-center gap-2.5">
         <button
-          id="systemInfoBtn"
-          class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold border border-slate-700 transition-all shadow-sm"
+          id="btnNewOrder"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-brand-600/25 transition-all"
         >
-          <span>ℹ</span> System Details
+          <span>✂</span>
+          <span>Book Order / نیا آرڈر</span>
+        </button>
+        <button
+          id="btnNewCustomer"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold border border-slate-700 transition-all"
+        >
+          <span>👤</span>
+          <span>Add Customer / نیا گاہک</span>
         </button>
       </div>
     </div>
 
-    <!-- Reactive Stat Cards Grid (Populated by TypeScript Component) -->
-    <div id="statCardsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6 my-8"></div>
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-2 mt-6 border-b border-slate-800 overflow-x-auto pb-2 text-sm select-none">
+      <button id="tabOrdersBtn" class="tab-btn active px-4 py-2 rounded-lg font-semibold bg-brand-600 text-white transition-all">
+        Orders Queue / آرڈرز
+      </button>
+      <button id="tabCustomersBtn" class="tab-btn px-4 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-all">
+        Customers / گاہکوں کا ریکارڈ
+      </button>
+      <button id="tabDeliveriesBtn" class="tab-btn px-4 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-all">
+        Upcoming Deliveries / ڈیلیوریز
+      </button>
+      <button id="tabTelemetryBtn" class="tab-btn px-4 py-2 rounded-lg font-medium text-slate-400 hover:text-white transition-all">
+        System Health / سسٹم
+      </button>
+    </div>
 
-    <!-- Live Telemetry Monitor Card -->
-    <section class="card rounded-2xl p-6 bg-slate-900/60 border border-slate-800 shadow-xl">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-indicator"></span>
-          <h2 class="text-lg font-bold text-white">Live Health Telemetry</h2>
+    <!-- TAB 1: ORDERS QUEUE & METRICS -->
+    <div id="tabOrders" class="tab-content mt-6 space-y-6">
+      
+      <!-- Operational Metric Cards (Today's bookings, Stitching, Ready, Balance) -->
+      <div id="metricsRow" class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4"></div>
+
+      <!-- Filters & Search Bar -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+        <div class="relative flex-1">
+          <input
+            type="text"
+            id="orderSearchInput"
+            placeholder="Search Order # or WhatsApp phone / آرڈر نمبر یا فون سے تلاش کریں..."
+            class="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+          >
         </div>
-        <span class="text-xs text-slate-500 font-mono">Auto-polling (5s)</span>
+        <div class="flex items-center gap-2">
+          <select
+            id="statusFilterSelect"
+            class="px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs sm:text-sm text-slate-200 focus:outline-none focus:border-brand-500"
+          >
+            <option value="">All Statuses / تمام حالتیں</option>
+            <option value="pending">Pending / زیرِ التوا</option>
+            <option value="cutting">Cutting / کٹائی</option>
+            <option value="stitching">Stitching / سلائی</option>
+            <option value="ready">Ready / تیار</option>
+            <option value="delivered">Delivered / حوالے کیا گیا</option>
+          </select>
+          <button id="btnRefreshOrders" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700" title="Refresh">
+            🔄
+          </button>
+        </div>
       </div>
-      <pre id="telemetryData" class="dashboard-telemetry-container p-4 rounded-xl text-cyan-300 text-xs sm:text-sm overflow-x-auto shadow-inner leading-relaxed">Loading telemetry...</pre>
-    </section>
+
+      <!-- Orders List Container -->
+      <div id="ordersListContainer" class="space-y-3">
+        <div class="text-center py-12 text-slate-500 text-sm">
+          Loading tailoring orders queue...
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: CUSTOMERS & MEASUREMENTS -->
+    <div id="tabCustomers" class="tab-content mt-6 space-y-6 hidden">
+      <div class="flex items-center justify-between gap-3">
+        <input
+          type="text"
+          id="customerSearchInput"
+          placeholder="Search by customer name or phone / گاہک کے نام یا فون نمبر سے تلاش کریں..."
+          class="w-full max-w-md px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+        >
+        <button id="btnRegisterCustomerFromTab" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap">
+          + Add Customer / نیا گاہک
+        </button>
+      </div>
+
+      <div id="customersListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="text-slate-500 text-sm py-8">Loading customer directory...</div>
+      </div>
+    </div>
+
+    <!-- TAB 3: UPCOMING DELIVERIES -->
+    <div id="tabDeliveries" class="tab-content mt-6 space-y-4 hidden">
+      <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs sm:text-sm flex items-center gap-2">
+        <span>⏰</span>
+        <span>Orders promised for delivery in the next 3 days / اگلے تین دن میں ڈیلیور ہونے والے آرڈرز</span>
+      </div>
+      <div id="upcomingDeliveriesContainer" class="space-y-3"></div>
+    </div>
+
+    <!-- TAB 4: SYSTEM HEALTH & TELEMETRY -->
+    <div id="tabTelemetry" class="tab-content mt-6 space-y-4 hidden">
+      <section class="card rounded-2xl p-6 bg-slate-900/60 border border-slate-800 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-dot"></span>
+            <h2 class="text-base font-bold text-white">Live System Telemetry</h2>
+          </div>
+          <span class="text-xs text-slate-500 font-mono">Auto-polling</span>
+        </div>
+        <pre id="telemetryData" class="dashboard-telemetry-container p-4 rounded-xl text-cyan-300 text-xs overflow-x-auto leading-relaxed">Loading telemetry...</pre>
+      </section>
+    </div>
   </main>
+
+  <!-- ==========================================
+       MODAL 1: NEW ORDER BOOKING MODAL
+       ========================================== -->
+  <div id="modalOrderBooking" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-5 sm:p-6 shadow-2xl">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>✂</span> Book Stitching Order / نیا سوٹ بک کریں
+        </h2>
+        <button id="closeOrderModal" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="formBookOrder" class="space-y-4 text-xs sm:text-sm">
+        <!-- 1. Customer Selector -->
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">
+            Customer / گاہک منتخب کریں <span class="text-rose-400">*</span>
+          </label>
+          <select id="orderCustomerSelect" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+            <option value="">Select customer / گاہک منتخب کریں</option>
+          </select>
+        </div>
+
+        <!-- 2. Garment Category & Quantity -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">
+              Clothing Type / لباس کی قسم <span class="text-rose-400">*</span>
+            </label>
+            <select id="orderCategorySelect" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+              <option value="shalwaar_qameez">Shalwaar Qameez / شلوار قمیض</option>
+              <option value="kurta_pajama">Kurta Pajama / کرتہ پاجامہ</option>
+              <option value="waistcoat">Waistcoat / واسکٹ</option>
+              <option value="trouser_shirt">Shirt & Trouser / پینٹ شرٹ</option>
+              <option value="sherwani">Sherwani / شیروانی</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Quantity / تعداد (Suits)</label>
+            <input type="number" id="orderQuantity" min="1" value="1" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+          </div>
+        </div>
+
+        <!-- 3. Measurement Profile Selector -->
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">
+            Saved Measurement Profile / ناپ کا پروفائل
+          </label>
+          <select id="orderMeasurementProfileSelect" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+            <option value="">Select or use default / ڈیفالٹ ناپ استعمال کریں</option>
+          </select>
+        </div>
+
+        <!-- 4. Fabric Details -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Fabric By / کپڑا</label>
+            <select id="orderFabricProvidedBy" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+              <option value="customer">Customer / گاہک کا اپنا</option>
+              <option value="shop">Shop Provided / شاپ کا</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Fabric Type / قسم</label>
+            <input type="text" id="orderFabricType" placeholder="Cotton, Boski, Wash & Wear" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Color / رنگ</label>
+            <input type="text" id="orderFabricColor" placeholder="White, Navy Blue, Off-White" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+          </div>
+        </div>
+
+        <!-- 5. Pakistani Tailoring Design Options -->
+        <div class="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3">
+          <div class="font-bold text-xs text-brand-400 uppercase tracking-wider">Design & Cut / ڈیزائن اور کٹائی کی تفصیل</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Collar / کالر</label>
+              <select id="orderCollarStyle" class="w-full px-2 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">
+                <option value="ban_collar">Ban / بین کالر</option>
+                <option value="regular">Regular / ریگولر کالر</option>
+                <option value="sherwani_chinese">Chinese / چینی گلا</option>
+                <option value="soft_collar">Soft / نرم کالر</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Cuff / کف</label>
+              <select id="orderCuffStyle" class="w-full px-2 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">
+                <option value="single_button">Single Button / سنگل</option>
+                <option value="double_button">Double Button / ڈبل</option>
+                <option value="open_sleeve">Open / گول بازو</option>
+                <option value="french">French / فرینچ کف</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Ghera / دامن</label>
+              <select id="orderDamanStyle" class="w-full px-2 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">
+                <option value="round_gol">Gol / گول دامن</option>
+                <option value="straight_chors">Chors / چورس دامن</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Shalwaar / شلوار</label>
+              <select id="orderShalwaarStyle" class="w-full px-2 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">
+                <option value="simple_shalwaar">Simple / سادہ شلوار</option>
+                <option value="trouser_pajama">Trouser / پینٹ ٹراؤزر</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Pricing & Delivery -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Stitching Price / سلائی (PKR) <span class="text-rose-400">*</span></label>
+            <input type="number" id="orderStitchingPrice" min="0" placeholder="2500" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Advance / ایڈوانس (PKR)</label>
+            <input type="number" id="orderAdvancePayment" min="0" value="0" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Delivery Date / ڈیلیوری تاریخ <span class="text-rose-400">*</span></label>
+            <input type="date" id="orderDeliveryDate" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Special Notes / خاص ہدایات</label>
+          <input type="text" id="orderNotes" placeholder="e.g. موبائل جیب رکھیں، نرم پٹی" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
+          <button type="button" id="btnCancelOrderModal" class="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800">
+            Cancel / منسوخ
+          </button>
+          <button type="submit" id="btnSubmitOrder" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 font-semibold text-white">
+            Confirm & Save Order / آرڈر محفوظ کریں
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: REGISTER NEW CUSTOMER
+       ========================================== -->
+  <div id="modalNewCustomer" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>👤</span> Add Customer / نیا گاہک درج کریں
+        </h2>
+        <button id="closeCustomerModal" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="formNewCustomer" class="space-y-3.5 text-xs sm:text-sm">
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Customer Full Name / گاہک کا نام <span class="text-rose-400">*</span></label>
+          <input type="text" id="custName" placeholder="e.g. Muhammad Bilal / محمد بلال" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">WhatsApp / Phone / فون نمبر <span class="text-rose-400">*</span></label>
+          <input type="tel" id="custPhone" placeholder="0300-1234567" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">City / شہر</label>
+          <input type="text" id="custCity" value="Lahore" placeholder="Lahore, Faisalabad, Karachi" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Address / پتہ</label>
+          <input type="text" id="custAddress" placeholder="Shop / House details" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
+          <button type="button" id="btnCancelCustomerModal" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300">
+            Cancel
+          </button>
+          <button type="submit" id="btnSubmitCustomer" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 font-semibold text-white">
+            Save Customer / محفوظ کریں
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 3: QUICK RECORD PAYMENT
+       ========================================== -->
+  <div id="modalRecordPayment" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <span>💵</span> Receive Payment / رقم وصولی
+        </h2>
+        <button id="closePaymentModal" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="formRecordPayment" class="space-y-3 text-xs sm:text-sm">
+        <input type="hidden" id="payOrderId">
+        <div>
+          <div class="text-xs text-slate-400 mb-1">Order # / آرڈر نمبر:</div>
+          <div id="payOrderNumberDisplay" class="font-mono font-bold text-brand-400 text-sm">--</div>
+        </div>
+
+        <div>
+          <div class="text-xs text-slate-400 mb-1">Remaining Balance / باقی رقم:</div>
+          <div id="payRemainingDisplay" class="font-bold text-rose-400 text-base">0 PKR</div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Amount to Pay / وصول شدہ رقم (PKR) <span class="text-rose-400">*</span></label>
+          <input type="number" id="payAmount" min="1" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Payment Method / طریقہ کار</label>
+          <select id="payMethod" class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white">
+            <option value="cash">Cash / نقد</option>
+            <option value="jazzcash">JazzCash / جاز کیش</option>
+            <option value="easypaisa">EasyPaisa / ایزی پیسہ</option>
+            <option value="bank_transfer">Bank Transfer / بینک</option>
+          </select>
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-800">
+          <button type="button" id="btnCancelPaymentModal" class="px-3.5 py-1.5 rounded-xl border border-slate-700 text-slate-300">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-semibold text-white">
+            Confirm Payment / وصولی درج کریں
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       PRINTABLE ORDER RECEIPT SLIP AREA
+       (Visible during print or modal preview)
+       ========================================== -->
+  <div id="printableSlipArea" class="hidden print:block font-mono text-black bg-white p-6 max-w-xl mx-auto border border-dashed border-slate-300">
+    <div id="printSlipContent"></div>
+  </div>
 
   <!-- Centralized Global JS & External View TypeScript Controller -->
   <script src="/global.js"></script>
-  <script type="module" src="/js/dashboard.ts"></script>
+  <script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>
