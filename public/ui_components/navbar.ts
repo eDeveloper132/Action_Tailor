@@ -91,3 +91,4 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
   container.appendChild(nav);
   return nav;
 };
+

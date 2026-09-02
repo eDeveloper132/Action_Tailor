@@ -44,3 +44,4 @@ export const setButtonLoading = (button: HTMLButtonElement, loading: boolean, lo
     button.textContent = button.dataset.originalText || button.textContent;
   }
 };
+

@@ -115,3 +115,4 @@ export const showModal = (options: ModalOptions): ModalInstance => {
 
   return { close, element: overlay };
 };
+
