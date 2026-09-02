@@ -66,9 +66,29 @@
             class="w-full px-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 auth-input focus:outline-none text-sm"
             placeholder="••••••••"
             required
-            minlength="6"
+            minlength="8"
             autocomplete="new-password"
           >
+          <!-- Password Strength Bar -->
+          <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2.5 overflow-hidden">
+            <div id="strengthBar" class="h-full w-0 transition-all duration-300 rounded-full bg-slate-700"></div>
+          </div>
+
+          <!-- Password Requirement Indicators -->
+          <div id="passwordRequirements" class="mt-2.5 space-y-1.5 text-xs text-slate-400">
+            <div id="ruleLength" class="flex items-center gap-2 text-slate-400 transition-colors duration-200">
+              <span class="rule-icon w-3.5 h-3.5 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold">○</span>
+              <span>At least 8 characters</span>
+            </div>
+            <div id="ruleLetter" class="flex items-center gap-2 text-slate-400 transition-colors duration-200">
+              <span class="rule-icon w-3.5 h-3.5 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold">○</span>
+              <span>Contains at least one letter</span>
+            </div>
+            <div id="ruleNumber" class="flex items-center gap-2 text-slate-400 transition-colors duration-200">
+              <span class="rule-icon w-3.5 h-3.5 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold">○</span>
+              <span>Contains at least one number</span>
+            </div>
+          </div>
         </div>
 
         <div>

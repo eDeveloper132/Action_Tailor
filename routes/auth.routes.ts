@@ -63,6 +63,17 @@ router.post('/signup', (req: Request, res: Response<ApiResponse<AuthResponse>>) 
     return;
   }
 
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+
+  if (password.length < 8 || !hasLetter || !hasNumber) {
+    res.status(400).json({
+      status: 'error',
+      message: 'Password must be at least 8 characters long and contain both letters and numbers.',
+    });
+    return;
+  }
+
   const newUser = {
     userId: 'usr_' + Date.now().toString(36),
     email,
