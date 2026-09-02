@@ -134,11 +134,31 @@
       }
     }
 
+    // Fetch authenticated user info
+    async function loadUser() {
+      try {
+        const res = await window.ActionTailor.apiFetch('/api/auth/me');
+        if (res.data) {
+          const user = res.data;
+          document.querySelector('.dashboard-header h1').textContent = `Welcome, ${user.name || user.email}!`;
+          document.querySelector('.dashboard-header p').textContent = `Signed in as ${user.email} (Role: ${user.role || 'user'})`;
+        }
+      } catch (_err) {
+        // Handled by middleware or cookies
+      }
+    }
+
+    loadUser();
     loadTelemetry();
     setInterval(loadTelemetry, 5000);
 
     // Logout handling
-    document.getElementById('logoutBtn').addEventListener('click', () => {
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await window.ActionTailor.apiFetch('/api/auth/signout', { method: 'POST' });
+      } catch (_e) {}
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/signin';
     });
   </script>

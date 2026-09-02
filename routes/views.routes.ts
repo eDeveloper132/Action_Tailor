@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { Router, type Request, type Response } from 'express';
+import { authenticate } from '../middlewares/auth.middleware.ts';
 
 const router = Router();
 const publicDir = path.join(process.cwd(), 'public');
@@ -31,13 +32,13 @@ router.get('/auth/signup', (_req: Request, res: Response) => {
 // Protected Views (Dashboard & Internal)
 // ==========================================
 
-// Protected dashboard view
-router.get('/dashboard', (_req: Request, res: Response) => {
+// Protected dashboard view (requires valid JWT in cookie or Authorization header)
+router.get('/dashboard', authenticate, (_req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'protected', 'index.html'));
 });
 
 // Protected alias
-router.get('/protected', (_req: Request, res: Response) => {
+router.get('/protected', authenticate, (_req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'protected', 'index.html'));
 });
 

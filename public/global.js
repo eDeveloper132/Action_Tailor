@@ -12,11 +12,14 @@ console.log('[Action Tailor] Global script initialized.');
  * @returns {Promise<any>}
  */
 async function apiFetch(endpoint, options = {}) {
+  const token = localStorage.getItem('token');
   const defaultHeaders = {
     'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
   };
 
   const config = {
+    credentials: 'include',
     ...options,
     headers: {
       ...defaultHeaders,

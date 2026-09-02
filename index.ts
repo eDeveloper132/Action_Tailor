@@ -4,11 +4,13 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import chalk from 'chalk';
 
+import cookieParser from 'cookie-parser';
 import { connectDB, disconnectDB } from './config/db.ts';
 import { initSocketServer } from './sockets/socket.ts';
 import apiRoutes from './routes/index.ts';
 import viewRoutes from './routes/views.routes.ts';
-import type { ErrorResponse } from './types/index.ts';
+import authRoutes from './routes/auth.routes.ts';
+import { requestLogger, notFoundHandler, errorHandler } from './middlewares/index.ts';
 
 dotenv.config();
 
@@ -22,13 +24,11 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 app.use(cors({ origin: CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(express.static('public'));
 
-// Simple request logger
-app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(chalk.gray(`[${new Date().toISOString()}] ${req.method} ${req.url}`));
-  next();
-});
+// Request Logger
+app.use(requestLogger);
 
 // Ensure MongoDB is connected before handling requests (cached for serverless)
 app.use(async (_req: Request, _res: Response, next: NextFunction) => {
@@ -42,19 +42,13 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
 
 // Routes
 app.use('/', viewRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
 app.use('/', apiRoutes);
 
-// 404 handler
-app.use((_req: Request, res: Response<ErrorResponse>) => {
-  res.status(404).json({ error: 'Endpoint not found' });
-});
-
-// Global error handler
-app.use((err: Error, _req: Request, res: Response<ErrorResponse>, _next: NextFunction) => {
-  console.error(chalk.red('Internal Server Error:'), err);
-  res.status(500).json({ error: 'Internal server error', message: err.message });
-});
+// Error Middlewares
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Start HTTP server & Socket.IO only when running in traditional/local environments (not Vercel serverless)
 if (!process.env.VERCEL) {

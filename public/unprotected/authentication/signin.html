@@ -147,11 +147,31 @@
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
-      msgBox.className = 'auth-message success';
-      msgBox.textContent = 'Signing in... Redirecting to dashboard';
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1000);
+      try {
+        msgBox.className = 'auth-message success';
+        msgBox.textContent = 'Signing in...';
+
+        const res = await window.ActionTailor.apiFetch('/api/auth/signin', {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (res.data && res.data.token) {
+          localStorage.setItem('token', res.data.token);
+          localStorage.setItem('user', JSON.stringify(res.data.user));
+        }
+
+        msgBox.textContent = 'Success! Redirecting to dashboard...';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect') || '/dashboard';
+        setTimeout(() => {
+          window.location.href = redirect;
+        }, 800);
+      } catch (err) {
+        msgBox.className = 'auth-message error';
+        msgBox.textContent = err.message || 'Invalid email or password';
+      }
     });
   </script>
 </body>

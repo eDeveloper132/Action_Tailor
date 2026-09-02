@@ -62,3 +62,26 @@ export interface DbConnectionOptions {
   autoIndex?: boolean;
 }
 
+// ==========================================
+// Authentication & JWT Types & Interfaces
+// ==========================================
+
+export interface JwtUserPayload {
+  userId: string;
+  email: string;
+  name?: string;
+  role?: string;
+  iat?: number;
+  exp?: number;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: {
+    userId: string;
+    email: string;
+    name?: string;
+    role?: string;
+  };
+}
+
