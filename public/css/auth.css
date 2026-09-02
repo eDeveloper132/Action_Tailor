@@ -36,3 +36,42 @@
   text-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
 }
 
+/* Real-time Password Checklist & Status Styles */
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.rule-item.valid {
+  color: #34d399;
+  font-weight: 500;
+}
+
+.rule-item.valid .rule-icon {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #34d399;
+}
+
+.rule-item.invalid {
+  color: #94a3b8;
+}
+
+.rule-item.invalid .rule-icon {
+  border-color: #475569;
+  color: #64748b;
+}
+
+.auth-input.input-valid {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 1px #10b981;
+}
+
+.auth-input.input-invalid {
+  border-color: #f43f5e !important;
+  box-shadow: 0 0 0 1px #f43f5e;
+}
+
