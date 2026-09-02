@@ -55,12 +55,28 @@ router.get('/protected', authenticate, (req: AuthRequest, res: Response) => {
 // ==========================================
 
 // Admin main desk (restricted to admin & staff)
-router.get('/admin', authenticate, requireRole('admin', 'staff'), (_req: Request, res: Response) => {
+router.get(['/admin', '/admin/dashboard'], authenticate, requireRole('admin', 'staff'), (_req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'protected', 'admin', 'index.html'));
 });
 
-router.get('/admin/dashboard', authenticate, requireRole('admin', 'staff'), (_req: Request, res: Response) => {
-  res.sendFile(path.join(publicDir, 'protected', 'admin', 'index.html'));
+// Admin orders queue (restricted to admin & staff)
+router.get(['/orders', '/admin/orders'], authenticate, requireRole('admin', 'staff'), (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'protected', 'orders.html'));
+});
+
+// Admin book new suit view (restricted to admin & staff)
+router.get(['/orders/new', '/admin/orders/new'], authenticate, requireRole('admin', 'staff'), (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'protected', 'new-order.html'));
+});
+
+// Admin customers directory (restricted to admin & staff)
+router.get(['/customers', '/admin/customers'], authenticate, requireRole('admin', 'staff'), (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'protected', 'customers.html'));
+});
+
+// Admin measurement studio (restricted to admin & staff)
+router.get(['/measurements', '/admin/measurements'], authenticate, requireRole('admin', 'staff'), (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'protected', 'measurements.html'));
 });
 
 // ==========================================
@@ -68,36 +84,16 @@ router.get('/admin/dashboard', authenticate, requireRole('admin', 'staff'), (_re
 // ==========================================
 
 // Dedicated Customer Portal (suit tracking, measurements & receipts)
-router.get('/portal', authenticate, (_req: Request, res: Response) => {
-  res.sendFile(path.join(publicDir, 'protected', 'customer', 'index.html'));
-});
+router.get(
+  ['/portal', '/customer/portal', '/portal/orders', '/portal/measurements'],
+  authenticate,
+  (_req: Request, res: Response) => {
+    res.sendFile(path.join(publicDir, 'protected', 'customer', 'index.html'));
+  }
+);
 
-router.get('/customer/portal', authenticate, (_req: Request, res: Response) => {
-  res.sendFile(path.join(publicDir, 'protected', 'customer', 'index.html'));
-});
-
-// Orders queue view
-router.get('/orders', authenticate, (_req: Request, res: Response) => {
-  res.sendFile(path.join(publicDir, 'protected', 'orders.html'));
-});
-
-// Book new suit view
-router.get('/orders/new', authenticate, (_req: Request, res: Response) => {
-  res.sendFile(path.join(publicDir, 'protected', 'new-order.html'));
-});
-
-// Customers directory view
-router.get('/customers', authenticate, (_req: Request, res: Response) => {
-  res.sendFile(path.join(publicDir, 'protected', 'customers.html'));
-});
-
-// Measurement profiles view
-router.get('/measurements', authenticate, (_req: Request, res: Response) => {
-  res.sendFile(path.join(publicDir, 'protected', 'measurements.html'));
-});
-
-// User profile view
-router.get('/profile', authenticate, (_req: Request, res: Response) => {
+// User profile view (accessible by all authenticated roles)
+router.get(['/profile', '/admin/profile', '/portal/profile'], authenticate, (_req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'protected', 'profile.html'));
 });
 

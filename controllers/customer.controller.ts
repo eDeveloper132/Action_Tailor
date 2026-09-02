@@ -29,6 +29,19 @@ export class CustomerController {
   static async getById(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+      // IDOR Protection: Customers may only view their own profile
+      if (req.user && req.user.role === 'customer') {
+        const userCustId = (req.user as any).customerProfile?.toString();
+        if (!userCustId || userCustId !== id) {
+          res.status(403).json({
+            status: 'error',
+            message: 'Access denied: You can only access your own profile / اس پروفائل تک رسائی کی اجازت نہیں ہے',
+          });
+          return;
+        }
+      }
+
       const details = await CustomerService.getCustomerDetails(id);
       if (!details.customer) {
         res.status(404).json({ status: 'error', message: 'Customer not found / گاہک نہیں ملا' });

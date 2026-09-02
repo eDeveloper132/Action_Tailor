@@ -67,36 +67,36 @@ function renderOrderRow(order) {
   const custPhone = order.customer?.phone || "";
   const deliveryDate = order.expectedDeliveryDate ? new Date(order.expectedDeliveryDate).toLocaleDateString("en-GB") : "--";
   return `
-    <div class="tailor-card p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="tailor-card p-4 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="space-y-1">
         <div class="flex items-center gap-2">
-          <span class="font-mono font-extrabold text-white text-base tracking-wider">${order.orderNumber}</span>
+          <span class="font-mono font-extrabold text-slate-900 text-base tracking-wider">${order.orderNumber}</span>
           ${getStatusBadge(order.status)}
-          <span class="text-xs px-2 py-0.5 rounded ${isPaid ? "payment-paid" : "payment-partial"}">
+          <span class="text-xs px-2 py-0.5 rounded font-semibold ${isPaid ? "payment-paid" : "payment-partial"}">
             ${isPaid ? "Paid / \u0627\u062F\u0627 \u0634\u062F\u06C1" : `Due: ${order.remainingAmount} PKR`}
           </span>
         </div>
-        <div class="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-2">
+        <div class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
           <span>${custName}</span>
-          ${custPhone ? `<a href="https://wa.me/92${custPhone.replace(/\D/g, "").replace(/^0/, "")}" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1 text-xs">
+          ${custPhone ? `<a href="https://wa.me/92${custPhone.replace(/\D/g, "").replace(/^0/, "")}" target="_blank" class="text-emerald-600 hover:underline flex items-center gap-1 text-xs font-semibold">
                   <span>\u{1F4AC}</span> <span>${custPhone}</span>
                 </a>` : ""}
         </div>
-        <div class="text-xs text-slate-400">
-          <span>${order.clothingCategory.replace("_", " ").toUpperCase()}</span> \u2022
-          <span>Delivery: <strong class="text-slate-300">${deliveryDate}</strong></span>
+        <div class="text-xs text-slate-500">
+          <span class="font-medium text-slate-700">${order.clothingCategory.replace("_", " ").toUpperCase()}</span> \u2022
+          <span>Delivery: <strong class="text-slate-800">${deliveryDate}</strong></span>
           ${order.fabric?.fabricType ? ` \u2022 <span>${order.fabric.fabricType}</span>` : ""}
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        ${next ? `<button class="btn-advance-status px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold" data-id="${order._id}" data-next="${next}">
+        ${next ? `<button class="btn-advance-status px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs" data-id="${order._id}" data-next="${next}">
                 Move to ${next.toUpperCase()} \u2794
               </button>` : ""}
-        ${!isPaid ? `<button class="btn-pay px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold" data-id="${order._id}" data-num="${order.orderNumber}" data-rem="${order.remainingAmount}">
-                + Payment
+        ${!isPaid ? `<button class="btn-pay px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-semibold" data-id="${order._id}" data-num="${order.orderNumber}" data-rem="${order.remainingAmount}">
+                + Payment / \u0648\u0635\u0648\u0644\u06CC
               </button>` : ""}
-        <button class="btn-print p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700" data-id="${order._id}">
+        <button class="btn-print p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs border border-slate-300 font-semibold" data-id="${order._id}">
           \u{1F5A8} Slip
         </button>
       </div>

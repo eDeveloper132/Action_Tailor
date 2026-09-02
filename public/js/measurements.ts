@@ -79,41 +79,41 @@ function renderProfileCard(p: any): string {
   const s = p.measurements?.shalwaar || {};
 
   return `
-    <div class="tailor-card p-5 rounded-2xl space-y-3">
+    <div class="tailor-card p-5 rounded-xl border border-slate-200 bg-white shadow-xs space-y-3">
       <div class="flex justify-between items-start">
         <div>
-          <h3 class="font-bold text-white text-base">${p.title}</h3>
-          <div class="text-xs text-brand-400 font-medium mt-0.5">${p.clothingCategory.toUpperCase()} • ${p.unit}</div>
+          <h3 class="font-bold text-slate-900 text-base">${p.title}</h3>
+          <div class="text-xs text-emerald-700 font-semibold mt-0.5">${p.clothingCategory.toUpperCase()} • ${p.unit}</div>
         </div>
         ${
           p.isDefault
-            ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold">DEFAULT</span>'
+            ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">DEFAULT</span>'
             : ''
         }
       </div>
 
-      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2 text-xs">
-        <div class="font-semibold text-slate-400 text-[11px] uppercase tracking-wider">Upper / قمیض</div>
-        <div class="grid grid-cols-3 gap-1.5 text-slate-300">
-          <div><span class="text-slate-500">Lambai:</span> ${q.length || '--'}</div>
-          <div><span class="text-slate-500">Teera:</span> ${q.shoulder || '--'}</div>
-          <div><span class="text-slate-500">Chhati:</span> ${q.chest || '--'}</div>
-          <div><span class="text-slate-500">Bazu:</span> ${q.sleeve || '--'}</div>
-          <div><span class="text-slate-500">Collar:</span> ${q.collar || '--'}</div>
-          <div><span class="text-slate-500">Ghera:</span> ${q.ghera || '--'}</div>
+      <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+        <div class="font-bold text-slate-500 text-[11px] uppercase tracking-wider">Upper / قمیض</div>
+        <div class="grid grid-cols-3 gap-1.5 text-slate-800">
+          <div><span class="text-slate-400">Lambai:</span> <strong>${q.length || '--'}</strong></div>
+          <div><span class="text-slate-400">Teera:</span> <strong>${q.shoulder || '--'}</strong></div>
+          <div><span class="text-slate-400">Chhati:</span> <strong>${q.chest || '--'}</strong></div>
+          <div><span class="text-slate-400">Bazu:</span> <strong>${q.sleeve || '--'}</strong></div>
+          <div><span class="text-slate-400">Collar:</span> <strong>${q.collar || '--'}</strong></div>
+          <div><span class="text-slate-400">Ghera:</span> <strong>${q.ghera || '--'}</strong></div>
         </div>
 
-        <div class="font-semibold text-slate-400 text-[11px] uppercase tracking-wider pt-2 border-t border-slate-800/60">Lower / شلوار</div>
-        <div class="grid grid-cols-3 gap-1.5 text-slate-300">
-          <div><span class="text-slate-500">Lambai:</span> ${s.length || '--'}</div>
-          <div><span class="text-slate-500">Paincha:</span> ${s.paincha || '--'}</div>
-          <div><span class="text-slate-500">Aasan:</span> ${s.aasan || '--'}</div>
+        <div class="font-bold text-slate-500 text-[11px] uppercase tracking-wider pt-2 border-t border-slate-200">Lower / شلوار</div>
+        <div class="grid grid-cols-3 gap-1.5 text-slate-800">
+          <div><span class="text-slate-400">Lambai:</span> <strong>${s.length || '--'}</strong></div>
+          <div><span class="text-slate-400">Paincha:</span> <strong>${s.paincha || '--'}</strong></div>
+          <div><span class="text-slate-400">Aasan:</span> <strong>${s.aasan || '--'}</strong></div>
         </div>
       </div>
 
       <div class="pt-1 flex justify-end">
-        <a href="/orders/new?customerId=${p.customer}&profileId=${p._id}" class="text-xs font-semibold text-brand-400 hover:text-brand-300">
-          Use For New Suit ➔
+        <a href="/orders/new?customerId=${p.customer}&profileId=${p._id}" class="text-xs font-bold text-slate-700 hover:text-emerald-700">
+          Use for New Order ➔
         </a>
       </div>
     </div>

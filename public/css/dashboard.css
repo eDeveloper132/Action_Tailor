@@ -1,6 +1,6 @@
 /* ==========================================
-   Action Tailor - Pakistani Tailor Shop Management Dashboard
-   Custom Stylesheet: Bilingual Accents, Steppers, Status Badges & Print Receipts
+   Action Tailor - Bright Modern Tailor SaaS Stylesheet
+   Polished Emerald / Crisp White / Deep Slate Theme
    ========================================== */
 
 /* Bilingual Urdu Typography Enhancement */
@@ -20,7 +20,7 @@
   opacity: 0.85;
 }
 
-/* Status Badges */
+/* Status Badges - Bright & Readable */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -33,74 +33,74 @@
 }
 
 .status-pending {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border-color: rgba(245, 158, 11, 0.3);
+  background-color: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
 }
 
 .status-confirmed {
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border-color: rgba(59, 130, 246, 0.3);
+  background-color: #e0e7ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
 }
 
 .status-cutting {
-  background-color: rgba(14, 165, 233, 0.15);
-  color: #38bdf8;
-  border-color: rgba(14, 165, 233, 0.3);
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
 }
 
 .status-stitching {
-  background-color: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
-  border-color: rgba(168, 85, 247, 0.3);
+  background-color: #ede9fe;
+  color: #6d28d9;
+  border-color: #ddd6fe;
 }
 
 .status-quality_check {
-  background-color: rgba(236, 72, 153, 0.15);
-  color: #f472b6;
-  border-color: rgba(236, 72, 153, 0.3);
+  background-color: #fce7f3;
+  color: #be185d;
+  border-color: #fbcfe8;
 }
 
 .status-ready {
-  background-color: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+  background-color: #d1fae5;
+  color: #047857;
+  border-color: #a7f3d0;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.15);
 }
 
 .status-delivered {
-  background-color: rgba(100, 116, 139, 0.2);
-  color: #94a3b8;
-  border-color: rgba(100, 116, 139, 0.3);
+  background-color: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
 }
 
 .status-cancelled {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.3);
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
 }
 
 /* Payment Badges */
 .payment-paid {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background-color: #d1fae5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
 }
 
 .payment-partial {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
 }
 
 .payment-unpaid {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 
-/* Operational Stepper Progress for Customer & Admin */
+/* Bright Workflow Stepper Progress */
 .workflow-stepper {
   display: flex;
   align-items: center;
@@ -115,7 +115,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #334155;
+  background-color: #e2e8f0;
   transform: translateY(-50%);
   z-index: 0;
 }
@@ -129,17 +129,19 @@
 }
 
 .step-circle {
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 9999px;
-  background-color: #1e293b;
-  border: 2px solid #475569;
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #64748b;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  transition: all 0.3s;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .step-node.completed .step-circle {
@@ -149,38 +151,41 @@
 }
 
 .step-node.active .step-circle {
-  background-color: #6366f1;
-  border-color: #818cf8;
+  background-color: #059669;
+  border-color: #047857;
   color: #ffffff;
-  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 10px rgba(5, 150, 105, 0.35);
 }
 
 .step-label {
-  font-size: 0.7rem;
-  margin-top: 0.35rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+  color: #64748b;
   text-align: center;
+  font-weight: 500;
 }
 
 .step-node.completed .step-label,
 .step-node.active .step-label {
-  color: #f8fafc;
-  font-weight: 600;
+  color: #0f172a;
+  font-weight: 700;
 }
 
-/* Interactive Card Glows */
+/* Bright Tailor Cards */
 .tailor-card {
-  background-color: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(51, 65, 85, 0.7);
-  transition: border-color 0.2s, transform 0.2s;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 
 .tailor-card:hover {
-  border-color: rgba(99, 102, 241, 0.4);
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
 }
 
-/* Pulse animation for live order notifications */
+/* Pulse animation */
 .pulse-dot {
   animation: pulseDot 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -191,7 +196,7 @@
     transform: scale(1);
   }
   50% {
-    opacity: 0.3;
+    opacity: 0.4;
     transform: scale(0.85);
   }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,53 +13,53 @@
   <link rel="stylesheet" href="/global.css">
   <link rel="stylesheet" href="/css/dashboard.css">
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
   <div id="navbarMount" class="no-print"></div>
 
-  <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 no-print">
-    <div class="mb-6 pb-4 border-b border-slate-800 flex justify-between items-center">
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 no-print space-y-6">
+    <div class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex justify-between items-center">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
           Account Profile / اکاؤنٹ کی تفصیلات
         </h1>
-        <p class="text-xs sm:text-sm text-slate-400 mt-1">
-          Manage your tailor shop credentials and account settings
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+          Manage your credentials, role privileges, and account settings
         </p>
       </div>
-      <button id="btnSignOutProfile" class="px-4 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 text-xs font-semibold">
+      <button id="btnSignOutProfile" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold shadow-2xs">
         Sign Out / لاگ آؤٹ
       </button>
     </div>
 
     <!-- User Information Card -->
-    <div class="tailor-card p-6 rounded-2xl space-y-6">
+    <div class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-6">
       <div class="flex items-center gap-4">
-        <div class="w-16 h-16 rounded-full bg-brand-600/20 border-2 border-brand-500/40 flex items-center justify-center text-2xl font-bold text-brand-400" id="avatarLetter">
+        <div class="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-300 flex items-center justify-center text-2xl font-bold text-emerald-700" id="avatarLetter">
           U
         </div>
         <div>
-          <h2 class="text-xl font-bold text-white" id="profileName">Loading user...</h2>
-          <div class="text-xs text-slate-400" id="profileEmail">--</div>
-          <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-600/20 text-brand-400 border border-brand-500/30" id="profileRoleBadge">
+          <h2 class="text-xl font-bold text-slate-900" id="profileName">Loading user...</h2>
+          <div class="text-xs text-slate-500" id="profileEmail">--</div>
+          <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" id="profileRoleBadge">
             Role
           </span>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-800 text-xs sm:text-sm">
-        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-          <div class="text-slate-400 text-xs mb-1">User Identifier:</div>
-          <div class="font-mono text-white" id="profileUserId">--</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100 text-xs sm:text-sm">
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="text-slate-500 text-xs mb-1">User Identifier:</div>
+          <div class="font-mono font-bold text-slate-800" id="profileUserId">--</div>
         </div>
-        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-          <div class="text-slate-400 text-xs mb-1">Account Role:</div>
-          <div class="font-semibold text-white capitalize" id="profileRoleText">--</div>
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="text-slate-500 text-xs mb-1">Account Role:</div>
+          <div class="font-bold text-slate-800 capitalize" id="profileRoleText">--</div>
         </div>
       </div>
 
-      <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400 space-y-2">
-        <div class="font-bold text-slate-300">Operational Role Permissions:</div>
-        <p id="profilePermsDescription">Loading role capabilities...</p>
+      <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
+        <h3 class="font-bold text-slate-800">Security & Authentication Info</h3>
+        <p>Your session is protected with cryptographically signed JSON Web Tokens (JWT) stored in HTTP-only cookies and local storage. Role-based access control guarantees strict separation between shop operations and customer records.</p>
       </div>
     </div>
   </main>
@@ -68,4 +68,3 @@
   <script type="module" src="/js/profile.js"></script>
 </body>
 </html>
-

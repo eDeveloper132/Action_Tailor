@@ -46,11 +46,12 @@ router.post('/signin', async (req: Request, res: Response<ApiResponse<AuthRespon
         return;
       }
 
-      const tokenPayload = {
+      const tokenPayload: JwtUserPayload = {
         userId: user._id.toString(),
         email: user.email,
         name: user.name,
         role: user.role,
+        customerProfile: user.customerProfile ? user.customerProfile.toString() : undefined,
       };
 
       const token = generateToken(tokenPayload);
@@ -168,11 +169,12 @@ router.post('/signup', async (req: Request, res: Response<ApiResponse<AuthRespon
       customerProfile.user = newUser._id;
       await customerProfile.save();
 
-      const tokenPayload = {
+      const tokenPayload: JwtUserPayload = {
         userId: newUser._id.toString(),
         email: newUser.email,
         name: newUser.name,
         role: newUser.role,
+        customerProfile: customerProfile._id.toString(),
       };
 
       const token = generateToken(tokenPayload);

@@ -28,7 +28,7 @@ async function loadCustomers(): Promise<void> {
 
     if (customers.length === 0) {
       container.innerHTML = `
-        <div class="col-span-full p-8 text-center text-slate-500 text-sm bg-slate-900/40 rounded-2xl border border-dashed border-slate-800">
+        <div class="col-span-full p-8 text-center text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
           No customers found / کوئی گاہک نہیں ملا
         </div>
       `;
@@ -38,25 +38,25 @@ async function loadCustomers(): Promise<void> {
     container.innerHTML = customers
       .map(
         (c: any) => `
-      <div class="tailor-card p-4 rounded-2xl space-y-2.5">
+      <div class="tailor-card p-4 rounded-xl border border-slate-200 bg-white shadow-xs space-y-2.5">
         <div class="flex justify-between items-start">
           <div>
-            <h3 class="font-bold text-white text-base">${c.name}</h3>
-            <div class="text-xs text-slate-400 mt-0.5">📞 ${c.phone} ${c.city ? `• ${c.city}` : ''}</div>
+            <h3 class="font-bold text-slate-900 text-base">${c.name}</h3>
+            <div class="text-xs text-slate-500 mt-0.5">📞 ${c.phone} ${c.city ? `• ${c.city}` : ''}</div>
           </div>
-          <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-brand-400 border border-slate-700">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
             ${c.totalOrders || 0} Suits
           </span>
         </div>
 
-        ${c.address ? `<div class="text-xs text-slate-300 truncate">📍 ${c.address}</div>` : ''}
-        ${c.notes ? `<div class="text-xs text-slate-400 italic truncate">${c.notes}</div>` : ''}
+        ${c.address ? `<div class="text-xs text-slate-600 truncate">📍 ${c.address}</div>` : ''}
+        ${c.notes ? `<div class="text-xs text-slate-500 italic truncate">${c.notes}</div>` : ''}
 
-        <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
-          <a href="https://wa.me/92${c.phone.replace(/\D/g, '').replace(/^0/, '')}" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1 font-medium">
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+          <a href="https://wa.me/92${c.phone.replace(/\D/g, '').replace(/^0/, '')}" target="_blank" class="text-emerald-700 hover:underline flex items-center gap-1 font-semibold">
             <span>💬</span> <span>WhatsApp Chat</span>
           </a>
-          <a href="/orders/new?customerId=${c._id}" class="text-brand-400 hover:text-brand-300 font-semibold">
+          <a href="/orders/new?customerId=${c._id}" class="text-slate-700 hover:text-emerald-700 font-bold">
             + Book Suit ➔
           </a>
         </div>

@@ -2,6 +2,9 @@ import type { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.ts';
 import type { JwtUserPayload } from '../types/index.ts';
 
+import mongoose from 'mongoose';
+import { User } from '../models/user.model.ts';
+
 // Extend Express Request interface locally
 export interface AuthRequest extends Request {
   user?: JwtUserPayload;
@@ -12,7 +15,7 @@ export interface AuthRequest extends Request {
  * Validates JWT from Authorization header, HTTP-only cookies, or query string.
  * Supports both HTML views (redirect to /signin) and API endpoints (401 JSON).
  */
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   let token: string | undefined;
 
   // 1. Check Authorization Bearer header
@@ -44,6 +47,17 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
 
   // Attach decoded user to request
   req.user = decoded;
+
+  // If customer without customerProfile in token, resolve from DB for IDOR safety
+  if (decoded.role === 'customer' && !decoded.customerProfile && mongoose.connection.readyState >= 1) {
+    try {
+      const u = await User.findById(decoded.userId).select('customerProfile');
+      if (u && u.customerProfile) {
+        req.user.customerProfile = u.customerProfile.toString();
+      }
+    } catch (_e) {}
+  }
+
   next();
 };
 

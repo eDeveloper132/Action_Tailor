@@ -71,6 +71,7 @@ export interface JwtUserPayload {
   email: string;
   name?: string;
   role?: string;
+  customerProfile?: string;
   iat?: number;
   exp?: number;
 }

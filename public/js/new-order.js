@@ -24,9 +24,9 @@ async function loadClothingCategories() {
     const categories = res.data || [];
     grid.innerHTML = categories.map(
       (cat) => `
-      <div class="cat-card p-3 rounded-xl border cursor-pointer transition-all ${cat.key === selectedCategory ? "bg-brand-600/20 border-brand-500 text-white shadow-md" : "bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600"}" data-key="${cat.key}">
+      <div class="cat-card p-3 rounded-xl border cursor-pointer transition-all ${cat.key === selectedCategory ? "bg-emerald-50 border-emerald-600 text-emerald-900 shadow-xs ring-1 ring-emerald-600" : "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-100"}" data-key="${cat.key}">
         <div class="font-bold text-xs sm:text-sm">${cat.nameEn}</div>
-        <div class="text-xs text-brand-400/90 font-medium">${cat.nameUr}</div>
+        <div class="text-xs text-emerald-700 font-medium">${cat.nameUr}</div>
       </div>
     `
     ).join("");
@@ -36,9 +36,9 @@ async function loadClothingCategories() {
         selectedCategory = target.dataset.key || "shalwaar_qameez";
         document.getElementById("selectedCategoryInput").value = selectedCategory;
         grid.querySelectorAll(".cat-card").forEach((c) => {
-          c.className = "cat-card p-3 rounded-xl border cursor-pointer transition-all bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600";
+          c.className = "cat-card p-3 rounded-xl border cursor-pointer transition-all bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-100";
         });
-        target.className = "cat-card p-3 rounded-xl border cursor-pointer transition-all bg-brand-600/20 border-brand-500 text-white shadow-md";
+        target.className = "cat-card p-3 rounded-xl border cursor-pointer transition-all bg-emerald-50 border-emerald-600 text-emerald-900 shadow-xs ring-1 ring-emerald-600";
       });
     });
   } catch (err) {

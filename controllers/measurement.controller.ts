@@ -9,6 +9,19 @@ export class MeasurementController {
       const customerId = Array.isArray(req.params.customerId)
         ? req.params.customerId[0]
         : req.params.customerId;
+
+      // IDOR Protection: Customer can only view their own measurements
+      if (req.user && req.user.role === 'customer') {
+        const userCustId = (req.user as any).customerProfile?.toString();
+        if (!userCustId || userCustId !== customerId) {
+          res.status(403).json({
+            status: 'error',
+            message: 'Access denied: You can only view your own measurements / صرف اپنے ناپ دیکھنے کی اجازت ہے',
+          });
+          return;
+        }
+      }
+
       const profiles = await MeasurementService.getProfilesByCustomer(customerId);
       res.json({ status: 'success', data: profiles });
     } catch (err: any) {
@@ -24,6 +37,20 @@ export class MeasurementController {
         res.status(404).json({ status: 'error', message: 'Measurement profile not found / ناپ نہیں ملا' });
         return;
       }
+
+      // IDOR Protection: Customer can only view their own measurement profile
+      if (req.user && req.user.role === 'customer') {
+        const userCustId = (req.user as any).customerProfile?.toString();
+        const profileCustId = (profile.customer as any)?._id?.toString() || profile.customer?.toString();
+        if (!userCustId || userCustId !== profileCustId) {
+          res.status(403).json({
+            status: 'error',
+            message: 'Access denied: You can only view your own measurements / صرف اپنے ناپ دیکھنے کی اجازت ہے',
+          });
+          return;
+        }
+      }
+
       res.json({ status: 'success', data: profile });
     } catch (err: any) {
       res.status(500).json({ status: 'error', message: err.message });
