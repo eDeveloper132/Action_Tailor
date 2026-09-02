@@ -116,3 +116,4 @@ if (modalBtn) {
 loadUser();
 loadTelemetry();
 setInterval(loadTelemetry, 5000);
+
