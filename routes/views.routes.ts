@@ -42,5 +42,30 @@ router.get('/protected', authenticate, (_req: Request, res: Response) => {
   res.sendFile(path.join(publicDir, 'protected', 'index.html'));
 });
 
+// Orders queue view
+router.get('/orders', authenticate, (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'protected', 'orders.html'));
+});
+
+// Book new suit view
+router.get('/orders/new', authenticate, (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'protected', 'new-order.html'));
+});
+
+// Customers directory view
+router.get('/customers', authenticate, (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'protected', 'customers.html'));
+});
+
+// Measurement profiles view
+router.get('/measurements', authenticate, (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'protected', 'measurements.html'));
+});
+
+// User profile view
+router.get('/profile', authenticate, (_req: Request, res: Response) => {
+  res.sendFile(path.join(publicDir, 'protected', 'profile.html'));
+});
+
 export default router;
 

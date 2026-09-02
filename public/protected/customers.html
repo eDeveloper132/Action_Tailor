@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers Directory - Action Tailor / گاہکوں کا ریکارڈ</title>
+
+  <!-- Tailwind CSS CDN & Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/js/tailwind-config.js"></script>
+
+  <!-- Centralized & View-Specific Custom CSS -->
+  <link rel="stylesheet" href="/global.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+  <div id="navbarMount" class="no-print"></div>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-slate-800">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          Customer Directory / گاہکوں کا کھاتہ
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">
+          Search by WhatsApp/phone, view past stitching history and recorded measurements
+        </p>
+      </div>
+      <div>
+        <button
+          id="btnOpenAddCustomerModal"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-brand-600/25 transition-all"
+        >
+          <span>👤</span>
+          <span>Add New Customer / نیا گاہک درج کریں</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="my-6">
+      <input
+        type="text"
+        id="custSearchInput"
+        placeholder="Search customer by name, WhatsApp, or phone number (e.g. 0300...)..."
+        class="w-full max-w-lg px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+      >
+    </div>
+
+    <!-- Customer Cards Grid -->
+    <div id="customersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="text-slate-500 text-sm py-8">Loading customer directory...</div>
+    </div>
+  </main>
+
+  <!-- Add Customer Modal -->
+  <div id="modalAddCust" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <span>👤</span> Register Customer / نیا گاہک
+        </h2>
+        <button id="closeAddCustModal" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="formAddCust" class="space-y-3.5 text-xs sm:text-sm">
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Full Name / پورا نام <span class="text-rose-400">*</span></label>
+          <input type="text" id="addCustName" placeholder="e.g. Haji Abdul Rasheed / حاجی عبدالرشید" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">WhatsApp / Phone Number <span class="text-rose-400">*</span></label>
+          <input type="tel" id="addCustPhone" placeholder="0300-1234567" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">City / شہر</label>
+          <input type="text" id="addCustCity" value="Lahore" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Address / پتہ</label>
+          <input type="text" id="addCustAddress" placeholder="Colony / Bazaar location" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Notes / ترجیحات</label>
+          <input type="text" id="addCustNotes" placeholder="Special stitching preference" class="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none">
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2.5 border-t border-slate-800">
+          <button type="button" id="btnCancelAddCust" class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 font-semibold text-white">Save Customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/global.js"></script>
+  <script type="module" src="/js/customers.js"></script>
+</body>
+</html>
