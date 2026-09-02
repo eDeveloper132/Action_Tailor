@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import { connectDB, disconnectDB } from './config/db.ts';
 import { initSocketServer } from './sockets/socket.ts';
 import apiRoutes from './routes/index.ts';
+import type { ErrorResponse } from './types/index.ts';
 
 dotenv.config();
 
@@ -41,12 +42,12 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
 app.use('/', apiRoutes);
 
 // 404 handler
-app.use((_req: Request, res: Response) => {
+app.use((_req: Request, res: Response<ErrorResponse>) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 
 // Global error handler
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response<ErrorResponse>, _next: NextFunction) => {
   console.error(chalk.red('Internal Server Error:'), err);
   res.status(500).json({ error: 'Internal server error', message: err.message });
 });

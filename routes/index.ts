@@ -1,9 +1,10 @@
 import { Router, type Request, type Response } from 'express';
+import type { ApiResponse, HealthResponse } from '../types/index.ts';
 
 const router = Router();
 
 // Root route
-router.get('/', (_req: Request, res: Response) => {
+router.get('/', (_req: Request, res: Response<ApiResponse>) => {
   res.json({
     status: 'success',
     message: 'Action Tailor API is running',
@@ -12,7 +13,7 @@ router.get('/', (_req: Request, res: Response) => {
 });
 
 // Health check route
-router.get('/health', (_req: Request, res: Response) => {
+router.get('/health', (_req: Request, res: Response<HealthResponse>) => {
   res.json({
     status: 'healthy',
     uptime: process.uptime(),

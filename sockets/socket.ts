@@ -1,13 +1,39 @@
 import type { Server as HttpServer } from 'node:http';
 import { Server as SocketIOServer, type Socket } from 'socket.io';
 import chalk from 'chalk';
+import type {
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData,
+  PingPayload,
+} from '../types/index.ts';
 
-let io: SocketIOServer | null = null;
+type AppSocketServer = SocketIOServer<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>;
 
-export const initSocketServer = (httpServer: HttpServer): SocketIOServer => {
+type AppSocket = Socket<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>;
+
+let io: AppSocketServer | null = null;
+
+export const initSocketServer = (httpServer: HttpServer): AppSocketServer => {
   const allowedOrigin = process.env.CORS_ORIGIN || '*';
 
-  io = new SocketIOServer(httpServer, {
+  io = new SocketIOServer<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+  >(httpServer, {
     cors: {
       origin: allowedOrigin,
       methods: ['GET', 'POST'],
@@ -15,11 +41,11 @@ export const initSocketServer = (httpServer: HttpServer): SocketIOServer => {
     },
   });
 
-  io.on('connection', (socket: Socket) => {
+  io.on('connection', (socket: AppSocket) => {
     console.log(chalk.cyan(`⚡ Socket connected: ${socket.id}`));
 
-    // Example custom ping/pong event
-    socket.on('ping', (data) => {
+    // Typed ping/pong event
+    socket.on('ping', (data: PingPayload) => {
       socket.emit('pong', { ...data, timestamp: new Date().toISOString() });
     });
 
@@ -32,7 +58,7 @@ export const initSocketServer = (httpServer: HttpServer): SocketIOServer => {
   return io;
 };
 
-export const getIO = (): SocketIOServer => {
+export const getIO = (): AppSocketServer => {
   if (!io) {
     throw new Error('Socket.IO has not been initialized yet. Call initSocketServer first.');
   }
