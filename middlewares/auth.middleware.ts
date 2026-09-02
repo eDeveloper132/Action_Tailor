@@ -3,7 +3,7 @@ import { verifyToken } from '../utils/jwt.ts';
 import type { JwtUserPayload } from '../types/index.ts';
 
 import mongoose from 'mongoose';
-import { User } from '../models/user.model.ts';
+import { User } from '../models/index.ts';
 
 // Extend Express Request interface locally
 export interface AuthRequest extends Request {

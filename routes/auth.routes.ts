@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { generateToken } from '../utils/jwt.ts';
 import { authenticate, type AuthRequest } from '../middlewares/auth.middleware.ts';
 import { User, CustomerProfile } from '../models/index.ts';
-import type { ApiResponse, AuthResponse } from '../types/index.ts';
+import type { ApiResponse, AuthResponse, JwtUserPayload } from '../types/index.ts';
 
 const router = Router();
 
