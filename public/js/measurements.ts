@@ -181,3 +181,4 @@ function setupModalHandlers(): void {
 }
 
 initMeasurementsPage();
+
