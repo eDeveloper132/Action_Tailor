@@ -1,13 +1,20 @@
 import mongoose from 'mongoose';
 import chalk from 'chalk';
 
+let isConnected = false;
+
 export const connectDB = async (): Promise<void> => {
+  if (isConnected || mongoose.connection.readyState >= 1) {
+    return;
+  }
+
   const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/action_tailor';
 
   try {
     const conn = await mongoose.connect(mongoURI, {
       serverSelectionTimeoutMS: 5000,
     });
+    isConnected = true;
     console.log(chalk.green(`✓ MongoDB Connected: ${conn.connection.host}`));
   } catch (error: any) {
     console.warn(chalk.yellow(`! MongoDB connection warning: ${error.message || error}`));

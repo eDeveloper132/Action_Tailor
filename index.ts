@@ -27,6 +27,16 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
+// Ensure MongoDB is connected before handling requests (cached for serverless)
+app.use(async (_req: Request, _res: Response, next: NextFunction) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Routes
 app.use('/', apiRoutes);
 
@@ -41,34 +51,35 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ error: 'Internal server error', message: err.message });
 });
 
-// Initialize Socket.IO
-initSocketServer(server);
+// Start HTTP server & Socket.IO only when running in traditional/local environments (not Vercel serverless)
+if (!process.env.VERCEL) {
+  initSocketServer(server);
 
-// Start server and connect to database
-const startServer = async () => {
-  server.listen(PORT, () => {
-    console.log(
-      chalk.bold.magenta(`\n🚀 Server is running on: ${chalk.underline(`http://localhost:${PORT}`)}`)
-    );
-    console.log(chalk.gray(`Mode: ${process.env.NODE_ENV || 'development'}\n`));
-  });
+  const startServer = async () => {
+    server.listen(PORT, () => {
+      console.log(
+        chalk.bold.magenta(`\n🚀 Server is running on: ${chalk.underline(`http://localhost:${PORT}`)}`)
+      );
+      console.log(chalk.gray(`Mode: ${process.env.NODE_ENV || 'development'}\n`));
+    });
 
-  await connectDB();
-};
+    await connectDB();
+  };
 
-// Graceful shutdown handling
-const gracefulShutdown = async (signal: string) => {
-  console.log(chalk.yellow(`\nReceived ${signal}. Shutting down gracefully...`));
-  server.close(async () => {
-    await disconnectDB();
-    console.log(chalk.gray('Server closed. Process exiting.'));
-    process.exit(0);
-  });
-};
+  const gracefulShutdown = async (signal: string) => {
+    console.log(chalk.yellow(`\nReceived ${signal}. Shutting down gracefully...`));
+    server.close(async () => {
+      await disconnectDB();
+      console.log(chalk.gray('Server closed. Process exiting.'));
+      process.exit(0);
+    });
+  };
 
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
-startServer();
+  startServer();
+}
 
 export { app, server };
+export default app;
