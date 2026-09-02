@@ -1,0 +1,33 @@
+/* ==========================================
+   Action Tailor - Dashboard Custom Stylesheet
+   Augmenting Tailwind CSS with glassmorphism & telemetry styles
+   ========================================== */
+
+.dashboard-telemetry-container {
+  background: radial-gradient(circle at top left, #111827, #030712);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.dashboard-card-glow {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card-glow:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1);
+}
+
+.pulse-indicator {
+  animation: pulseAnimation 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseAnimation {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
