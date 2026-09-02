@@ -26,3 +26,4 @@ router.patch('/:id', requireRole('admin', 'staff'), CustomerController.update);
 router.delete('/:id', requireRole('admin'), CustomerController.delete);
 
 export default router;
+

@@ -15,3 +15,4 @@ router.get('/admin', authenticate, requireRole('admin', 'staff'), DashboardContr
 router.get('/customer', authenticate, DashboardController.getCustomerData);
 
 export default router;
+

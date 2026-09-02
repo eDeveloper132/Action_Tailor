@@ -22,3 +22,4 @@ router.patch('/:id', MeasurementController.update);
 router.delete('/:id', MeasurementController.delete);
 
 export default router;
+

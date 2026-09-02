@@ -14,3 +14,4 @@ router.post('/', requireRole('admin', 'staff'), PaymentController.record);
 router.get('/order/:orderId', PaymentController.getByOrder);
 
 export default router;
+

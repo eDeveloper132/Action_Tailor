@@ -20,3 +20,4 @@ router.post('/', requireRole('admin', 'staff'), OrderController.create);
 router.patch('/:id/status', requireRole('admin', 'staff'), OrderController.updateStatus);
 
 export default router;
+
