@@ -85,3 +85,8 @@ export interface AuthResponse {
   };
 }
 
+// ==========================================
+// Pakistani Tailoring Domain Exports
+// ==========================================
+export * from './tailoring.types.ts';
+
