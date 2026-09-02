@@ -9,3 +9,4 @@ export const requestLogger = (req: Request, _res: Response, next: NextFunction):
   console.log(chalk.gray(`[${timestamp}]`) + ` ${chalk.cyan(req.method)} ${chalk.white(req.originalUrl || req.url)}`);
   next();
 };
+
