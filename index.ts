@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import { connectDB, disconnectDB } from './config/db.ts';
 import { initSocketServer } from './sockets/socket.ts';
 import apiRoutes from './routes/index.ts';
+import viewRoutes from './routes/views.routes.ts';
 import type { ErrorResponse } from './types/index.ts';
 
 dotenv.config();
@@ -40,6 +41,8 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
 });
 
 // Routes
+app.use('/', viewRoutes);
+app.use('/api', apiRoutes);
 app.use('/', apiRoutes);
 
 // 404 handler

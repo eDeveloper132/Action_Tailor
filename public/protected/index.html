@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Action Tailor (Protected)</title>
+  <link rel="stylesheet" href="/global.css">
+  <style>
+    .navbar {
+      background-color: var(--surface-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .brand span {
+      color: var(--primary-color);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .badge {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--success-color);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .dashboard-header {
+      margin-bottom: 2rem;
+    }
+    .dashboard-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    .dashboard-header p {
+      color: var(--text-secondary);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card h3 {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .stat-card .value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">
+      <span>⚡</span> Action Tailor
+    </div>
+    <div class="nav-actions">
+      <span class="badge">Protected Area</span>
+      <button id="logoutBtn" class="btn btn-secondary">Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="dashboard-header">
+      <h1>Protected Dashboard</h1>
+      <p>Welcome to your secure Action Tailor workspace.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card stat-card">
+        <h3>Server Status</h3>
+        <div id="serverStatus" class="value">Checking...</div>
+      </div>
+      <div class="card stat-card">
+        <h3>System Uptime</h3>
+        <div id="serverUptime" class="value">--</div>
+      </div>
+      <div class="card stat-card">
+        <h3>Environment</h3>
+        <div class="value" style="color: var(--primary-color);">Production-Ready</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom: 1rem; font-size: 1.25rem;">Live Health Telemetry</h2>
+      <pre id="telemetryData" style="background: #090d16; padding: 1rem; border-radius: 0.5rem; color: #a5f3fc; overflow-x: auto; font-size: 0.875rem;">Loading telemetry...</pre>
+    </div>
+  </div>
+
+  <script src="/global.js"></script>
+  <script>
+    // Live telemetry update
+    async function loadTelemetry() {
+      try {
+        const data = await window.ActionTailor.apiFetch('/health');
+        document.getElementById('serverStatus').textContent = data.status.toUpperCase();
+        document.getElementById('serverStatus').style.color = 'var(--success-color)';
+        document.getElementById('serverUptime').textContent = Math.floor(data.uptime) + 's';
+        document.getElementById('telemetryData').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('serverStatus').textContent = 'OFFLINE';
+        document.getElementById('serverStatus').style.color = 'var(--error-color)';
+        document.getElementById('telemetryData').textContent = 'Error fetching telemetry: ' + err.message;
+      }
+    }
+
+    loadTelemetry();
+    setInterval(loadTelemetry, 5000);
+
+    // Logout handling
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      window.location.href = '/signin';
+    });
+  </script>
+</body>
+</html>

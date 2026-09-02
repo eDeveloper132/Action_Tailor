@@ -4,8 +4,11 @@ import type { ApiResponse, HealthResponse } from '../types/index.ts';
 const router = Router();
 
 // Root route
-router.get('/', (_req: Request, res: Response<ApiResponse>) => {
-  res.json({
+router.get('/', (req: Request, res: Response<ApiResponse>) => {
+  if (req.originalUrl === '/' && req.accepts('html') && !req.headers['x-requested-with']) {
+    return res.redirect('/signin');
+  }
+  return res.json({
     status: 'success',
     message: 'Action Tailor API is running',
     version: '1.0.0',

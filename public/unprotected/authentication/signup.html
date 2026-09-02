@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Action Tailor</title>
+  <link rel="stylesheet" href="/global.css">
+  <style>
+    .auth-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .auth-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+    .auth-header p {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      background-color: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 1px var(--primary-color);
+    }
+    .auth-btn {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    .auth-switch {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    .auth-message {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .auth-message.error {
+      display: block;
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--error-color);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .auth-message.success {
+      display: block;
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success-color);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="card auth-card">
+      <div class="auth-header">
+        <h1>Create Account</h1>
+        <p>Get started with Action Tailor today</p>
+      </div>
+
+      <div id="authMessage" class="auth-message"></div>
+
+      <form id="signupForm">
+        <div class="form-group">
+          <label class="form-label" for="fullname">Full Name</label>
+          <input type="text" id="fullname" class="form-control" placeholder="John Doe" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="name@company.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required minlength="6">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" required minlength="6">
+        </div>
+
+        <button type="submit" class="btn auth-btn">Sign Up</button>
+      </form>
+
+      <div class="auth-switch">
+        Already have an account? <a href="/signin">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/global.js"></script>
+  <script>
+    const form = document.getElementById('signupForm');
+    const msgBox = document.getElementById('authMessage');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pass = document.getElementById('password').value;
+      const confirmPass = document.getElementById('confirmPassword').value;
+
+      if (pass !== confirmPass) {
+        msgBox.className = 'auth-message error';
+        msgBox.textContent = 'Passwords do not match!';
+        return;
+      }
+
+      msgBox.className = 'auth-message success';
+      msgBox.textContent = 'Account created successfully! Redirecting to sign in...';
+      setTimeout(() => {
+        window.location.href = '/signin';
+      }, 1200);
+    });
+  </script>
+</body>
+</html>
