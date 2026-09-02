@@ -81,3 +81,4 @@ CustomerProfileSchema.index({ name: 'text', phone: 'text', whatsapp: 'text' });
 export const CustomerProfile: Model<ICustomerProfile> =
   mongoose.models.CustomerProfile ||
   mongoose.model<ICustomerProfile>('CustomerProfile', CustomerProfileSchema);
+

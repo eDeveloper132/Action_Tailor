@@ -97,3 +97,4 @@ MeasurementProfileSchema.index({ customer: 1, isDefault: -1 });
 export const MeasurementProfile: Model<IMeasurementProfile> =
   mongoose.models.MeasurementProfile ||
   mongoose.model<IMeasurementProfile>('MeasurementProfile', MeasurementProfileSchema);
+

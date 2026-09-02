@@ -227,3 +227,4 @@ OrderSchema.index({ customer: 1, createdAt: -1 });
 
 export const Order: Model<IOrder> =
   mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+

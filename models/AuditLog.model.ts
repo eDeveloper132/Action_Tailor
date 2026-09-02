@@ -50,3 +50,4 @@ AuditLogSchema.index({ entityType: 1, entityId: 1, createdAt: -1 });
 
 export const AuditLog: Model<IAuditLog> =
   mongoose.models.AuditLog || mongoose.model<IAuditLog>('AuditLog', AuditLogSchema);
+

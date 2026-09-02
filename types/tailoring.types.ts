@@ -202,3 +202,4 @@ export type NotificationType =
   | 'payment_received'
   | 'delivery_reminder'
   | 'general';
+

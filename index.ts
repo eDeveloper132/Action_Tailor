@@ -10,6 +10,11 @@ import { initSocketServer } from './sockets/socket.ts';
 import apiRoutes from './routes/index.ts';
 import viewRoutes from './routes/views.routes.ts';
 import authRoutes from './routes/auth.routes.ts';
+import customerRoutes from './routes/customer.routes.ts';
+import measurementRoutes from './routes/measurement.routes.ts';
+import orderRoutes from './routes/order.routes.ts';
+import paymentRoutes from './routes/payment.routes.ts';
+import dashboardRoutes from './routes/dashboard.routes.ts';
 import { requestLogger, notFoundHandler, errorHandler, tsTranspiler } from './middlewares/index.ts';
 
 dotenv.config();
@@ -41,9 +46,16 @@ app.use(async (_req: Request, _res: Response, next: NextFunction) => {
   }
 });
 
-// Routes
+// View Routes
 app.use('/', viewRoutes);
+
+// Tailoring REST API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/measurements', measurementRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api', apiRoutes);
 app.use('/', apiRoutes);
 
