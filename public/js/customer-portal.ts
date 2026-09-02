@@ -298,3 +298,4 @@ document.getElementById('btnDismissReady')?.addEventListener('click', () => {
 });
 
 initCustomerPortal();
+
