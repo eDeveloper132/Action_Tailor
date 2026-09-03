@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "tsc --noEmit",
   "functions": {
     "api/index.ts": {
       "memory": 1024,

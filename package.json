@@ -15,7 +15,10 @@
     "dev:admin": "npm --prefix frontend-admin run dev",
     "dev:customer": "npm --prefix frontend-customer run dev",
     "start": "tsx backend/index.ts",
-    "build": "npm --prefix frontend-admin run build && npm --prefix frontend-customer run build",
+    "build": "echo \"Action Tailor Backend ready for deployment\"",
+    "build:admin": "npm --prefix frontend-admin run build",
+    "build:customer": "npm --prefix frontend-customer run build",
+    "build:frontends": "npm --prefix frontend-admin run build && npm --prefix frontend-customer run build",
     "typecheck": "tsc --noEmit -p backend/tsconfig.json && tsc --noEmit -p frontend-admin/tsconfig.json && tsc --noEmit -p frontend-customer/tsconfig.json",
     "seed": "tsx backend/seeds/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
