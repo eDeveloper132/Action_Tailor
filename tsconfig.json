@@ -13,6 +13,6 @@
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["backend/**/*.ts", "shared/**/*.ts", "scripts/**/*.ts", "api/**/*.ts", "index.ts"],
+  "exclude": ["node_modules", "frontend-admin", "frontend-customer", "public"]
 }
