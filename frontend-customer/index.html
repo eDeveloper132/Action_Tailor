@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Portal - Action Tailor / کسٹمر پورٹل</title>
+
+  <!-- Tailwind CSS CDN & Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/tailwind-config.js"></script>
+
+  <!-- Socket.IO for Live Suit Progress Updates -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+  <!-- Centralized Bright Theme & View-Specific Custom CSS -->
+  <link rel="stylesheet" href="/src/css/global.css">
+  <link rel="stylesheet" href="/src/css/dashboard.css">
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+  <!-- Dynamic Mount for Customer Navigation Bar -->
+  <div id="navbarMount" class="no-print"></div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 no-print space-y-8">
+    
+    <!-- Top Customer Welcome Card -->
+    <div class="tailor-card p-6 sm:p-8 rounded-2xl border border-slate-200 bg-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">
+      <div class="space-y-1.5">
+        <div class="flex items-center gap-2.5">
+          <span class="px-3 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Customer Portal / کسٹمر پورٹل
+          </span>
+          <span class="text-xs text-slate-500 font-mono" id="customerPhoneDisplay">--</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight" id="custWelcomeName">
+          Welcome to Action Tailor
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600">
+          Track the live cutting and stitching progress of your suits and view your tailoring measurements
+        </p>
+      </div>
+
+      <!-- Quick WhatsApp Button to Shop -->
+      <div>
+        <a
+          href="https://wa.me/923001234567?text=Hello%20Action%20Tailor,%20I%20am%20checking%20my%20suit%20status"
+          target="_blank"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all"
+        >
+          <span>💬</span>
+          <span>Contact Shop / رابطہ</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Ready for Pickup Notification Alert (Shows when suit is ready) -->
+    <div id="readyPickupAlert" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🎉</span>
+        <div>
+          <h2 class="text-sm font-bold text-emerald-900">Your Suit is Ready for Pickup! / آپ کا سوٹ تیار ہے</h2>
+          <p class="text-xs text-emerald-700">Please visit the shop with your receipt slip to collect your suit.</p>
+        </div>
+      </div>
+      <button id="btnDismissReady" class="text-xs px-3 py-1 rounded-lg bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold shadow-2xs">
+        Dismiss
+      </button>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="tailor-card p-4 rounded-xl border border-slate-200 bg-white shadow-xs">
+        <div class="text-xs font-semibold text-slate-500 mb-1">Active Suits / زیرِ عمل</div>
+        <div class="text-2xl font-extrabold text-emerald-600" id="statActiveSuits">0</div>
+      </div>
+      <div class="tailor-card p-4 rounded-xl border border-slate-200 bg-white shadow-xs">
+        <div class="text-xs font-semibold text-slate-500 mb-1">Ready for Pickup / تیار</div>
+        <div class="text-2xl font-extrabold text-emerald-700" id="statReadySuits">0</div>
+      </div>
+      <div class="tailor-card p-4 rounded-xl border border-slate-200 bg-white shadow-xs">
+        <div class="text-xs font-semibold text-slate-500 mb-1">Balance Due / بقایا رقم</div>
+        <div class="text-2xl font-extrabold text-amber-600" id="statDueBalance">0 PKR</div>
+      </div>
+      <div class="tailor-card p-4 rounded-xl border border-slate-200 bg-white shadow-xs">
+        <div class="text-xs font-semibold text-slate-500 mb-1">Completed Suits / کل تیار</div>
+        <div class="text-2xl font-extrabold text-slate-700" id="statCompletedSuits">0</div>
+      </div>
+    </div>
+
+    <!-- SECTION 1: ACTIVE SUITS & PROGRESS STEPPERS -->
+    <section id="active-suits" class="space-y-4">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <span>🧵</span> Active Stitching Orders / زیرِ سلائی سوٹ
+        </h2>
+        <span class="text-xs text-slate-500 font-medium">Live Progress</span>
+      </div>
+
+      <div id="activeSuitsContainer" class="space-y-4">
+        <div class="text-center py-8 text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
+          Loading your active orders...
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: SAVED MEASUREMENTS PROFILE CARDS -->
+    <section id="measurements" class="space-y-4 pt-2">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <span>📐</span> Your Recorded Measurements / آپ کے محفوظ شدہ ناپ
+        </h2>
+        <span class="text-xs text-slate-500 font-medium">Recorded by Master Tailor</span>
+      </div>
+
+      <div id="customerMeasurementsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="text-center py-8 text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200 col-span-full">
+          Loading measurements...
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: COMPLETED ORDERS HISTORY -->
+    <section class="space-y-4 pt-2">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <span>📜</span> Delivered Suits History / پچھلے آرڈرز
+        </h2>
+      </div>
+
+      <div id="completedOrdersContainer" class="space-y-3">
+        <div class="text-center py-6 text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
+          Loading order history...
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Printable Slip Container -->
+  <div id="printableSlipArea" class="hidden print:block font-mono text-black bg-white p-6 max-w-xl mx-auto border border-dashed border-slate-300">
+    <div id="printSlipContent"></div>
+  </div>
+
+  <script type="module" src="/src/js/customer-portal.ts"></script>
+</body>
+</html>

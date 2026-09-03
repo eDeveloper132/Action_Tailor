@@ -1,0 +1,108 @@
+/* ==========================================
+   Action Tailor - Modern Bright Design System
+   Global CSS variables, resets, Urdu typography & responsive utilities
+   ========================================== */
+
+:root {
+  --primary-color: #059669;      /* Fresh Emerald Green */
+  --primary-hover: #047857;      /* Deep Emerald */
+  --primary-light: #ecfdf5;      /* Emerald Tint */
+  --secondary-color: #0284c7;    /* Soft Tailor Blue */
+  --accent-warm: #d97706;        /* Warm Amber */
+
+  --background-color: #f8fafc;   /* Soft Crisp Light Surface */
+  --surface-color: #ffffff;      /* Pure White Surface */
+  --surface-muted: #f1f5f9;      /* Neutral Slate 100 */
+  
+  --text-primary: #0f172a;       /* Deep Slate / Near Black */
+  --text-secondary: #475569;     /* Slate 600 */
+  --text-muted: #94a3b8;         /* Slate 400 */
+  
+  --border-color: #e2e8f0;       /* Soft Slate 200 Border */
+  --border-subtle: #f1f5f9;      /* Slate 100 */
+
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --info-color: #3b82f6;
+
+  --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-urdu: 'Noto Nastaliq Urdu', 'Urdu Typesetting', 'Jameel Noori Nastaleeq', 'Segoe UI', system-ui, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.card {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn:hover {
+  background-color: var(--primary-hover);
+  box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.2);
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Urdu typography */
+.urdu-text {
+  font-family: var(--font-urdu);
+  direction: rtl;
+}

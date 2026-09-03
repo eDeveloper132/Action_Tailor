@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Measurement Profiles - Action Tailor / ناپ کا ریکارڈ</title>
+
+  <!-- Tailwind CSS CDN & Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/tailwind-config.js"></script>
+
+  <!-- Centralized & View-Specific Custom CSS -->
+  <link rel="stylesheet" href="/src/css/global.css">
+  <link rel="stylesheet" href="/src/css/dashboard.css">
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+  <!-- Dynamic Mount for Admin Navigation Bar -->
+  <div id="navbarMount" class="no-print"></div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 no-print space-y-6">
+    <!-- Header -->
+    <div class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Measurement Profiles / ناپ کا کھاتہ
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+          Record, customize and reuse bilingual Pakistani tailoring measurement profiles
+        </p>
+      </div>
+      <div>
+        <button
+          id="btnOpenNewProfileModal"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition-all"
+        >
+          <span>📐</span>
+          <span>Record New Profile / نیا ناپ لکھیں</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter by Customer -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
+      <div class="relative flex-1">
+        <select
+          id="filterCustomerSelect"
+          class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white"
+        >
+          <option value="">Select a customer to view their saved measurements / گاہک منتخب کریں...</option>
+        </select>
+      </div>
+      <button id="btnRefreshMeasurements" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-300" title="Refresh">
+        🔄
+      </button>
+    </div>
+
+    <!-- Profiles Grid -->
+    <div id="profilesGridContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="col-span-full text-center py-12 text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
+        Please select a customer from the dropdown above to view or manage measurements.
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Record / Edit Measurement Profile -->
+  <div id="modalMeasureProfile" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 hidden overflow-y-auto">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-6 shadow-2xl text-slate-900 my-8">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>📐</span> Pakistani Suit Measurements Studio / ناپ سٹوڈیو
+        </h2>
+        <button id="closeMeasureModal" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="formMeasureProfile" class="space-y-4 text-xs sm:text-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Customer / گاہک <span class="text-rose-500">*</span></label>
+            <select id="measureCustomerSelect" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600" required></select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Profile Title / عنوان <span class="text-rose-500">*</span></label>
+            <input type="text" id="measureTitle" placeholder="e.g. Shalwar Qameez Fitting, Kurta Regular" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600" required>
+          </div>
+        </div>
+
+        <!-- Upper Garment / Qameez Dimensions -->
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+            Upper Body / قمیض / کرتہ (Inches)
+          </h3>
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-500">Lambai / لمبائی</label>
+              <input type="number" step="0.25" id="dimLength" placeholder="40" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Teera / تیرا</label>
+              <input type="number" step="0.25" id="dimShoulder" placeholder="17.5" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Chhati / چھاتی</label>
+              <input type="number" step="0.25" id="dimChest" placeholder="21" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Bazu / بازو</label>
+              <input type="number" step="0.25" id="dimSleeve" placeholder="24" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Collar / کالر</label>
+              <input type="number" step="0.25" id="dimCollar" placeholder="15.5" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Ghera / دامن</label>
+              <input type="number" step="0.25" id="dimGhera" placeholder="23" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+          </div>
+        </div>
+
+        <!-- Lower Garment / Shalwaar Dimensions -->
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+          <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+            Lower Body / شلوار / پاجامہ (Inches)
+          </h3>
+          <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-500">Shalwaar Lambai</label>
+              <input type="number" step="0.25" id="dimShalwaarLength" placeholder="38.5" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Paincha / پائینچہ</label>
+              <input type="number" step="0.25" id="dimPaincha" placeholder="8.5" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Aasan / آسن</label>
+              <input type="number" step="0.25" id="dimAasan" placeholder="17" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500">Ghera / گھیرا</label>
+              <input type="number" step="0.25" id="dimShalwaarGhera" placeholder="22" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold">
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
+          <button type="button" id="btnCancelMeasure" class="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-semibold text-white">
+            Save Measurements / ناپ محفوظ کریں
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/src/js/measurements.ts"></script>
+</body>
+</html>

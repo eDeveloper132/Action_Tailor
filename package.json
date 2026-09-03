@@ -1,14 +1,23 @@
 {
   "name": "action-tailor",
   "version": "1.0.0",
-  "description": "",
+  "description": "Action Tailor - Pakistani Tailoring Shop Management System",
   "main": "index.ts",
   "type": "module",
+  "workspaces": [
+    "backend",
+    "frontend-admin",
+    "frontend-customer"
+  ],
   "scripts": {
-    "dev": "tsx watch index.ts",
-    "start": "tsx index.ts",
-    "typecheck": "tsc --noEmit",
-    "seed": "tsx seeds/seed.ts",
+    "dev": "tsx scripts/dev.ts",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:admin": "npm --prefix frontend-admin run dev",
+    "dev:customer": "npm --prefix frontend-customer run dev",
+    "start": "tsx backend/index.ts",
+    "build": "npm --prefix frontend-admin run build && npm --prefix frontend-customer run build",
+    "typecheck": "tsc --noEmit -p backend/tsconfig.json && tsc --noEmit -p frontend-admin/tsconfig.json && tsc --noEmit -p frontend-customer/tsconfig.json",
+    "seed": "tsx backend/seeds/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -30,7 +39,9 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.4.1",
+    "socket.io-client": "^4.8.3",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vite": "^6.2.0"
   }
 }

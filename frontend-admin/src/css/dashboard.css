@@ -1,0 +1,233 @@
+/* ==========================================
+   Action Tailor - Bright Modern Tailor SaaS Stylesheet
+   Polished Emerald / Crisp White / Deep Slate Theme
+   ========================================== */
+
+/* Bilingual Urdu Typography Enhancement */
+.lang-ur {
+  font-family: 'Noto Nastaliq Urdu', 'Urdu Typesetting', 'Jameel Noori Nastaleeq', 'Segoe UI', system-ui, sans-serif;
+  direction: rtl;
+}
+
+.bilingual-label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.bilingual-label .ur {
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
+/* Status Badges - Bright & Readable */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-width: 1px;
+}
+
+.status-pending {
+  background-color: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.status-confirmed {
+  background-color: #e0e7ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
+}
+
+.status-cutting {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+.status-stitching {
+  background-color: #ede9fe;
+  color: #6d28d9;
+  border-color: #ddd6fe;
+}
+
+.status-quality_check {
+  background-color: #fce7f3;
+  color: #be185d;
+  border-color: #fbcfe8;
+}
+
+.status-ready {
+  background-color: #d1fae5;
+  color: #047857;
+  border-color: #a7f3d0;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.15);
+}
+
+.status-delivered {
+  background-color: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.status-cancelled {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+/* Payment Badges */
+.payment-paid {
+  background-color: #d1fae5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.payment-partial {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.payment-unpaid {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Bright Workflow Stepper Progress */
+.workflow-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.workflow-stepper::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #e2e8f0;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.step-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-circle {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.step-node.completed .step-circle {
+  background-color: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.step-node.active .step-circle {
+  background-color: #059669;
+  border-color: #047857;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(5, 150, 105, 0.35);
+}
+
+.step-label {
+  font-size: 0.75rem;
+  margin-top: 0.4rem;
+  color: #64748b;
+  text-align: center;
+  font-weight: 500;
+}
+
+.step-node.completed .step-label,
+.step-node.active .step-label {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+/* Bright Tailor Cards */
+.tailor-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.tailor-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Pulse animation */
+.pulse-dot {
+  animation: pulseDot 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+/* ==========================================
+   Printable Tailor Receipt Slip (@media print)
+   ========================================== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #printableSlipArea,
+  #printableSlipArea * {
+    visibility: visible;
+  }
+
+  #printableSlipArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 1.5cm;
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

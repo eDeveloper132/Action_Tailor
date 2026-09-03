@@ -1,0 +1,77 @@
+/* ==========================================
+   Action Tailor - Authentication Views Stylesheet
+   Custom CSS augmenting Tailwind utilities
+   ========================================== */
+
+.auth-card {
+  backdrop-filter: blur(12px);
+  background-color: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(51, 65, 85, 0.8);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  animation: authFadeIn 0.35s ease-out;
+}
+
+@keyframes authFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-input {
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.auth-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  background-color: #0f172a;
+}
+
+.auth-brand-glow {
+  text-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+/* Real-time Password Checklist & Status Styles */
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.rule-item.valid {
+  color: #34d399;
+  font-weight: 500;
+}
+
+.rule-item.valid .rule-icon {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #34d399;
+}
+
+.rule-item.invalid {
+  color: #94a3b8;
+}
+
+.rule-item.invalid .rule-icon {
+  border-color: #475569;
+  color: #64748b;
+}
+
+.auth-input.input-valid {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 1px #10b981;
+}
+
+.auth-input.input-invalid {
+  border-color: #f43f5e !important;
+  box-shadow: 0 0 0 1px #f43f5e;
+}
+
