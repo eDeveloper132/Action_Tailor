@@ -1,45 +1,27 @@
 {
   "name": "action-tailor",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js",
-    "build": "tsc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eDeveloper132/Action_Tailor.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "description": "Action Tailor - Bespoke Tailoring Management System",
+  "private": true,
   "type": "module",
-  "bugs": {
-    "url": "https://github.com/eDeveloper132/Action_Tailor/issues"
-  },
-  "homepage": "https://github.com/eDeveloper132/Action_Tailor#readme",
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "chalk": "^6.0.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "mongoose": "^9.9.5",
-    "socket.io": "^4.8.3"
+  "workspaces": [
+    "backend",
+    "admin-panel",
+    "customer-panel"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"BACKEND,ADMIN,CUSTOMER\" -c \"magenta,blue,green\" \"npm --workspace=action-tailor-backend run dev\" \"npm --workspace=action-tailor-admin run dev\" \"npm --workspace=action-tailor-customer run dev\"",
+    "dev:backend": "npm --workspace=action-tailor-backend run dev",
+    "dev:admin": "npm --workspace=action-tailor-admin run dev",
+    "dev:customer": "npm --workspace=action-tailor-customer run dev",
+    "build": "npm --workspace=action-tailor-backend run typecheck && npm --workspace=action-tailor-admin run build && npm --workspace=action-tailor-customer run build",
+    "build:backend": "npm --workspace=action-tailor-backend run typecheck",
+    "build:admin": "npm --workspace=action-tailor-admin run build",
+    "build:customer": "npm --workspace=action-tailor-customer run build",
+    "typecheck": "npm --workspace=action-tailor-backend run typecheck && npm --workspace=action-tailor-admin run typecheck && npm --workspace=action-tailor-customer run typecheck",
+    "seed": "npm --workspace=action-tailor-backend run seed"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/chalk": "^0.4.31",
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/dotenv": "^6.1.1",
-    "@types/express": "^5.0.6",
-    "@types/mongoose": "^5.11.96",
-    "@types/node": "^26.4.1",
-    "@types/socket.io": "^3.0.1",
-    "typescript": "^7.0.2"
+    "concurrently": "^9.1.2"
   }
 }

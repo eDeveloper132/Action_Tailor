@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Owner Dashboard - Action Tailor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-lg font-bold shadow-md shadow-emerald-900/30">
+            ✂️
+          </div>
+          <span class="font-extrabold text-white text-base tracking-tight">Action Tailor</span>
+        </a>
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/80 ml-2">
+          Shop Owner / ماسٹر ٹیلر
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="/" class="text-xs text-slate-400 hover:text-slate-200 transition-colors">
+          Store Front
+        </a>
+        <a href="/signin" class="text-xs text-rose-400 hover:text-rose-300 font-semibold px-3 py-1.5 rounded-lg border border-rose-950 bg-rose-950/40 transition-colors">
+          Sign Out
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Welcome & Quick Action Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl shadow-emerald-950/10">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Shop Operations Dashboard</h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1">Manage orders, live cutting & stitching queues, and payments / دکان کا انتظام</p>
+      </div>
+
+      <button class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-900/40 transition-all hover:scale-[1.02]">
+        <span>➕</span>
+        <span>Book New Order / نیا آرڈر</span>
+      </button>
+    </div>
+
+    <!-- Live Metric Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+        <div class="text-xs font-semibold text-slate-400 mb-1">Total Active / کل آرڈرز</div>
+        <div class="text-2xl font-black text-white">12</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+        <div class="text-xs font-semibold text-slate-400 mb-1">Cutting Queue / کٹائی</div>
+        <div class="text-2xl font-black text-amber-400">4</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+        <div class="text-xs font-semibold text-slate-400 mb-1">In Stitching / سلائی</div>
+        <div class="text-2xl font-black text-blue-400">5</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800">
+        <div class="text-xs font-semibold text-slate-400 mb-1">Ready for Pickup / تیار</div>
+        <div class="text-2xl font-black text-emerald-400">3</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 col-span-2 lg:col-span-1">
+        <div class="text-xs font-semibold text-slate-400 mb-1">Pending Balance / بقایا</div>
+        <div class="text-2xl font-black text-rose-400">14,500 PKR</div>
+      </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-slate-900 border border-slate-800">
+      <div class="relative flex-1">
+        <input
+          type="text"
+          placeholder="Search by Order #, Customer Name or Phone / تلاش کریں..."
+          class="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+        >
+      </div>
+      <div class="flex items-center gap-2">
+        <select class="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-300 focus:outline-none focus:border-emerald-500">
+          <option value="">All Statuses / تمام حالتیں</option>
+          <option value="pending">Pending</option>
+          <option value="cutting">Cutting</option>
+          <option value="stitching">Stitching</option>
+          <option value="ready">Ready</option>
+          <option value="delivered">Delivered</option>
+        </select>
+        <button class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Refresh">
+          🔄
+        </button>
+      </div>
+    </div>
+
+    <!-- Orders Queue Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <h2 class="font-bold text-white text-base">Recent Orders Queue / آرڈرز کی فہرست</h2>
+        <span class="text-xs text-slate-400">Showing active suits</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800">
+            <tr>
+              <th class="py-3.5 px-4 font-semibold">Order #</th>
+              <th class="py-3.5 px-4 font-semibold">Customer</th>
+              <th class="py-3.5 px-4 font-semibold">Suit Type</th>
+              <th class="py-3.5 px-4 font-semibold">Delivery Date</th>
+              <th class="py-3.5 px-4 font-semibold">Status</th>
+              <th class="py-3.5 px-4 font-semibold">Balance</th>
+              <th class="py-3.5 px-4 font-semibold text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/80 text-slate-200">
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-bold text-emerald-400">#AT-1001</td>
+              <td class="py-3.5 px-4">
+                <div class="font-bold text-white">Tariq Mehmood</div>
+                <div class="text-xs text-slate-500">0300-9876543</div>
+              </td>
+              <td class="py-3.5 px-4">Kameez Shalwar (Wash & Wear)</td>
+              <td class="py-3.5 px-4 text-slate-300">10 Sep 2026</td>
+              <td class="py-3.5 px-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-950 text-amber-400 border border-amber-800/60">
+                  Cutting
+                </span>
+              </td>
+              <td class="py-3.5 px-4 font-bold text-rose-400">1,500 PKR</td>
+              <td class="py-3.5 px-4 text-right">
+                <button class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors">
+                  Advance ➔
+                </button>
+              </td>
+            </tr>
+
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-bold text-emerald-400">#AT-1002</td>
+              <td class="py-3.5 px-4">
+                <div class="font-bold text-white">Bilal Ahmed</div>
+                <div class="text-xs text-slate-500">0321-1234567</div>
+              </td>
+              <td class="py-3.5 px-4">Kurta Pajama (Cotton)</td>
+              <td class="py-3.5 px-4 text-slate-300">12 Sep 2026</td>
+              <td class="py-3.5 px-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-950 text-blue-400 border border-blue-800/60">
+                  Stitching
+                </span>
+              </td>
+              <td class="py-3.5 px-4 font-bold text-slate-400">Paid</td>
+              <td class="py-3.5 px-4 text-right">
+                <button class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors">
+                  Advance ➔
+                </button>
+              </td>
+            </tr>
+
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-bold text-emerald-400">#AT-1003</td>
+              <td class="py-3.5 px-4">
+                <div class="font-bold text-white">Zahid Khan</div>
+                <div class="text-xs text-slate-500">0345-5554321</div>
+              </td>
+              <td class="py-3.5 px-4">2x Shalwar Kameez (Boski)</td>
+              <td class="py-3.5 px-4 text-slate-300">08 Sep 2026</td>
+              <td class="py-3.5 px-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/60">
+                  Ready for Pickup
+                </span>
+              </td>
+              <td class="py-3.5 px-4 font-bold text-rose-400">3,000 PKR</td>
+              <td class="py-3.5 px-4 text-right">
+                <button class="px-3 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold transition-colors">
+                  Deliver ✔
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-600">
+    &copy; 2026 Action Tailor. Shop Management Portal.
+  </footer>
+
+</body>
+</html>
