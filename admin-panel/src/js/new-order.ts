@@ -1,10 +1,11 @@
 import { renderNavbar, showToast } from '../ui_components/index.ts';
 import '../utils/api.ts';
 
-let customersList: any[] = [];
 let selectedCategory = 'shalwaar_qameez';
+let selectedCustomer: any = null;
+let customerMeasurementsCache: any[] = [];
 let currentGarmentProfile: any = null;
-let isEditingMeasurement: boolean = false;
+let searchDebounceTimer: any = null;
 
 const GARMENT_NAMES: Record<string, string> = {
   shalwaar_qameez: 'Shalwar Qameez / شلوار قمیض',
@@ -29,29 +30,214 @@ async function initNewOrderStudio(): Promise<void> {
   });
 
   // Set default delivery date to 7 days from today
-  const defaultDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  const dateInput = document.getElementById('orderDeliveryDateInput') as HTMLInputElement;
-  if (dateInput) dateInput.value = defaultDate;
+  setDatePreset(7);
+  setupDatePresets();
 
   const urlParams = new URLSearchParams(window.location.search);
   const targetCustomerId = urlParams.get('customerId') || '';
 
   await loadClothingCategories();
-  await loadCustomers(targetCustomerId);
-  setupSearchFilter();
+  setupFastCustomerSearch();
   setupQuickAddCustomerModal();
-  setupCustomerChangeListener();
   setupFormSubmission();
 
   if (targetCustomerId) {
-    const selectCustomer = document.getElementById('selectCustomer') as HTMLSelectElement;
-    if (selectCustomer) {
-      selectCustomer.value = targetCustomerId;
-      await onCustomerSelected(targetCustomerId);
-    }
+    try {
+      const res = await (window as any).ActionTailor.apiFetch(`/api/customers/${targetCustomerId}`);
+      if (res.data) {
+        selectCustomerAndLoad(res.data);
+      }
+    } catch (_e) {}
   }
 }
 
+function setDatePreset(days: number): void {
+  const target = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  const formatted = target.toISOString().split('T')[0];
+  const dateInput = document.getElementById('orderDeliveryDateInput') as HTMLInputElement;
+  if (dateInput) dateInput.value = formatted;
+}
+
+function setupDatePresets(): void {
+  document.querySelectorAll('.btn-preset-days').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const days = parseInt((e.currentTarget as HTMLElement).dataset.days || '7', 10);
+      setDatePreset(days);
+      document.querySelectorAll('.btn-preset-days').forEach((b) => {
+        b.classList.remove('bg-emerald-100', 'text-emerald-800', 'font-bold');
+        b.classList.add('bg-slate-100', 'text-slate-700', 'font-semibold');
+      });
+      (e.currentTarget as HTMLElement).classList.remove('bg-slate-100', 'text-slate-700', 'font-semibold');
+      (e.currentTarget as HTMLElement).classList.add('bg-emerald-100', 'text-emerald-800', 'font-bold');
+    });
+  });
+}
+
+/**
+ * Step 1: Fast Customer Search by Phone or Name
+ * Real-time instant lookup with auto-dropdown
+ */
+function setupFastCustomerSearch(): void {
+  const searchInput = document.getElementById('inputSearchCust') as HTMLInputElement;
+  const resultsDropdown = document.getElementById('customerSearchResults') as HTMLDivElement;
+  const previewBox = document.getElementById('customerInfoPreview');
+  const btnChange = document.getElementById('btnChangeCustomer');
+
+  btnChange?.addEventListener('click', () => {
+    selectedCustomer = null;
+    currentGarmentProfile = null;
+    customerMeasurementsCache = [];
+    (document.getElementById('selectCustomer') as HTMLSelectElement).value = '';
+
+    if (previewBox) previewBox.classList.add('hidden');
+    searchInput.value = '';
+    searchInput.classList.remove('hidden');
+    searchInput.focus();
+    updateCategoryCardsMeasurementBadges([]);
+    resetMeasurementStatusBanner();
+    clearMeasurements();
+  });
+
+  searchInput?.addEventListener('input', () => {
+    clearTimeout(searchDebounceTimer);
+    const query = searchInput.value.trim();
+
+    if (!query) {
+      resultsDropdown.classList.add('hidden');
+      resultsDropdown.innerHTML = '';
+      return;
+    }
+
+    searchDebounceTimer = setTimeout(async () => {
+      try {
+        const res = await (window as any).ActionTailor.apiFetch(
+          `/api/customers?search=${encodeURIComponent(query)}&limit=10`
+        );
+        const list: any[] = res.data?.customers || [];
+        renderSearchResults(list, query);
+      } catch (err: any) {
+        console.error('Search error:', err);
+      }
+    }, 150); // Fast 150ms debounce
+  });
+
+  searchInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const firstResult = resultsDropdown.querySelector('.cust-search-row') as HTMLElement;
+      if (firstResult) {
+        firstResult.click();
+      }
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!resultsDropdown.contains(e.target as Node) && e.target !== searchInput) {
+      resultsDropdown.classList.add('hidden');
+    }
+  });
+}
+
+function renderSearchResults(list: any[], query: string): void {
+  const resultsDropdown = document.getElementById('customerSearchResults') as HTMLDivElement;
+  if (!resultsDropdown) return;
+
+  if (list.length === 0) {
+    resultsDropdown.innerHTML = `
+      <div class="p-3 text-xs text-slate-500 flex items-center justify-between">
+        <span>No customer found with "<strong>${query}</strong>"</span>
+        <button type="button" id="btnQuickAddFromSearch" class="text-xs font-bold text-emerald-700 hover:underline">
+          + Quick Register / نیا گاہک درج کریں
+        </button>
+      </div>
+    `;
+    resultsDropdown.classList.remove('hidden');
+
+    document.getElementById('btnQuickAddFromSearch')?.addEventListener('click', () => {
+      resultsDropdown.classList.add('hidden');
+      openQuickAddModalWithPrefill(query);
+    });
+    return;
+  }
+
+  resultsDropdown.innerHTML = list
+    .map(
+      (c: any) => `
+    <div class="cust-search-row p-3 hover:bg-emerald-50 cursor-pointer flex justify-between items-center text-xs transition-colors" data-id="${c._id}">
+      <div>
+        <div class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+          <span>${c.name}</span>
+          <span class="font-mono text-emerald-700 font-bold text-xs">📞 ${c.phone}</span>
+        </div>
+        <div class="text-[11px] text-slate-500 mt-0.5">${c.address || c.city || 'Lahore'}</div>
+      </div>
+      <div class="text-right shrink-0">
+        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
+          ${c.totalOrders || 0} Suits
+        </span>
+      </div>
+    </div>
+  `
+    )
+    .join('');
+
+  resultsDropdown.classList.remove('hidden');
+
+  resultsDropdown.querySelectorAll('.cust-search-row').forEach((row) => {
+    row.addEventListener('click', () => {
+      const customerId = (row as HTMLElement).dataset.id;
+      const found = list.find((c) => c._id === customerId);
+      if (found) {
+        selectCustomerAndLoad(found);
+      }
+    });
+  });
+}
+
+async function selectCustomerAndLoad(customer: any): Promise<void> {
+  selectedCustomer = customer;
+  const searchInput = document.getElementById('inputSearchCust') as HTMLInputElement;
+  const resultsDropdown = document.getElementById('customerSearchResults') as HTMLDivElement;
+  const previewBox = document.getElementById('customerInfoPreview');
+  const selectCustomer = document.getElementById('selectCustomer') as HTMLSelectElement;
+
+  if (resultsDropdown) resultsDropdown.classList.add('hidden');
+  if (searchInput) searchInput.value = '';
+
+  // Synchronize hidden select
+  if (selectCustomer) {
+    selectCustomer.innerHTML = `<option value="${customer._id}" selected>${customer.name}</option>`;
+    selectCustomer.value = customer._id;
+  }
+
+  // Display Customer Card Preview
+  if (previewBox) {
+    (document.getElementById('previewCustName') as HTMLElement).textContent = customer.name;
+    (document.getElementById('previewCustPhone') as HTMLElement).textContent = `📞 ${customer.phone}`;
+    (document.getElementById('previewCustAddress') as HTMLElement).textContent = customer.address
+      ? `📍 ${customer.address}`
+      : `📍 ${customer.city || 'Lahore'}`;
+    (document.getElementById('previewCustOrders') as HTMLElement).textContent = `${customer.totalOrders || 0} Previous Suits`;
+    previewBox.classList.remove('hidden');
+  }
+
+  // Immediately fetch all saved measurements for this customer to highlight garment cards
+  try {
+    const res = await (window as any).ActionTailor.apiFetch(`/api/measurements/customer/${customer._id}`);
+    customerMeasurementsCache = res.data || [];
+    updateCategoryCardsMeasurementBadges(customerMeasurementsCache);
+  } catch (_e) {
+    customerMeasurementsCache = [];
+  }
+
+  // Immediately load measurement for current garment
+  await checkAndLoadGarmentMeasurement(customer._id, selectedCategory);
+}
+
+/**
+ * Step 2: Clothing Categories Grid
+ * Shows badges indicating which garments have saved measurements
+ */
 async function loadClothingCategories(): Promise<void> {
   const grid = document.getElementById('clothingCategoriesGrid');
   if (!grid) return;
@@ -68,8 +254,13 @@ async function loadClothingCategories(): Promise<void> {
           ? 'bg-emerald-50 border-emerald-600 text-emerald-900 shadow-xs ring-1 ring-emerald-600'
           : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
       }" data-key="${cat.key}">
-        <div class="font-bold text-xs sm:text-sm">${cat.nameEn}</div>
-        <div class="text-xs text-emerald-700 font-medium">${cat.nameUr}</div>
+        <div class="flex justify-between items-start gap-1">
+          <div>
+            <div class="font-bold text-xs sm:text-sm">${cat.nameEn}</div>
+            <div class="text-xs text-emerald-700 font-medium">${cat.nameUr}</div>
+          </div>
+          <span class="cat-meas-badge text-[10px] px-1.5 py-0.5 rounded font-bold hidden" id="badge-${cat.key}"></span>
+        </div>
       </div>
     `
       )
@@ -89,10 +280,9 @@ async function loadClothingCategories(): Promise<void> {
         target.className =
           'cat-card p-3 rounded-xl border cursor-pointer transition-all bg-emerald-50 border-emerald-600 text-emerald-900 shadow-xs ring-1 ring-emerald-600';
 
-        // When category changes, auto-load garment-specific measurement for selected customer
-        const customerId = (document.getElementById('selectCustomer') as HTMLSelectElement)?.value;
-        if (customerId) {
-          await checkAndLoadGarmentMeasurement(customerId, selectedCategory);
+        // Auto-load garment-specific measurement for selected customer
+        if (selectedCustomer?._id) {
+          await checkAndLoadGarmentMeasurement(selectedCustomer._id, selectedCategory);
         }
       });
     });
@@ -101,89 +291,24 @@ async function loadClothingCategories(): Promise<void> {
   }
 }
 
-async function loadCustomers(selectedId: string = ''): Promise<void> {
-  const select = document.getElementById('selectCustomer') as HTMLSelectElement;
-  if (!select) return;
-
-  try {
-    const res = await (window as any).ActionTailor.apiFetch('/api/customers?limit=100');
-    customersList = res.data?.customers || [];
-
-    renderCustomerOptions(customersList, selectedId);
-  } catch (err: any) {
-    select.innerHTML = `<option value="">Error loading customers: ${err.message}</option>`;
-  }
-}
-
-function renderCustomerOptions(list: any[], selectedId: string = ''): void {
-  const select = document.getElementById('selectCustomer') as HTMLSelectElement;
-  if (!select) return;
-
-  if (list.length === 0) {
-    select.innerHTML = '<option value="">No customers found</option>';
-    return;
-  }
-
-  select.innerHTML =
-    '<option value="">Select customer / گاہک منتخب کریں</option>' +
-    list
-      .map(
-        (c: any) =>
-          `<option value="${c._id}" ${c._id === selectedId ? 'selected' : ''}>${c.name} (${c.phone} ${c.address ? `- ${c.address}` : ''})</option>`
-      )
-      .join('');
-}
-
-function setupSearchFilter(): void {
-  const searchInput = document.getElementById('inputSearchCust') as HTMLInputElement;
-  const select = document.getElementById('selectCustomer') as HTMLSelectElement;
-
-  searchInput?.addEventListener('input', () => {
-    const q = searchInput.value.trim().toLowerCase();
-    if (!q) {
-      renderCustomerOptions(customersList, select.value);
-      return;
-    }
-
-    const filtered = customersList.filter(
-      (c) =>
-        (c.name && c.name.toLowerCase().includes(q)) ||
-        (c.phone && c.phone.includes(q)) ||
-        (c.address && c.address.toLowerCase().includes(q))
-    );
-
-    renderCustomerOptions(filtered, select.value);
-
-    // If exact or single match, select it
-    if (filtered.length === 1) {
-      select.value = filtered[0]._id;
-      onCustomerSelected(filtered[0]._id);
-    }
+function updateCategoryCardsMeasurementBadges(profiles: any[]): void {
+  document.querySelectorAll('.cat-meas-badge').forEach((badge) => {
+    badge.classList.add('hidden');
   });
-}
 
-function setupCustomerChangeListener(): void {
-  const selectCustomer = document.getElementById('selectCustomer') as HTMLSelectElement;
-  selectCustomer?.addEventListener('change', () => {
-    const customerId = selectCustomer.value;
-    if (customerId) {
-      onCustomerSelected(customerId);
-    } else {
-      clearCustomerPreview();
-      clearMeasurements();
-      resetMeasurementStatusBanner();
+  for (const p of profiles) {
+    const key = p.clothingCategory;
+    const badgeEl = document.getElementById(`badge-${key}`);
+    if (badgeEl) {
+      badgeEl.textContent = '✓ Saved / ناپ محفوظ';
+      badgeEl.className = 'cat-meas-badge text-[10px] px-1.5 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800';
+      badgeEl.classList.remove('hidden');
     }
-  });
-}
-
-async function onCustomerSelected(customerId: string): Promise<void> {
-  const customer = customersList.find((c) => c._id === customerId);
-  updateCustomerPreview(customer);
-  await checkAndLoadGarmentMeasurement(customerId, selectedCategory);
+  }
 }
 
 /**
- * Core Workflow: Garment-Specific Measurement Resolution
+ * Step 3: Garment-Specific Measurement Resolution
  * Checks if measurement exists for Customer + Garment Type
  * Shows "Previous Measurement Found" vs "No Previous Measurement"
  */
@@ -208,7 +333,6 @@ async function checkAndLoadGarmentMeasurement(customerId: string, category: stri
     );
     const profile = res.data;
     currentGarmentProfile = profile;
-    isEditingMeasurement = false;
 
     if (profile && profile.measurements) {
       // PREVIOUS MEASUREMENT FOUND / پچھلا ناپ موجود ہے
@@ -241,13 +365,11 @@ async function checkAndLoadGarmentMeasurement(customerId: string, category: stri
 
         document.getElementById('btnUseExisting')?.addEventListener('click', () => {
           populateMeasurements(profile);
-          isEditingMeasurement = false;
           highlightButtons('existing');
           showToast('Loaded existing measurement / محفوظ شدہ ناپ لاگو ہو گیا', 'info');
         });
 
         document.getElementById('btnEditMeasurement')?.addEventListener('click', () => {
-          isEditingMeasurement = true;
           highlightButtons('editing');
           if (updateChk) updateChk.checked = true;
           showToast('Editing measurement. Changes will update the latest profile.', 'info');
@@ -255,9 +377,9 @@ async function checkAndLoadGarmentMeasurement(customerId: string, category: stri
         });
       }
 
-      // Automatically load the existing measurements into the inputs
+      // Automatically populate existing measurements
       populateMeasurements(profile);
-      if (updateChk) updateChk.checked = false; // Unchecked by default for clean existing usage
+      if (updateChk) updateChk.checked = false;
     } else {
       // NO PREVIOUS MEASUREMENT / پچھلا ناپ موجود نہیں
       if (banner) {
@@ -283,7 +405,6 @@ async function checkAndLoadGarmentMeasurement(customerId: string, category: stri
       }
 
       clearMeasurements();
-      isEditingMeasurement = true;
       if (updateChk) updateChk.checked = true;
     }
   } catch (err: any) {
@@ -369,28 +490,28 @@ function clearMeasurements(): void {
   (document.getElementById('ordDimShalwaarGhera') as HTMLInputElement).value = '';
 }
 
-function updateCustomerPreview(customer: any): void {
-  const previewBox = document.getElementById('customerInfoPreview');
-  if (!previewBox) return;
+function openQuickAddModalWithPrefill(query: string): void {
+  const modal = document.getElementById('modalQuickAddCustomer');
+  const nameInput = document.getElementById('quickCustName') as HTMLInputElement;
+  const phoneInput = document.getElementById('quickCustPhone') as HTMLInputElement;
 
-  if (!customer) {
-    clearCustomerPreview();
-    return;
+  // If query is numbers, put in phone, else in name
+  const digits = query.replace(/\D/g, '');
+  if (digits.length >= 7) {
+    if (phoneInput) phoneInput.value = query;
+    if (nameInput) {
+      nameInput.value = '';
+      nameInput.focus();
+    }
+  } else {
+    if (nameInput) nameInput.value = query;
+    if (phoneInput) {
+      phoneInput.value = '';
+      phoneInput.focus();
+    }
   }
 
-  (document.getElementById('previewCustName') as HTMLElement).textContent = customer.name;
-  (document.getElementById('previewCustPhone') as HTMLElement).textContent = `📞 ${customer.phone}`;
-  (document.getElementById('previewCustAddress') as HTMLElement).textContent = customer.address
-    ? `📍 ${customer.address}`
-    : '';
-  (document.getElementById('previewCustOrders') as HTMLElement).textContent = `${customer.totalOrders || 0} Previous Suits`;
-
-  previewBox.classList.remove('hidden');
-}
-
-function clearCustomerPreview(): void {
-  const previewBox = document.getElementById('customerInfoPreview');
-  if (previewBox) previewBox.classList.add('hidden');
+  modal?.classList.remove('hidden');
 }
 
 function setupQuickAddCustomerModal(): void {
@@ -399,7 +520,11 @@ function setupQuickAddCustomerModal(): void {
   const btnClose = document.getElementById('closeQuickCustModal');
   const btnCancel = document.getElementById('btnCancelQuickCust');
 
-  btnOpen?.addEventListener('click', () => modal?.classList.remove('hidden'));
+  btnOpen?.addEventListener('click', () => {
+    (document.getElementById('formQuickAddCustomer') as HTMLFormElement)?.reset();
+    modal?.classList.remove('hidden');
+    (document.getElementById('quickCustName') as HTMLInputElement)?.focus();
+  });
   btnClose?.addEventListener('click', () => modal?.classList.add('hidden'));
   btnCancel?.addEventListener('click', () => modal?.classList.add('hidden'));
 
@@ -411,7 +536,7 @@ function setupQuickAddCustomerModal(): void {
     const email = (document.getElementById('quickCustEmail') as HTMLInputElement).value.trim() || undefined;
 
     if (!name || !phone) {
-      showToast('Name and phone are required', 'warning');
+      showToast('Name and phone are required / نام اور فون نمبر ضروری ہیں', 'warning');
       return;
     }
 
@@ -422,15 +547,12 @@ function setupQuickAddCustomerModal(): void {
       });
 
       const newCustomer = res.data;
-      showToast(`Customer "${newCustomer.name}" registered!`, 'success');
+      showToast(`Customer "${newCustomer.name}" registered! / گاہک درج ہو گیا`, 'success');
       modal?.classList.add('hidden');
       (e.target as HTMLFormElement).reset();
 
-      // Add to memory and select
-      customersList.unshift(newCustomer);
-      renderCustomerOptions(customersList, newCustomer._id);
-      (document.getElementById('selectCustomer') as HTMLSelectElement).value = newCustomer._id;
-      await onCustomerSelected(newCustomer._id);
+      // Immediately select new customer and proceed with order flow
+      await selectCustomerAndLoad(newCustomer);
     } catch (err: any) {
       showToast(err.message, 'error');
     }
@@ -442,7 +564,7 @@ function setupFormSubmission(): void {
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const customer = (document.getElementById('selectCustomer') as HTMLSelectElement).value;
+    const customerId = selectedCustomer?._id;
     const clothingCategory = (document.getElementById('selectedCategoryInput') as HTMLInputElement).value;
     const quantity = parseInt((document.getElementById('orderQtyInput') as HTMLInputElement).value, 10);
     const expectedDeliveryDate = (document.getElementById('orderDeliveryDateInput') as HTMLInputElement).value;
@@ -464,8 +586,9 @@ function setupFormSubmission(): void {
     const saveMeasurementProfile =
       (document.getElementById('chkUpdateGarmentProfile') as HTMLInputElement)?.checked ?? true;
 
-    if (!customer) {
-      showToast('Please select a customer / گاہک منتخب کریں', 'warning');
+    if (!customerId) {
+      showToast('Please search and select a customer / گاہک منتخب کریں', 'warning');
+      (document.getElementById('inputSearchCust') as HTMLInputElement)?.focus();
       return;
     }
 
@@ -491,7 +614,7 @@ function setupFormSubmission(): void {
       const res = await (window as any).ActionTailor.apiFetch('/api/orders', {
         method: 'POST',
         body: JSON.stringify({
-          customer,
+          customer: customerId,
           clothingCategory,
           quantity,
           measurementProfileId: currentGarmentProfile?._id,
@@ -506,10 +629,10 @@ function setupFormSubmission(): void {
         }),
       });
 
-      showToast(`Order #${res.data.orderNumber} successfully booked!`, 'success');
+      showToast(`Order #${res.data.orderNumber} successfully booked! / آرڈر کامیابی سے بک ہو گیا`, 'success');
       setTimeout(() => {
         window.location.href = '/orders.html';
-      }, 900);
+      }, 850);
     } catch (err: any) {
       showToast(err.message || 'Failed to book order', 'error');
     }

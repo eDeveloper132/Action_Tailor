@@ -1,4 +1,5 @@
 import { CustomerProfile, type ICustomerProfile, MeasurementProfile, Order } from '../models/index.ts';
+import { normalizePakistaniPhone } from '../types/tailoring.types.ts';
 
 export interface CustomerFilterOptions {
   query?: string;
@@ -8,7 +9,7 @@ export interface CustomerFilterOptions {
 
 export class CustomerService {
   /**
-   * Search customers by name, phone, or WhatsApp with lean projection
+   * Search customers by phone or name with fast indexing
    */
   static async searchCustomers(query: string, limit = 20): Promise<ICustomerProfile[]> {
     const trimmed = query.trim();
@@ -19,10 +20,24 @@ export class CustomerService {
         .lean() as unknown as Promise<ICustomerProfile[]>;
     }
 
-    const regex = new RegExp(trimmed, 'i');
-    return CustomerProfile.find({
-      $or: [{ name: regex }, { phone: regex }, { whatsapp: regex }, { city: regex }],
-    })
+    const normPhone = normalizePakistaniPhone(trimmed);
+    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'i');
+
+    const orConditions: any[] = [
+      { name: regex },
+      { phone: regex },
+      { city: regex },
+      { address: regex },
+    ];
+
+    if (normPhone && normPhone.length >= 3) {
+      orConditions.unshift({ phone: normPhone });
+      orConditions.push({ phone: new RegExp(normPhone, 'i') });
+      orConditions.push({ whatsapp: normPhone });
+    }
+
+    return CustomerProfile.find({ $or: orConditions })
       .sort({ updatedAt: -1 })
       .limit(limit)
       .lean() as unknown as Promise<ICustomerProfile[]>;
@@ -84,19 +99,28 @@ export class CustomerService {
     notes?: string;
     user?: string;
   }): Promise<ICustomerProfile> {
-    const phone = data.phone.trim();
+    const rawPhone = data.phone?.trim() || '';
+    const phone = normalizePakistaniPhone(rawPhone);
 
-    // Check if phone already registered
+    if (!phone) {
+      throw new Error('Valid Pakistani phone number is required / درست فون نمبر درج کریں');
+    }
+
+    // Prevent duplicate customer phone numbers across different formats
     const existing = await CustomerProfile.findOne({ phone });
     if (existing) {
-      throw new Error(`Customer with phone number ${phone} already exists / گاہک کا یہ فون نمبر پہلے سے درج ہے`);
+      throw new Error(
+        `Customer with phone number "${rawPhone}" is already registered as "${existing.name}" / یہ فون نمبر پہلے سے رجسٹرڈ ہے`
+      );
     }
+
+    const whatsapp = data.whatsapp ? normalizePakistaniPhone(data.whatsapp) : phone;
 
     const newCustomer = await CustomerProfile.create({
       name: data.name.trim(),
       phone,
-      whatsapp: data.whatsapp ? data.whatsapp.trim() : phone,
-      alternatePhone: data.alternatePhone?.trim(),
+      whatsapp,
+      alternatePhone: data.alternatePhone ? normalizePakistaniPhone(data.alternatePhone) : undefined,
       address: data.address?.trim(),
       city: data.city?.trim() || 'Lahore',
       email: data.email?.trim()?.toLowerCase(),
@@ -108,7 +132,7 @@ export class CustomerService {
   }
 
   /**
-   * Update customer profile
+   * Update customer profile with phone normalization & uniqueness check
    */
   static async updateCustomer(
     id: string,
@@ -123,6 +147,19 @@ export class CustomerService {
       notes: string;
     }>
   ): Promise<ICustomerProfile | null> {
+    if (data.phone) {
+      const norm = normalizePakistaniPhone(data.phone);
+      const dup = await CustomerProfile.findOne({ phone: norm, _id: { $ne: id } });
+      if (dup) {
+        throw new Error(`Phone number "${data.phone}" is already assigned to "${dup.name}"`);
+      }
+      data.phone = norm;
+    }
+
+    if (data.whatsapp) {
+      data.whatsapp = normalizePakistaniPhone(data.whatsapp);
+    }
+
     const updated = await CustomerProfile.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
     return updated;
   }

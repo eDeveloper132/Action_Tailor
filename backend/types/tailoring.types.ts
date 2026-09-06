@@ -38,6 +38,31 @@ export function normalizeClothingCategory(category: string): ClothingCategory {
   return 'custom';
 }
 
+/**
+ * Normalizes any Pakistani phone number format into canonical standard 11-digit local format (03XXXXXXXXX).
+ * Handles:
+ *  - 03001234567 -> 03001234567
+ *  - +923001234567 -> 03001234567
+ *  - 923001234567 -> 03001234567
+ *  - 00923001234567 -> 03001234567
+ *  - 3001234567 -> 03001234567
+ *  - 0300-1234567 / 0300 1234567 -> 03001234567
+ */
+export function normalizePakistaniPhone(phone: string): string {
+  if (!phone) return '';
+  let digits = phone.replace(/\D/g, '');
+
+  if (digits.startsWith('0092') && digits.length >= 12) {
+    digits = '0' + digits.slice(4);
+  } else if (digits.startsWith('92') && digits.length >= 11) {
+    digits = '0' + digits.slice(2);
+  } else if (digits.length === 10 && digits.startsWith('3')) {
+    digits = '0' + digits;
+  }
+
+  return digits;
+}
+
 export interface ClothingTypeDefinition {
   key: ClothingCategory;
   nameEn: string;

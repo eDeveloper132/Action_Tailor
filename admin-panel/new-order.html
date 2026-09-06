@@ -32,52 +32,69 @@
     </div>
 
     <form id="formNewOrderStudio" class="space-y-6">
-      <!-- 1. Customer Search & Selection -->
+      <!-- 1. Customer Selection & Fast Lookup -->
       <section class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
         <div class="flex justify-between items-center pb-2 border-b border-slate-100">
-          <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-            1. Search & Select Customer / گاہک تلاش اور انتخاب
-          </h2>
+          <div>
+            <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+              1. Customer Lookup / گاہک کی تلاش
+            </h2>
+            <p class="text-[11px] text-slate-400 mt-0.5">
+              Search by phone number (0300... or +92300...) or customer name
+            </p>
+          </div>
           <span class="text-xs text-slate-400">Step 1 of 6</span>
         </div>
 
         <div class="space-y-3">
-          <!-- Search Row & Quick Register -->
-          <div class="flex flex-col sm:flex-row gap-2">
-            <div class="relative flex-1">
-              <input
-                type="text"
-                id="inputSearchCust"
-                placeholder="Type customer name or phone to filter list... / نام یا فون لکھیں"
-                class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white"
+          <!-- Search Row with live results dropdown -->
+          <div class="relative">
+            <div class="flex items-center gap-2">
+              <div class="relative flex-1">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
+                  📞
+                </span>
+                <input
+                  type="text"
+                  id="inputSearchCust"
+                  placeholder="Enter phone number (e.g. 03001234567, +92300...) or customer name..."
+                  class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 font-medium focus:outline-none focus:border-emerald-600 focus:bg-white shadow-2xs"
+                  autocomplete="off"
+                  autofocus
+                >
+              </div>
+              <button
+                type="button"
+                id="btnOpenQuickAddCust"
+                class="px-4 py-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300 flex items-center justify-center gap-1.5 shrink-0 shadow-2xs transition-all"
               >
+                <span>👤</span>
+                <span>+ New Customer / نیا گاہک</span>
+              </button>
             </div>
-            <button
-              type="button"
-              id="btnOpenQuickAddCust"
-              class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-300 flex items-center justify-center gap-1.5 shrink-0"
-            >
-              <span>👤</span>
-              <span>+ New Customer / نیا گاہک</span>
+
+            <!-- Instant Autocomplete Results Dropdown -->
+            <div id="customerSearchResults" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-64 overflow-y-auto divide-y divide-slate-100">
+            </div>
+          </div>
+
+          <!-- Hidden select for form requirement -->
+          <select id="selectCustomer" class="hidden" required></select>
+          <input type="hidden" id="selectMeasurementProfile" value="">
+
+          <!-- Selected Customer Card -->
+          <div id="customerInfoPreview" class="hidden p-4 rounded-xl bg-emerald-50/90 border border-emerald-300 text-slate-900 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-2xs">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-sm sm:text-base text-emerald-950" id="previewCustName">--</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-200/70 text-emerald-800" id="previewCustOrders">0 Suits</span>
+              </div>
+              <div class="text-xs text-emerald-800 font-mono font-semibold" id="previewCustPhone">--</div>
+              <div class="text-xs text-slate-500" id="previewCustAddress">--</div>
+            </div>
+            <button type="button" id="btnChangeCustomer" class="text-xs px-3 py-1.5 rounded-lg bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100 font-semibold shrink-0">
+              Change Customer / گاہک تبدیل کریں 🔄
             </button>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Select Customer / گاہک منتخب کریں <span class="text-rose-500">*</span></label>
-            <select id="selectCustomer" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-emerald-600 focus:bg-white" required>
-              <option value="">Loading customers...</option>
-            </select>
-            <input type="hidden" id="selectMeasurementProfile" value="">
-          </div>
-
-          <!-- Customer info preview -->
-          <div id="customerInfoPreview" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex justify-between items-center">
-            <div>
-              <span class="font-bold" id="previewCustName">--</span>
-              <span class="ml-2 text-emerald-700" id="previewCustPhone">--</span>
-              <span class="ml-2 text-emerald-600 truncate" id="previewCustAddress">--</span>
-            </div>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-200/60 font-bold" id="previewCustOrders">0 Orders</span>
           </div>
         </div>
       </section>
@@ -85,9 +102,14 @@
       <!-- 2. Clothing Type & Quantity -->
       <section class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
         <div class="flex justify-between items-center pb-2 border-b border-slate-100">
-          <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-            2. Garment Category / لباس کی قسم
-          </h2>
+          <div>
+            <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+              2. Garment Category / لباس کی قسم
+            </h2>
+            <p class="text-[11px] text-slate-400 mt-0.5" id="garmentSubtitle">
+              Select garment to load customer's tailored measurements
+            </p>
+          </div>
           <span class="text-xs text-slate-400">Step 2 of 6</span>
         </div>
 
@@ -102,6 +124,13 @@
           <div>
             <label class="block text-xs font-semibold text-slate-700 mb-1">Promised Delivery Date / ڈیلیوری تاریخ <span class="text-rose-500">*</span></label>
             <input type="date" id="orderDeliveryDateInput" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-emerald-600 focus:bg-white" required>
+            <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              <span class="text-[11px] text-slate-400">Presets:</span>
+              <button type="button" class="btn-preset-days text-[10px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold" data-days="3">+3 Days</button>
+              <button type="button" class="btn-preset-days text-[10px] px-2 py-0.5 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold" data-days="7">+7 Days</button>
+              <button type="button" class="btn-preset-days text-[10px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold" data-days="10">+10 Days</button>
+              <button type="button" class="btn-preset-days text-[10px] px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold" data-days="14">+14 Days</button>
+            </div>
           </div>
         </div>
       </section>

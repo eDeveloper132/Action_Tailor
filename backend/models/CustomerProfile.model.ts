@@ -1,4 +1,5 @@
 import mongoose, { Schema, type Document, type Model } from 'mongoose';
+import { normalizePakistaniPhone } from '../types/tailoring.types.ts';
 
 export interface ICustomerProfile extends Document {
   name: string;
@@ -27,12 +28,10 @@ const CustomerProfileSchema = new Schema<ICustomerProfile>(
       type: String,
       required: [true, 'Customer phone number is required'],
       trim: true,
-      index: true,
     },
     whatsapp: {
       type: String,
       trim: true,
-      index: true,
     },
     alternatePhone: {
       type: String,
@@ -75,14 +74,21 @@ const CustomerProfileSchema = new Schema<ICustomerProfile>(
   }
 );
 
-// Auto-fill whatsapp with primary phone if not provided
+// Normalize phone and auto-fill whatsapp before saving
 CustomerProfileSchema.pre<ICustomerProfile>('save', function () {
-  if (!this.whatsapp && this.phone) {
+  if (this.phone) {
+    this.phone = normalizePakistaniPhone(this.phone);
+  }
+  if (this.whatsapp) {
+    this.whatsapp = normalizePakistaniPhone(this.whatsapp);
+  } else if (this.phone) {
     this.whatsapp = this.phone;
   }
 });
 
-// Compound text index for instant customer search by name or phone
+// Fast lookups and prevent duplicate customer phone numbers
+CustomerProfileSchema.index({ phone: 1 }, { unique: true });
+CustomerProfileSchema.index({ name: 1 });
 CustomerProfileSchema.index({ name: 'text', phone: 'text', whatsapp: 'text' });
 
 export const CustomerProfile: Model<ICustomerProfile> =

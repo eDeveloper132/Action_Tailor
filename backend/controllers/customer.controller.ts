@@ -6,7 +6,7 @@ import type { ApiResponse } from '../types/index.ts';
 export class CustomerController {
   static async search(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
-      const q = typeof req.query.q === 'string' ? req.query.q : '';
+      const q = typeof req.query.q === 'string' ? req.query.q : typeof req.query.search === 'string' ? req.query.search : '';
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
       const customers = await CustomerService.searchCustomers(q, limit);
       res.json({ status: 'success', data: customers });
@@ -17,8 +17,23 @@ export class CustomerController {
 
   static async list(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+      const searchQuery = (req.query.search || req.query.q) as string | undefined;
+
+      if (searchQuery && typeof searchQuery === 'string' && searchQuery.trim()) {
+        const customers = await CustomerService.searchCustomers(searchQuery, limit);
+        res.json({
+          status: 'success',
+          data: {
+            customers,
+            total: customers.length,
+            pages: 1,
+          },
+        });
+        return;
+      }
+
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
       const result = await CustomerService.listCustomers(page, limit);
       res.json({ status: 'success', data: result });
     } catch (err: any) {
