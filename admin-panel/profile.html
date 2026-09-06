@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Profile - Action Tailor / اکاؤنٹ پروفائل</title>
+  <title>Profile - Action Tailor / پروفائل</title>
 
   <!-- Tailwind CSS CDN & Configuration -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,14 +20,14 @@
     <div class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex justify-between items-center">
       <div>
         <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Account Profile / اکاؤنٹ کی تفصیلات
+          Profile / پروفائل
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-1">
-          Manage your credentials, role privileges, and account settings
+          Manage your credentials, role privileges, and account settings / اپنے اکاؤنٹ اور سیکیورٹی کی تفصیلات دیکھیں
         </p>
       </div>
       <button id="btnSignOutProfile" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold shadow-2xs">
-        Sign Out / لاگ آؤٹ
+        Logout / لاگ آؤٹ
       </button>
     </div>
 
@@ -41,25 +41,25 @@
           <h2 class="text-xl font-bold text-slate-900" id="profileName">Loading user...</h2>
           <div class="text-xs text-slate-500" id="profileEmail">--</div>
           <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" id="profileRoleBadge">
-            Role
+            Role / عہدہ
           </span>
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100 text-xs sm:text-sm">
         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-          <div class="text-slate-500 text-xs mb-1">User Identifier:</div>
+          <div class="text-slate-500 text-xs mb-1">User ID / صارف کی شناخت:</div>
           <div class="font-mono font-bold text-slate-800" id="profileUserId">--</div>
         </div>
         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-          <div class="text-slate-500 text-xs mb-1">Account Role:</div>
+          <div class="text-slate-500 text-xs mb-1">Role / عہدہ:</div>
           <div class="font-bold text-slate-800 capitalize" id="profileRoleText">--</div>
         </div>
       </div>
 
       <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
-        <h3 class="font-bold text-slate-800">Security & Authentication Info</h3>
-        <p>Your session is protected with cryptographically signed JSON Web Tokens (JWT) stored in HTTP-only cookies and local storage. Role-based access control guarantees strict separation between shop operations and customer records.</p>
+        <h3 class="font-bold text-slate-800">Security & Authentication / سیکیورٹی اور تصدیق</h3>
+        <p>Your session is protected with secure token authentication / آپ کا سیشن محفوظ ٹوکن کے ذریعے محفوظ ہے۔</p>
       </div>
     </div>
   </main>

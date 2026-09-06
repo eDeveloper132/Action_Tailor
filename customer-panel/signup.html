@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up - Action Tailor</title>
+  <title>Sign Up - Action Tailor / رجسٹریشن</title>
 
   <!-- Tailwind CSS CDN & Configuration -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,21 +22,21 @@
         <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-600/20 text-emerald-400 mb-4 border border-emerald-500/30">
           <span class="text-2xl font-bold">✂</span>
         </div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Create Account</h1>
-        <p class="text-sm text-slate-400 mt-2">Get started with Action Tailor today</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Create Account / نیا اکاؤنٹ بنائیں</h1>
+        <p class="text-sm text-slate-400 mt-2">Get started with Action Tailor today / ایکشن ٹیلرز میں خوش آمدید</p>
       </div>
 
       <!-- Registration Form -->
       <form id="signupForm" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2" for="fullname">
-            Full Name
+            Customer Name / کسٹمر کا نام
           </label>
           <input
             type="text"
             id="fullname"
             class="w-full px-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 auth-input focus:outline-none text-sm"
-            placeholder="John Doe"
+            placeholder="Tariq Mehmood"
             required
             autocomplete="name"
           >
@@ -44,13 +44,13 @@
 
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2" for="email">
-            Email Address
+            Email Address / ای میل پتہ
           </label>
           <input
             type="email"
             id="email"
             class="w-full px-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 auth-input focus:outline-none text-sm"
-            placeholder="name@company.com"
+            placeholder="customer@example.com"
             required
             autocomplete="email"
           >
@@ -58,7 +58,7 @@
 
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2" for="password">
-            Password
+            Password / پاس ورڈ
           </label>
           <input
             type="password"
@@ -71,8 +71,8 @@
           
           <!-- Real-time Strength Meter & Label -->
           <div class="flex items-center justify-between text-xs mt-2.5 mb-1.5">
-            <span class="text-slate-400">Password strength:</span>
-            <span id="strengthLabel" class="font-semibold text-slate-500">Not entered</span>
+            <span class="text-slate-400">Password strength / معیار:</span>
+            <span id="strengthLabel" class="font-semibold text-slate-500">Not entered / درج نہیں</span>
           </div>
           <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
             <div id="strengthBar" class="h-full w-0 transition-all duration-300 rounded-full bg-slate-700"></div>
@@ -82,22 +82,22 @@
           <div id="passwordRequirements" class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div id="ruleLetter" class="rule-item invalid p-2 rounded-lg bg-slate-900/60 border border-slate-800">
               <span class="rule-icon w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold">○</span>
-              <span>1+ Letter</span>
+              <span>1+ Letter / حرف</span>
             </div>
             <div id="ruleNumber" class="rule-item invalid p-2 rounded-lg bg-slate-900/60 border border-slate-800">
               <span class="rule-icon w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold">○</span>
-              <span>1+ Number</span>
+              <span>1+ Number / نمبر</span>
             </div>
             <div id="ruleLength" class="rule-item invalid p-2 rounded-lg bg-slate-900/60 border border-slate-800">
               <span class="rule-icon w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold">○</span>
-              <span id="ruleLengthText">8+ Chars</span>
+              <span id="ruleLengthText">8+ Chars / حروف</span>
             </div>
           </div>
         </div>
 
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2" for="confirmPassword">
-            Confirm Password
+            Confirm Password / پاس ورڈ کی تصدیق
           </label>
           <input
             type="password"
@@ -109,23 +109,23 @@
           >
           <div id="matchIndicator" class="mt-2 text-xs flex items-center gap-1.5 transition-colors duration-200 text-slate-500">
             <span id="matchIcon" class="font-bold">○</span>
-            <span id="matchText">Confirm password to match</span>
+            <span id="matchText">Confirm password to match / پاس ورڈ ملائیں</span>
           </div>
         </div>
 
         <button
           type="submit"
-          class="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl shadow-lg shadow-brand-600/25 transition-all duration-200 flex items-center justify-center text-sm mt-2"
+          class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/25 transition-all duration-200 flex items-center justify-center text-sm mt-2"
         >
-          Create Account
+          Register / رجسٹر کریں
         </button>
       </form>
 
       <!-- Switch to Sign In -->
       <div class="text-center mt-8 pt-6 border-t border-slate-800 text-sm text-slate-400">
-        Already have an account?
+        Already have an account? / کیا پہلے سے اکاؤنٹ ہے؟
         <a href="/signin.html" class="text-emerald-400 hover:text-emerald-300 font-semibold ml-1 transition-colors">
-          Sign in / لاگ ان
+          Login / لاگ ان کریں
         </a>
       </div>
     </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customers Directory - Action Tailor / گاہکوں کا ریکارڈ</title>
+  <title>Customers / کسٹمرز - Action Tailor</title>
 
   <!-- Tailwind CSS CDN & Configuration -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -23,7 +23,7 @@
     <div class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Customer Directory / گاہکوں کا کھاتہ
+          Customers / کسٹمرز
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-1">
           Search by Name or Phone, view stitching history, edit details, and inspect measurements
@@ -35,7 +35,7 @@
           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition-all"
         >
           <span>👤</span>
-          <span>+ Add Customer / نیا گاہک</span>
+          <span>Add Customer / کسٹمر بنائیں</span>
         </button>
       </div>
     </div>
@@ -45,7 +45,7 @@
       <input
         type="text"
         id="customerSearchInput"
-        placeholder="Quick search by Name or Phone Number / نام یا فون سے تلاش کریں..."
+        placeholder="Search Customer / کسٹمر تلاش کریں..."
         class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:bg-white"
       >
     </div>
@@ -53,7 +53,7 @@
     <!-- Customers Grid Container -->
     <div id="customersGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div class="col-span-full text-center py-12 text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
-        Loading customers directory...
+        Loading / لوڈ ہو رہا ہے...
       </div>
     </div>
   </main>
@@ -63,15 +63,15 @@
     <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl text-slate-900">
       <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <span>👤</span> Register Customer / نیا گاہک درج کریں
+          <span>👤</span> Add Customer / کسٹمر بنائیں
         </h2>
-        <button id="closeAddCustModal" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+        <button id="closeAddCustModal" title="Close / بند کریں" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
       </div>
 
       <form id="formAddCustomer" class="space-y-3.5 text-xs sm:text-sm">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Full Name / پورا نام <span class="text-rose-500">*</span></label>
-          <input type="text" id="newCustName" placeholder="e.g. Muhammad Ahmad" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600" required>
+          <label class="block font-semibold text-slate-700 mb-1">Customer Name / کسٹمر کا نام <span class="text-rose-500">*</span></label>
+          <input type="text" id="newCustName" placeholder="Muhammad Ali / محمد علی" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600" required>
         </div>
 
         <div>
@@ -81,20 +81,20 @@
 
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Home Address / گھر کا پتہ</label>
-          <input type="text" id="newCustAddress" placeholder="e.g. House 12, Street 4, Gulberg, Lahore" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600">
+          <input type="text" id="newCustAddress" placeholder="House 12, Street 4, Gulberg, Lahore" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600">
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Email Address / ای میل پتہ (Optional)</label>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address / ای میل پتہ (Optional / اختیاری)</label>
           <input type="email" id="newCustEmail" placeholder="customer@example.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600">
         </div>
 
         <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
           <button type="button" id="btnCancelAddCust" class="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50">
-            Cancel / منسوخ
+            Cancel / منسوخ کریں
           </button>
           <button type="submit" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-semibold text-white">
-            Register Customer / محفوظ کریں
+            Save Customer / کسٹمر محفوظ کریں
           </button>
         </div>
       </form>
@@ -106,15 +106,15 @@
     <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl text-slate-900">
       <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <span>✏️</span> Edit Customer / معلومات تبدیل کریں
+          <span>✏️</span> Edit Customer / کسٹمر میں ترمیم کریں
         </h2>
-        <button id="closeEditCustModal" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+        <button id="closeEditCustModal" title="Close / بند کریں" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
       </div>
 
       <form id="formEditCustomer" class="space-y-3.5 text-xs sm:text-sm">
         <input type="hidden" id="editCustId">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Full Name / پورا نام <span class="text-rose-500">*</span></label>
+          <label class="block font-semibold text-slate-700 mb-1">Customer Name / کسٹمر کا نام <span class="text-rose-500">*</span></label>
           <input type="text" id="editCustName" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600" required>
         </div>
 
@@ -129,16 +129,16 @@
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Email Address / ای میل پتہ (Optional)</label>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address / ای میل پتہ (Optional / اختیاری)</label>
           <input type="email" id="editCustEmail" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600">
         </div>
 
         <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
           <button type="button" id="btnCancelEditCust" class="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50">
-            Cancel
+            Cancel / منسوخ کریں
           </button>
           <button type="submit" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-semibold text-white">
-            Save Changes / تبدیل کریں
+            Update / اپڈیٹ کریں
           </button>
         </div>
       </form>
@@ -151,7 +151,7 @@
       <div class="flex justify-between items-start pb-3 border-b border-slate-100">
         <div>
           <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2" id="viewCustName">
-            Customer Profile
+            Customer / کسٹمر
           </h2>
           <div class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-3">
             <span id="viewCustPhone">📞 --</span>
@@ -159,19 +159,19 @@
             <span id="viewCustEmail">✉️ --</span>
           </div>
         </div>
-        <button id="closeViewCustModal" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+        <button id="closeViewCustModal" title="Close / بند کریں" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
       </div>
 
       <!-- Quick Actions -->
       <div class="flex flex-wrap items-center gap-2 pt-1">
         <a id="btnCustBookSuit" href="/new-order.html" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold">
-          ✂ Book New Suit / نیا سوٹ بک کریں
+          ✂ New Order / نیا آرڈر
         </a>
         <button id="btnCustEditFromView" class="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-300">
-          ✏ Edit Customer Info
+          ✏ Edit / ترمیم کریں
         </button>
         <a id="btnCustWhatsApp" href="#" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-semibold flex items-center gap-1">
-          <span>💬</span> WhatsApp Chat
+          <span>💬</span> WhatsApp
         </a>
       </div>
 
@@ -179,24 +179,24 @@
       <div class="space-y-2">
         <div class="flex justify-between items-center">
           <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-            Saved Measurements / ناپ کے ریکارڈز
+            Measurements / ناپ
           </h3>
           <a id="linkRecordMeasurement" href="/measurements.html" class="text-xs text-emerald-600 hover:underline font-semibold">
-            + Record Measurement ➔
+            + Measurements / ناپ ➔
           </a>
         </div>
         <div id="viewCustMeasurementsList" class="space-y-2">
-          <div class="text-xs text-slate-400 p-3 bg-slate-50 rounded-xl text-center">Loading measurements...</div>
+          <div class="text-xs text-slate-400 p-3 bg-slate-50 rounded-xl text-center">Loading / لوڈ ہو رہا ہے...</div>
         </div>
       </div>
 
       <!-- Orders Section -->
       <div class="space-y-2 pt-2 border-t border-slate-100">
         <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-          Order History / سابقہ آرڈرز
+          Orders / آرڈرز
         </h3>
         <div id="viewCustOrdersList" class="space-y-2">
-          <div class="text-xs text-slate-400 p-3 bg-slate-50 rounded-xl text-center">Loading orders...</div>
+          <div class="text-xs text-slate-400 p-3 bg-slate-50 rounded-xl text-center">Loading / لوڈ ہو رہا ہے...</div>
         </div>
       </div>
 

@@ -31,7 +31,7 @@ async function loadCustomers(q: string = ''): Promise<void> {
     if (customersCache.length === 0) {
       container.innerHTML = `
         <div class="col-span-full p-8 text-center text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
-          No customers found matching "${q}" / کوئی گاہک نہیں ملا
+          No Customers Found / کوئی کسٹمر نہیں ملا
         </div>
       `;
       return;
@@ -40,7 +40,7 @@ async function loadCustomers(q: string = ''): Promise<void> {
     container.innerHTML = customersCache.map((c: any) => renderCustomerCard(c)).join('');
     attachCardListeners();
   } catch (err: any) {
-    container.innerHTML = `<div class="text-rose-500 p-4 text-sm">Error loading customers: ${err.message}</div>`;
+    container.innerHTML = `<div class="text-rose-500 p-4 text-sm">Error: ${err.message}</div>`;
   }
 }
 
@@ -57,32 +57,32 @@ function renderCustomerCard(c: any): string {
           <div class="text-xs text-slate-500 mt-0.5">📞 ${c.phone}</div>
         </div>
         <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-          ${c.totalOrders || 0} Suits
+          ${c.totalOrders || 0} Suits / سوٹ
         </span>
       </div>
 
-      ${c.address ? `<div class="text-xs text-slate-600 truncate">📍 ${c.address}</div>` : '<div class="text-xs text-slate-400 italic">No address on file</div>'}
+      ${c.address ? `<div class="text-xs text-slate-600 truncate">📍 ${c.address}</div>` : '<div class="text-xs text-slate-400 italic">No Address / پتہ درج نہیں</div>'}
       ${c.email ? `<div class="text-xs text-slate-500 truncate">✉️ ${c.email}</div>` : ''}
 
       <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
         <div class="flex items-center gap-3">
           <button class="text-slate-600 hover:text-emerald-700 font-semibold btn-view-cust" data-id="${c._id}">
-            View Profile / کھاتہ
+            View / دیکھیں
           </button>
           <button class="text-slate-500 hover:text-slate-900 font-medium btn-edit-cust" data-id="${c._id}">
-            ✏ Edit
+            Edit / ترمیم کریں
           </button>
         </div>
         <div class="flex items-center gap-2">
           ${
             cleanPhone
-              ? `<a href="https://wa.me/92${cleanPhone}" target="_blank" class="text-emerald-600 hover:text-emerald-800 font-bold" title="WhatsApp Chat">
+              ? `<a href="https://wa.me/92${cleanPhone}" target="_blank" class="text-emerald-600 hover:text-emerald-800 font-bold" title="WhatsApp">
                   💬
                 </a>`
               : ''
           }
           <a href="/new-order.html?customerId=${c._id}" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-colors">
-            + Book Suit
+            New Order / نیا آرڈر
           </a>
         </div>
       </div>
@@ -145,7 +145,7 @@ async function openViewCustomerModal(customerId: string): Promise<void> {
       if (measurementProfiles.length === 0) {
         measListEl.innerHTML = `
           <div class="text-xs text-slate-400 p-3 bg-slate-50 rounded-xl text-center">
-            No saved measurement profiles. Click "Record Measurement" to create one.
+            No Measurements Recorded / کوئی ناپ محفوظ نہیں ہے
           </div>
         `;
       } else {
@@ -158,14 +158,14 @@ async function openViewCustomerModal(customerId: string): Promise<void> {
                 <div class="flex justify-between items-center font-bold text-slate-800">
                   <span>${m.title} (${m.clothingCategory.toUpperCase()})</span>
                   <a href="/new-order.html?customerId=${customer._id}&profileId=${m._id}" class="text-emerald-600 hover:underline font-semibold">
-                    Use for Suit ➔
+                    New Order / نیا آرڈر ➔
                   </a>
                 </div>
                 <div class="text-slate-600">
-                  Qameez: Lambai ${q.length || '--'}" • Teera ${q.shoulder || '--'}" • Chhati ${q.chest || '--'}" • Bazu ${q.sleeve || '--'}" • Collar ${q.collar || '--'}"
+                  Qameez / قمیض: Length / لمبائی ${q.length || '--'}" • Shoulder / کندھا ${q.shoulder || '--'}" • Chest / چھاتی ${q.chest || '--'}" • Sleeve / آستین ${q.sleeve || '--'}" • Collar / کالر ${q.collar || '--'}"
                 </div>
                 <div class="text-slate-600">
-                  Shalwaar: Lambai ${s.length || '--'}" • Paincha ${s.paincha || '--'}" • Aasan ${s.aasan || '--'}"
+                  Shalwar / شلوار: Length / لمبائی ${s.length || '--'}" • Paincha / پائنچہ ${s.paincha || '--'}" • Aasan / آسن ${s.aasan || '--'}"
                 </div>
               </div>
             `;
@@ -180,7 +180,7 @@ async function openViewCustomerModal(customerId: string): Promise<void> {
       if (recentOrders.length === 0) {
         ordersListEl.innerHTML = `
           <div class="text-xs text-slate-400 p-3 bg-slate-50 rounded-xl text-center">
-            No orders on file yet.
+            No Orders Found / کوئی آرڈر موجود نہیں ہے
           </div>
         `;
       } else {
@@ -191,10 +191,10 @@ async function openViewCustomerModal(customerId: string): Promise<void> {
               <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs flex justify-between items-center">
                 <div>
                   <div class="font-mono font-bold text-slate-900">${o.orderNumber} <span class="capitalize text-slate-500 font-sans font-normal">• ${o.clothingCategory}</span></div>
-                  <div class="text-slate-500 text-[11px]">Due: ${o.expectedDeliveryDate ? new Date(o.expectedDeliveryDate).toLocaleDateString() : '--'}</div>
+                  <div class="text-slate-500 text-[11px]">Due / متوقع تاریخ: ${o.expectedDeliveryDate ? new Date(o.expectedDeliveryDate).toLocaleDateString() : '--'}</div>
                 </div>
                 <div class="text-right">
-                  <div class="font-bold text-slate-800">${o.totalAmount} PKR <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${isPaid ? 'Paid' : `Due: ${o.remainingAmount}`}</span></div>
+                  <div class="font-bold text-slate-800">${o.totalAmount} PKR <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${isPaid ? 'Paid / ادا شدہ' : `Due: ${o.remainingAmount}`}</span></div>
                   <div class="capitalize text-emerald-700 font-semibold text-[11px]">${o.status}</div>
                 </div>
               </div>
@@ -242,7 +242,7 @@ function setupModalHandlers(): void {
     const email = (document.getElementById('newCustEmail') as HTMLInputElement).value.trim() || undefined;
 
     if (!name || !phone) {
-      showToast('Name and phone number are required', 'warning');
+      showToast('Customer Name and Phone Number are required / کسٹمر کا نام اور فون نمبر ضروری ہیں', 'warning');
       return;
     }
 
@@ -251,7 +251,7 @@ function setupModalHandlers(): void {
         method: 'POST',
         body: JSON.stringify({ name, phone, address, email }),
       });
-      showToast('Customer registered successfully!', 'success');
+      showToast('Customer registered successfully / کسٹمر محفوظ ہو گیا ہے', 'success');
       modalAdd?.classList.add('hidden');
       (e.target as HTMLFormElement).reset();
       await loadCustomers();
@@ -281,7 +281,7 @@ function setupModalHandlers(): void {
         method: 'PATCH',
         body: JSON.stringify({ name, phone, address, email }),
       });
-      showToast('Customer updated successfully!', 'success');
+      showToast('Customer updated successfully / کسٹمر کی معلومات اپڈیٹ ہو گئی ہیں', 'success');
       modalEdit?.classList.add('hidden');
       await loadCustomers();
       if (currentViewingCustomer && currentViewingCustomer._id === id) {

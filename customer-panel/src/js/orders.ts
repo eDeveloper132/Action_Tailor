@@ -30,22 +30,22 @@ let searchQuery: string = '';
 
 const GARMENT_LABELS: Record<string, string> = {
   shalwar_qameez: 'Shalwar Qameez / شلوار قمیض',
-  kurta_pajama: 'Kurta Pajama / کرتہ پاجامہ',
+  kurta_pajama: 'Kurta Pajama / کرتا پاجامہ',
   waistcoat: 'Waistcoat / واسکٹ',
   sherwani: 'Sherwani / شیروانی',
-  pant_shirt: 'Pant Shirt / پینٹ شرٹ',
+  pant_shirt: 'Trouser & Shirt / پینٹ شرٹ',
   coat: 'Coat / کوٹ',
   other: 'Custom Garment / کسٹم لباس',
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'Booked / بک ہوا',
+  pending: 'Pending / زیر التوا',
   confirmed: 'Confirmed / تصدیق شدہ',
   cutting: 'Cutting / کٹائی',
   stitching: 'Stitching / سلائی',
   quality_check: 'Quality Check / معائنہ',
-  ready: 'Ready for Pickup / تیار ہے',
-  delivered: 'Delivered / دیا گیا',
+  ready: 'Ready / تیار',
+  delivered: 'Delivered / حوالے کیا گیا',
   cancelled: 'Cancelled / منسوخ',
 };
 
@@ -167,11 +167,11 @@ function renderOrders(): void {
 
 function renderOrderCard(order: OrderItem): string {
   const steps = [
-    { key: 'pending', label: 'Booked / بک ہوا' },
+    { key: 'pending', label: 'Pending / زیر التوا' },
     { key: 'cutting', label: 'Cutting / کٹائی' },
     { key: 'stitching', label: 'Stitching / سلائی' },
-    { key: 'ready', label: 'Ready / تیار ہے' },
-    { key: 'delivered', label: 'Delivered / دیا گیا' },
+    { key: 'ready', label: 'Ready / تیار' },
+    { key: 'delivered', label: 'Delivered / حوالے کیا گیا' },
   ];
 
   let currentIdx = steps.findIndex((s) => s.key === order.status);
@@ -193,22 +193,22 @@ function renderOrderCard(order: OrderItem): string {
       <div class="flex justify-between items-start flex-wrap gap-3">
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-mono text-lg sm:text-xl font-extrabold text-slate-900">Order #${order.orderNumber}</span>
+            <span class="font-mono text-lg sm:text-xl font-extrabold text-slate-900">Order # / آرڈر نمبر: ${order.orderNumber}</span>
             <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
               ${getGarmentName(order.clothingCategory)}
             </span>
           </div>
           <div class="text-xs text-slate-400 mt-1">
-            Booked on ${new Date(order.createdAt).toLocaleDateString('en-GB')}
+            Booked / تاریخ: ${new Date(order.createdAt).toLocaleDateString('en-GB')}
           </div>
         </div>
 
         <div class="flex items-center gap-2">
           <span class="text-xs px-3 py-1 rounded-full font-bold ${isPaid ? 'payment-paid' : 'payment-partial'}">
-            ${isPaid ? 'Paid in Full / مکمل ادا' : `Balance Due: ${order.remainingAmount} PKR`}
+            ${isPaid ? 'Paid / ادا شدہ' : `Due / بقایا: ${order.remainingAmount} PKR`}
           </span>
           <button class="btn-print-slip px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs border border-slate-300 font-semibold" data-id="${order._id}">
-            🖨 Slip
+            🖨 Slip / پرچی
           </button>
         </div>
       </div>
@@ -216,11 +216,11 @@ function renderOrderCard(order: OrderItem): string {
       <!-- Current Status & Expected Completion Date Banner -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200 gap-2 text-xs sm:text-sm">
         <div class="flex items-center gap-2">
-          <span class="text-slate-500 font-medium">Status:</span>
+          <span class="text-slate-500 font-medium">Status / حالت:</span>
           <span class="font-bold px-2.5 py-0.5 rounded-md ${getStatusBadgeClass(order.status)}">${getStatusLabel(order.status)}</span>
         </div>
         <div>
-          <span class="text-slate-500 font-medium">${isDelivered ? 'Delivered On / حوالے کیا گیا:' : 'Expected Date / متوقع تاریخ:'}</span>
+          <span class="text-slate-500 font-medium">${isDelivered ? 'Delivered / حوالے کیا گیا:' : 'Expected Date / متوقع تاریخ:'}</span>
           <strong class="text-slate-900 ml-1 font-mono">${isDelivered ? deliveredFormatted : deliveryFormatted}</strong>
         </div>
       </div>
@@ -246,12 +246,11 @@ function renderOrderCard(order: OrderItem): string {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
         <div>
           <div><strong>Fabric / کپڑا:</strong> ${order.fabric?.fabricType || 'Standard'} (${order.fabric?.color || 'White'})</div>
-          <div><strong>Style / ڈیزائن:</strong> Collar: ${order.designOptions?.collarStyle || 'Ban'} | Cuff: ${order.designOptions?.cuffStyle || 'Single'} | Pocket: ${order.designOptions?.pocketStyle || 'Front'}</div>
         </div>
         <div class="sm:text-right">
-          <div>Total Price: <strong class="text-slate-900">${order.totalAmount} PKR</strong></div>
-          <div>Advance Paid: <strong class="text-slate-900">${order.advancePayment || 0} PKR</strong></div>
-          ${order.remainingAmount > 0 ? `<div class="text-amber-700 font-bold">Remaining Balance: ${order.remainingAmount} PKR</div>` : ''}
+          <div>Total / کل رقم: <strong class="text-slate-900">${order.totalAmount} PKR</strong></div>
+          <div>Advance / پیشگی رقم: <strong class="text-slate-900">${order.advancePayment || 0} PKR</strong></div>
+          ${order.remainingAmount > 0 ? `<div class="text-amber-700 font-bold">Remaining / بقایا رقم: ${order.remainingAmount} PKR</div>` : ''}
         </div>
       </div>
     </div>
@@ -278,22 +277,22 @@ function printReceipt(orderId: string): void {
     <div style="font-family: monospace; font-size: 13px; line-height: 1.4; color: #000; padding: 10px;">
       <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 10px;">
         <h2 style="font-size: 18px; margin: 0; font-weight: bold;">ACTION TAILOR / ایکشن ٹیلرز</h2>
-        <p style="margin: 2px 0;">Customer Copy • Bespoke Pakistani Tailoring</p>
+        <p style="margin: 2px 0;">Customer Copy / کسٹمر کاپی</p>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <div><strong>Order #:</strong> ${order.orderNumber}</div>
-        <div><strong>Expected:</strong> ${order.expectedDeliveryDate ? new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB') : '--'}</div>
+        <div><strong>Order # / آرڈر نمبر:</strong> ${order.orderNumber}</div>
+        <div><strong>Expected / متوقع تاریخ:</strong> ${order.expectedDeliveryDate ? new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB') : '--'}</div>
       </div>
       <div style="margin-bottom: 8px;">
-        <div><strong>Item:</strong> ${getGarmentName(order.clothingCategory)}</div>
-        <div><strong>Fabric:</strong> ${order.fabric?.fabricType || 'Standard'} (${order.fabric?.color || 'Standard'})</div>
-        <div><strong>Status:</strong> ${getStatusLabel(order.status)}</div>
+        <div><strong>Item / لباس:</strong> ${getGarmentName(order.clothingCategory)}</div>
+        <div><strong>Fabric / کپڑا:</strong> ${order.fabric?.fabricType || 'Standard'} (${order.fabric?.color || 'Standard'})</div>
+        <div><strong>Status / حالت:</strong> ${getStatusLabel(order.status)}</div>
       </div>
       <div style="border-top: 1px dashed #000; padding-top: 6px;">
-        <div style="display: flex; justify-content: space-between;"><span>Total Amount:</span> <strong>${order.totalAmount} PKR</strong></div>
-        <div style="display: flex; justify-content: space-between;"><span>Advance Paid:</span> <span>${order.advancePayment || 0} PKR</span></div>
+        <div style="display: flex; justify-content: space-between;"><span>Total / کل رقم:</span> <strong>${order.totalAmount} PKR</strong></div>
+        <div style="display: flex; justify-content: space-between;"><span>Advance / پیشگی رقم:</span> <span>${order.advancePayment || 0} PKR</span></div>
         <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid #000; margin-top: 4px;">
-          <span>Remaining Balance:</span> <span>${order.remainingAmount} PKR</span>
+          <span>Remaining / بقایا رقم:</span> <span>${order.remainingAmount} PKR</span>
         </div>
       </div>
     </div>
@@ -336,11 +335,11 @@ function setupSocketIO(): void {
     try {
       const socket = (window as any).io();
       socket.on('order:status_changed', () => {
-        showToast('Your order status was updated!', 'info');
+        showToast('Your order status was updated / آپ کے آرڈر کی حالت اپڈیٹ ہو گئی', 'info');
         loadOrders();
       });
       socket.on('order:ready', () => {
-        showToast('Your suit is READY FOR PICKUP! / تیار ہے', 'success', { duration: 8000 });
+        showToast('Your suit is ready for pickup! / آپ کا سوٹ تیار ہے!', 'success', { duration: 8000 });
         loadOrders();
       });
     } catch (_e) {}

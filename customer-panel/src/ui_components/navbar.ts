@@ -66,7 +66,7 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
   if (!isAuthenticated) {
     linksHtml = `
       <div style="display: flex; gap: 0.75rem; font-size: 0.875rem;">
-        <a href="/signin.html" style="${getLinkStyle('signin')}">Sign In / لاگ ان</a>
+        <a href="/signin.html" style="${getLinkStyle('signin')}">Login / لاگ ان کریں</a>
         <a href="/signup.html" style="${getLinkStyle('signup')}">Sign Up / رجسٹریشن</a>
       </div>
     `;
@@ -75,7 +75,7 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
       <div style="display: flex; align-items: center; gap: 0.35rem; overflow-x: auto; -webkit-overflow-scrolling: touch;">
         <a href="/index.html" style="${getLinkStyle('dashboard')}">Dashboard / ڈیش بورڈ</a>
         <a href="/orders.html" style="${getLinkStyle('orders')}">My Orders / میرے آرڈرز</a>
-        <a href="/measurements.html" style="${getLinkStyle('measurements')}">My Measurements / ناپ</a>
+        <a href="/measurements.html" style="${getLinkStyle('measurements')}">My Measurements / میرے ناپ</a>
         <a href="/profile.html" style="${getLinkStyle('profile')}">Profile / پروفائل</a>
       </div>
     `;
@@ -145,25 +145,25 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
             z-index: 1050;
           ">
             <div style="padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 0.8125rem; font-weight: 700; color: #0f172a;">Notifications / اطلاعات</span>
+              <span style="font-size: 0.8125rem; font-weight: 700; color: #0f172a;">Notifications / نوٹیفکیشنز</span>
               <span id="navNotifCountLabel" style="font-size: 0.7rem; color: #059669; font-weight: 600;">0 new</span>
             </div>
             <div id="navNotifList" style="max-height: 280px; overflow-y: auto;">
               <div style="padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.75rem;">
-                Loading notifications...
+                Loading / لوڈ ہو رہا ہے...
               </div>
             </div>
           </div>
         </div>
 
         <span style="display: none; font-size: 0.75rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 600;" class="sm:inline-block">
-          ${user?.name || 'Customer'}
+          ${user?.name || 'Customer / کسٹمر'}
         </span>
       ` : ''}
 
       ${showAuthButton ? `
         <button id="uiNavAuthBtn" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 600; border-radius: 0.5rem; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.15s ease;">
-          ${isAuthenticated ? 'Sign Out / لاگ آؤٹ' : 'Sign In'}
+          ${isAuthenticated ? 'Logout / لاگ آؤٹ' : 'Login / لاگ ان کریں'}
         </button>
       ` : ''}
     </div>

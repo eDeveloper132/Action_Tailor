@@ -14,7 +14,7 @@ if (form && submitBtn) {
     const password = passwordInput?.value || '';
 
     try {
-      setButtonLoading(submitBtn, true, 'Signing in...');
+      setButtonLoading(submitBtn, true, 'Signing in... / لاگ ان ہو رہا ہے...');
 
       const res = await (window as any).ActionTailor.apiFetch('/api/auth/signin', {
         method: 'POST',
@@ -30,9 +30,9 @@ if (form && submitBtn) {
         setButtonLoading(submitBtn, false);
         const customerPortalUrl = (import.meta as any).env?.VITE_CUSTOMER_PORTAL_URL || 'http://localhost:3002';
         showToast(
-          `Access Denied: Customer accounts cannot access the Master Tailor Desk. Please log in through the Customer Portal at ${customerPortalUrl}.`,
+          `Access Denied / رسائی کی اجازت نہیں: Customer accounts cannot access the Master Tailor Desk. Please log in through the Customer Portal at ${customerPortalUrl}.`,
           'error',
-          { title: 'Admin Access Required' }
+          { title: 'Admin Access Required / مخصوص رسائی' }
         );
         return;
       }
@@ -42,14 +42,14 @@ if (form && submitBtn) {
         localStorage.setItem('user', JSON.stringify(res.data.user));
       }
 
-      showToast(`Welcome Master Tailor, ${user?.name || ''}! Redirecting...`, 'success', { title: 'Welcome Back' });
+      showToast(`Welcome / خوش آمدید، ${user?.name || ''}! Redirecting...`, 'success', { title: 'Welcome / خوش آمدید' });
 
       setTimeout(() => {
         window.location.href = '/index.html';
       }, 700);
     } catch (err: any) {
       setButtonLoading(submitBtn, false);
-      showToast(err.message || 'Invalid email or password', 'error', { title: 'Authentication Failed' });
+      showToast(err.message || 'Invalid email or password / غلط ای میل یا پاس ورڈ', 'error', { title: 'Authentication Failed / لاگ ان ناکام' });
     }
   });
 }

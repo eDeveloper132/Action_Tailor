@@ -78,13 +78,13 @@ const updateConfirmPasswordMatch = (): void => {
   if (password && password === confirmPassword) {
     matchIndicator.className = 'mt-2 text-xs flex items-center gap-1.5 text-emerald-400 font-medium';
     matchIcon.textContent = '✓';
-    matchText.textContent = 'Passwords match';
+    matchText.textContent = 'Passwords match / پاس ورڈ مل گئے';
     confirmPasswordInput.classList.add('input-valid');
     confirmPasswordInput.classList.remove('input-invalid');
   } else {
     matchIndicator.className = 'mt-2 text-xs flex items-center gap-1.5 text-rose-400 font-medium';
     matchIcon.textContent = '✕';
-    matchText.textContent = 'Passwords do not match';
+    matchText.textContent = 'Passwords do not match / پاس ورڈ مطابقت نہیں رکھتے';
     confirmPasswordInput.classList.add('input-invalid');
     confirmPasswordInput.classList.remove('input-valid');
   }
@@ -102,7 +102,7 @@ const handlePasswordInput = (): void => {
   updateRuleChip(ruleLength, hasLength);
 
   if (ruleLengthText) {
-    ruleLengthText.textContent = hasLength ? '8+ Chars (✓)' : `8+ Chars (${password.length}/8)`;
+    ruleLengthText.textContent = hasLength ? '8+ Chars / حروف (✓)' : `8+ Chars / حروف (${password.length}/8)`;
   }
 
   // 2. Update Strength Bar and Label
@@ -110,27 +110,27 @@ const handlePasswordInput = (): void => {
     if (password.length === 0) {
       strengthBar.style.width = '0%';
       strengthBar.className = 'h-full transition-all duration-300 rounded-full bg-slate-700';
-      strengthLabel.textContent = 'Not entered';
+      strengthLabel.textContent = 'Not entered / درج نہیں';
       strengthLabel.className = 'font-semibold text-slate-500';
       passwordInput.classList.remove('input-valid', 'input-invalid');
     } else if (count === 1) {
       strengthBar.style.width = '33%';
       strengthBar.className = 'h-full transition-all duration-300 rounded-full bg-rose-500';
-      strengthLabel.textContent = 'Weak (Needs 3 rules)';
+      strengthLabel.textContent = 'Weak / کمزور';
       strengthLabel.className = 'font-semibold text-rose-400';
       passwordInput.classList.add('input-invalid');
       passwordInput.classList.remove('input-valid');
     } else if (count === 2) {
       strengthBar.style.width = '66%';
       strengthBar.className = 'h-full transition-all duration-300 rounded-full bg-amber-500';
-      strengthLabel.textContent = 'Fair (Almost ready)';
+      strengthLabel.textContent = 'Fair / مناسب';
       strengthLabel.className = 'font-semibold text-amber-400';
       passwordInput.classList.add('input-invalid');
       passwordInput.classList.remove('input-valid');
     } else {
       strengthBar.style.width = '100%';
       strengthBar.className = 'h-full transition-all duration-300 rounded-full bg-emerald-500';
-      strengthLabel.textContent = 'Strong & Ready';
+      strengthLabel.textContent = 'Strong / مضبوط';
       strengthLabel.className = 'font-semibold text-emerald-400';
       passwordInput.classList.add('input-valid');
       passwordInput.classList.remove('input-invalid');
@@ -172,23 +172,23 @@ if (form && submitBtn) {
 
     if (!isValid) {
       const missing: string[] = [];
-      if (!hasLetter) missing.push('at least 1 letter');
-      if (!hasNumber) missing.push('at least 1 number');
-      if (!hasLength) missing.push('8+ characters');
+      if (!hasLetter) missing.push('1+ letter / حرف');
+      if (!hasNumber) missing.push('1+ number / نمبر');
+      if (!hasLength) missing.push('8+ characters / حروف');
 
-      showToast(`Password requires: ${missing.join(', ')}.`, 'warning', { title: 'Password Incomplete' });
+      showToast(`Password requires / پاس ورڈ ضروری ہے: ${missing.join(', ')}`, 'warning');
       passwordInput?.focus();
       return;
     }
 
     if (password !== confirmPassword) {
-      showToast('Passwords do not match! Please check and try again.', 'warning', { title: 'Validation Error' });
+      showToast('Passwords do not match / پاس ورڈ مطابقت نہیں رکھتے', 'warning');
       confirmPasswordInput?.focus();
       return;
     }
 
     try {
-      setButtonLoading(submitBtn, true, 'Creating Account...');
+      setButtonLoading(submitBtn, true, 'Creating Account... / اکاؤنٹ بن رہا ہے...');
 
       const res = await (window as any).ActionTailor.apiFetch('/api/auth/signup', {
         method: 'POST',
@@ -200,13 +200,13 @@ if (form && submitBtn) {
         localStorage.setItem('user', JSON.stringify(res.data.user));
       }
 
-      showToast('Account created successfully! Redirecting to your Customer Portal...', 'success', { title: 'Welcome to Action Tailor' });
+      showToast('Account created successfully! / اکاؤنٹ کامیابی سے بن گیا!', 'success');
       setTimeout(() => {
         window.location.href = '/index.html';
       }, 1000);
     } catch (err: any) {
       setButtonLoading(submitBtn, false);
-      showToast(err.message || 'Failed to create account', 'error', { title: 'Registration Error' });
+      showToast(err.message || 'Failed to create account / اکاؤنٹ بنانے میں خرابی', 'error');
     }
   });
 }

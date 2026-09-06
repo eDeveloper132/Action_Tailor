@@ -100,7 +100,7 @@ function renderProfileCard(profile: MeasurementProfile): string {
             ` : ''}
           </div>
           <div class="text-xs text-slate-400 mt-0.5">
-            Recorded on: ${formattedDate}
+            Recorded On / تاریخ: ${formattedDate}
           </div>
         </div>
 
@@ -112,25 +112,25 @@ function renderProfileCard(profile: MeasurementProfile): string {
       <!-- Upper Garment / Qameez / Kurta Grid -->
       <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Upper Garment / قمیض / کرتہ</span>
-          <span class="text-[11px] text-slate-400 font-medium">Bespoke Fit</span>
+          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Upper Body / قمیض / کرتا</span>
+          <span class="text-[11px] text-slate-400 font-medium">Bespoke Fit / روایتی ناپ</span>
         </div>
 
         <div class="grid grid-cols-3 gap-2.5 text-xs text-slate-800 pt-1">
           <div class="p-2 rounded-lg bg-white border border-slate-100">
-            <div class="text-[11px] text-slate-400">Lambai / لمبائی</div>
+            <div class="text-[11px] text-slate-400">Length / لمبائی</div>
             <div class="text-sm font-extrabold text-slate-900">${q.length ? `${q.length}"` : '--'}</div>
           </div>
           <div class="p-2 rounded-lg bg-white border border-slate-100">
-            <div class="text-[11px] text-slate-400">Teera / تیرا</div>
+            <div class="text-[11px] text-slate-400">Shoulder / کندھا</div>
             <div class="text-sm font-extrabold text-slate-900">${q.shoulder ? `${q.shoulder}"` : '--'}</div>
           </div>
           <div class="p-2 rounded-lg bg-white border border-slate-100">
-            <div class="text-[11px] text-slate-400">Chhati / چھاتی</div>
+            <div class="text-[11px] text-slate-400">Chest / چھاتی</div>
             <div class="text-sm font-extrabold text-slate-900">${q.chest ? `${q.chest}"` : '--'}</div>
           </div>
           <div class="p-2 rounded-lg bg-white border border-slate-100">
-            <div class="text-[11px] text-slate-400">Bazu / بازو</div>
+            <div class="text-[11px] text-slate-400">Sleeve / آستین</div>
             <div class="text-sm font-extrabold text-slate-900">${q.sleeve ? `${q.sleeve}"` : '--'}</div>
           </div>
           <div class="p-2 rounded-lg bg-white border border-slate-100">
@@ -138,8 +138,8 @@ function renderProfileCard(profile: MeasurementProfile): string {
             <div class="text-sm font-extrabold text-slate-900">${q.collar ? `${q.collar}"` : '--'}</div>
           </div>
           <div class="p-2 rounded-lg bg-white border border-slate-100">
-            <div class="text-[11px] text-slate-400">Ghera / گھیرا</div>
-            <div class="text-sm font-extrabold text-slate-900">${q.ghera ? `${q.ghera}"` : '--'}</div>
+            <div class="text-[11px] text-slate-400">Daman / دامن</div>
+            <div class="text-sm font-extrabold text-slate-900">${q.daman || q.ghera ? `${q.daman || q.ghera}"` : '--'}</div>
           </div>
         </div>
       </div>
@@ -147,17 +147,17 @@ function renderProfileCard(profile: MeasurementProfile): string {
       <!-- Lower Garment / Shalwaar Grid -->
       <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Lower Garment / شلوار / پاجامہ</span>
-          <span class="text-[11px] text-slate-400 font-medium">Bespoke Fit</span>
+          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Lower Body / شلوار / پاجامہ</span>
+          <span class="text-[11px] text-slate-400 font-medium">Bespoke Fit / روایتی ناپ</span>
         </div>
 
         <div class="grid grid-cols-3 gap-2.5 text-xs text-slate-800 pt-1">
           <div class="p-2 rounded-lg bg-white border border-slate-100">
-            <div class="text-[11px] text-slate-400">Lambai / لمبائی</div>
+            <div class="text-[11px] text-slate-400">Length / لمبائی</div>
             <div class="text-sm font-extrabold text-slate-900">${s.length ? `${s.length}"` : '--'}</div>
           </div>
           <div class="p-2 rounded-lg bg-white border border-slate-100">
-            <div class="text-[11px] text-slate-400">Paincha / پائنچہ</div>
+            <div class="text-[11px] text-slate-400">Paincha / پانچہ</div>
             <div class="text-sm font-extrabold text-slate-900">${s.paincha ? `${s.paincha}"` : '--'}</div>
           </div>
           <div class="p-2 rounded-lg bg-white border border-slate-100">
@@ -169,7 +169,7 @@ function renderProfileCard(profile: MeasurementProfile): string {
             <div class="text-sm font-extrabold text-slate-900">${s.ghera ? `${s.ghera}"` : '--'}</div>
           </div>
           <div class="p-2 rounded-lg bg-white border border-slate-100">
-            <div class="text-[11px] text-slate-400">Kamar / کمر</div>
+            <div class="text-[11px] text-slate-400">Waist / کمر</div>
             <div class="text-sm font-extrabold text-slate-900">${s.waist ? `${s.waist}"` : '--'}</div>
           </div>
           <div class="p-2 rounded-lg bg-white border border-slate-100">
@@ -182,7 +182,7 @@ function renderProfileCard(profile: MeasurementProfile): string {
       <!-- Tailor Instructions / Special Notes (if present) -->
       ${profile.notes ? `
         <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-amber-900 text-xs">
-          <strong>Tailor Notes / خصوصی ہدایات:</strong> ${profile.notes}
+          <strong>Special Instructions / خاص ہدایات:</strong> ${profile.notes}
         </div>
       ` : ''}
     </div>

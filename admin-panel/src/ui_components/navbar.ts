@@ -66,7 +66,7 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
   if (!isAuthenticated) {
     linksHtml = `
       <div style="display: flex; gap: 0.75rem; font-size: 0.875rem;">
-        <a href="/signin.html" style="${getLinkStyle('signin')}">Sign In / لاگ ان</a>
+        <a href="/signin.html" style="${getLinkStyle('signin')}">Login / لاگ ان کریں</a>
       </div>
     `;
   } else {
@@ -74,8 +74,8 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
       <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8125rem; overflow-x: auto; max-width: 100%;">
         <a href="/index.html" style="${getLinkStyle('dashboard')}">Dashboard / ڈیش بورڈ</a>
         <a href="/orders.html" style="${getLinkStyle('orders')}">Orders / آرڈرز</a>
-        <a href="/new-order.html" style="${getLinkStyle('new-order')}">+ Book Suit / نیا سوٹ</a>
-        <a href="/customers.html" style="${getLinkStyle('customers')}">Customers / گاہک</a>
+        <a href="/new-order.html" style="${getLinkStyle('new-order')}">New Order / نیا آرڈر</a>
+        <a href="/customers.html" style="${getLinkStyle('customers')}">Customers / کسٹمرز</a>
         <a href="/measurements.html" style="${getLinkStyle('measurements')}">Measurements / ناپ</a>
         <a href="/profile.html" style="${getLinkStyle('profile')}">Profile / پروفائل</a>
       </div>
@@ -95,7 +95,7 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
       ${isAuthenticated ? `
         <!-- Notifications Bell -->
         <div class="relative" style="position: relative;">
-          <button id="uiNavNotificationBtn" style="padding: 0.4rem 0.6rem; border-radius: 0.5rem; background: #f8fafc; border: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; font-size: 0.875rem; position: relative;" title="Notifications">
+          <button id="uiNavNotificationBtn" style="padding: 0.4rem 0.6rem; border-radius: 0.5rem; background: #f8fafc; border: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; font-size: 0.875rem; position: relative;" title="Notifications / نوٹیفکیشنز">
             <span>🔔</span>
             <span id="uiNavNotificationBadge" style="display: none; background: #ef4444; color: #ffffff; font-size: 0.65rem; font-weight: 700; border-radius: 9999px; padding: 0.1rem 0.35rem; line-height: 1;">0</span>
           </button>
@@ -103,11 +103,11 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
           <!-- Dropdown Panel -->
           <div id="uiNavNotificationDropdown" style="display: none; position: absolute; right: 0; top: 115%; width: 320px; max-height: 380px; overflow-y: auto; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 1050; padding: 0.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
-              <span style="font-size: 0.75rem; font-weight: 700; color: #0f172a; text-transform: uppercase;">Notifications / اطلاعات</span>
-              <span id="uiNavNotificationRefresh" style="font-size: 0.7rem; color: #059669; cursor: pointer; font-weight: 600;">Refresh 🔄</span>
+              <span style="font-size: 0.75rem; font-weight: 700; color: #0f172a; text-transform: uppercase;">Notifications / نوٹیفکیشنز</span>
+              <span id="uiNavNotificationRefresh" style="font-size: 0.7rem; color: #059669; cursor: pointer; font-weight: 600;">Refresh / ریفریش کریں 🔄</span>
             </div>
             <div id="uiNavNotificationList" style="display: flex; flex-direction: column; gap: 0.5rem;">
-              <div style="text-align: center; color: #94a3b8; font-size: 0.75rem; padding: 1rem 0;">Loading notifications...</div>
+              <div style="text-align: center; color: #94a3b8; font-size: 0.75rem; padding: 1rem 0;">Loading / لوڈ ہو رہا ہے...</div>
             </div>
           </div>
         </div>
@@ -118,7 +118,7 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
       ` : ''}
       ${showAuthButton ? `
         <button id="uiNavAuthBtn" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 600; border-radius: 0.5rem; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.15s ease;">
-          ${isAuthenticated ? 'Sign Out / لاگ آؤٹ' : 'Sign In'}
+          ${isAuthenticated ? 'Logout / لاگ آؤٹ' : 'Login / لاگ ان کریں'}
         </button>
       ` : ''}
     </div>

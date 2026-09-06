@@ -46,7 +46,7 @@ async function initProfilePage(): Promise<void> {
     if (addressEl) addressEl.textContent = displayAddress;
     if (avatar && displayName) avatar.textContent = displayName.charAt(0).toUpperCase();
   } catch (err: any) {
-    showToast('Failed to load profile details', 'error');
+    showToast('Failed to load profile / پروفائل لوڈ کرنے میں خرابی', 'error');
   }
 }
 

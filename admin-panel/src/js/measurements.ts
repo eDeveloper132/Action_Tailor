@@ -76,7 +76,7 @@ async function loadProfiles(customerId?: string): Promise<void> {
     if (profiles.length === 0) {
       grid.innerHTML = `
         <div class="col-span-full p-8 text-center text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
-          No measurement profiles found. Click "Record New Profile" above to save one.
+          No Measurements Found / کوئی ناپ نہیں ملا
         </div>
       `;
       return;
@@ -85,7 +85,7 @@ async function loadProfiles(customerId?: string): Promise<void> {
     grid.innerHTML = profiles.map((p: any) => renderProfileCard(p)).join('');
     attachProfileActions();
   } catch (err: any) {
-    grid.innerHTML = `<div class="text-rose-500 p-4 text-sm">Error loading profiles: ${err.message}</div>`;
+    grid.innerHTML = `<div class="text-rose-500 p-4 text-sm">Error: ${err.message}</div>`;
   }
 }
 
@@ -105,37 +105,37 @@ function renderProfileCard(p: any): string {
         </div>
         ${
           p.isDefault
-            ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">DEFAULT</span>'
+            ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">Default / بنیادی</span>'
             : ''
         }
       </div>
 
       <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-        <div class="font-bold text-slate-600 text-[11px] uppercase tracking-wider">Upper / قمیض (Inches)</div>
+        <div class="font-bold text-slate-600 text-[11px] uppercase tracking-wider">Upper Garment / قمیض (Inches / انچ)</div>
         <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-slate-800">
-          <div><span class="text-slate-400 block text-[10px]">Lambai</span><strong>${q.length || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Teera</span><strong>${q.shoulder || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Chhati</span><strong>${q.chest || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Bazu</span><strong>${q.sleeve || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Collar</span><strong>${q.collar || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Ghera</span><strong>${q.ghera || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Length / لمبائی</span><strong>${q.length || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Shoulder / کندھا</span><strong>${q.shoulder || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Chest / چھاتی</span><strong>${q.chest || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Sleeve / آستین</span><strong>${q.sleeve || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Collar / کالر</span><strong>${q.collar || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Daman / دامن</span><strong>${q.ghera || '--'}"</strong></div>
         </div>
 
-        <div class="font-bold text-slate-600 text-[11px] uppercase tracking-wider pt-2 border-t border-slate-200">Lower / شلوار (Inches)</div>
+        <div class="font-bold text-slate-600 text-[11px] uppercase tracking-wider pt-2 border-t border-slate-200">Lower Garment / شلوار (Inches / انچ)</div>
         <div class="grid grid-cols-3 sm:grid-cols-4 gap-2 text-slate-800">
-          <div><span class="text-slate-400 block text-[10px]">Lambai</span><strong>${s.length || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Paincha</span><strong>${s.paincha || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Aasan</span><strong>${s.aasan || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Ghera</span><strong>${s.ghera || s.waist || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Length / لمبائی</span><strong>${s.length || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Paincha / پائنچہ</span><strong>${s.paincha || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Aasan / آسن</span><strong>${s.aasan || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Daman / دامن</span><strong>${s.ghera || s.waist || '--'}"</strong></div>
         </div>
       </div>
 
       <div class="pt-1 flex items-center justify-between">
         <button class="text-xs text-slate-500 hover:text-slate-900 font-semibold btn-edit-profile" data-id="${p._id}">
-          ✏ Edit Profile
+          Edit / ترمیم کریں
         </button>
         <a href="/new-order.html?customerId=${p.customer}&profileId=${p._id}" class="text-xs font-bold text-emerald-600 hover:text-emerald-800">
-          Use for New Order ➔
+          New Order / نیا آرڈر ➔
         </a>
       </div>
     </div>
@@ -255,7 +255,7 @@ function setupModalHandlers(): void {
             measurements: { qameez, shalwaar },
           }),
         });
-        showToast('Measurement profile updated successfully!', 'success');
+        showToast('Measurement profile updated successfully / ناپ اپڈیٹ ہو گیا ہے', 'success');
       } else {
         // Create new
         await (window as any).ActionTailor.apiFetch('/api/measurements', {
@@ -269,7 +269,7 @@ function setupModalHandlers(): void {
             measurements: { qameez, shalwaar },
           }),
         });
-        showToast('Measurement profile saved successfully!', 'success');
+        showToast('Measurement profile saved successfully / ناپ محفوظ ہو گیا ہے', 'success');
       }
 
       modal?.classList.add('hidden');

@@ -9,7 +9,7 @@ let searchDebounceTimer: any = null;
 
 const GARMENT_NAMES: Record<string, string> = {
   shalwaar_qameez: 'Shalwar Qameez / شلوار قمیض',
-  kurta_pajama: 'Kurta Pajama / کرتہ پاجامہ',
+  kurta_pajama: 'Kurta Pajama / کرتا پاجامہ',
   waistcoat: 'Waistcoat / واسکٹ',
   trouser_shirt: 'Trouser & Shirt / پینٹ شرٹ',
   sherwani: 'Sherwani / شیروانی',
@@ -145,9 +145,9 @@ function renderSearchResults(list: any[], query: string): void {
   if (list.length === 0) {
     resultsDropdown.innerHTML = `
       <div class="p-3 text-xs text-slate-500 flex items-center justify-between">
-        <span>No customer found with "<strong>${query}</strong>"</span>
+        <span>No customer found / کوئی کسٹمر نہیں ملا ("<strong>${query}</strong>")</span>
         <button type="button" id="btnQuickAddFromSearch" class="text-xs font-bold text-emerald-700 hover:underline">
-          + Quick Register / نیا گاہک درج کریں
+          + Add Customer / کسٹمر بنائیں
         </button>
       </div>
     `;
@@ -173,7 +173,7 @@ function renderSearchResults(list: any[], query: string): void {
       </div>
       <div class="text-right shrink-0">
         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-          ${c.totalOrders || 0} Suits
+          ${c.totalOrders || 0} Suits / سوٹ
         </span>
       </div>
     </div>
@@ -350,7 +350,7 @@ async function checkAndLoadGarmentMeasurement(customerId: string, category: stri
         : '';
       if (subEl) {
         subEl.className = 'text-[11px] text-emerald-800 font-medium';
-        subEl.textContent = `${getGarmentDisplay(category)} • Last updated: ${updatedDate || 'On file'}`;
+        subEl.textContent = `${getGarmentDisplay(category)} • Last updated / آخری اپڈیٹ: ${updatedDate || 'On file'}`;
       }
 
       if (btnContainer) {
@@ -372,7 +372,7 @@ async function checkAndLoadGarmentMeasurement(customerId: string, category: stri
         document.getElementById('btnEditMeasurement')?.addEventListener('click', () => {
           highlightButtons('editing');
           if (updateChk) updateChk.checked = true;
-          showToast('Editing measurement. Changes will update the latest profile.', 'info');
+          showToast('Editing measurement / ناپ میں ترمیم کی جا رہی ہے', 'info');
           (document.getElementById('ordDimLength') as HTMLInputElement)?.focus();
         });
       }
@@ -393,13 +393,13 @@ async function checkAndLoadGarmentMeasurement(customerId: string, category: stri
       }
       if (subEl) {
         subEl.className = 'text-[11px] text-amber-800 font-medium';
-        subEl.textContent = `No recorded measurement for ${getGarmentDisplay(category)}. Enter new measurements below.`;
+        subEl.textContent = `No recorded measurement for ${getGarmentDisplay(category)}. Enter new measurements below / اس لباس کا کوئی ناپ موجود نہیں۔ نیا ناپ درج کریں۔`;
       }
 
       if (btnContainer) {
         btnContainer.innerHTML = `
           <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white shadow-xs">
-            + Create New Measurement / نیا ناپ بنائیں
+            + Create New Measurement / نیا ناپ درج کریں
           </span>
         `;
       }
@@ -450,11 +450,11 @@ function resetMeasurementStatusBanner(): void {
   if (iconEl) iconEl.textContent = 'ℹ️';
   if (titleEl) {
     titleEl.className = 'text-xs sm:text-sm font-bold text-slate-800';
-    titleEl.textContent = 'Select a customer to load garment measurements';
+    titleEl.textContent = 'Select a customer to load garment measurements / ناپ لوڈ کرنے کے لیے کسٹمر منتخب کریں';
   }
   if (subEl) {
     subEl.className = 'text-[11px] text-slate-500';
-    subEl.textContent = 'Please select customer and garment type above';
+    subEl.textContent = 'Please select customer and garment type above / اوپر کسٹمر اور لباس منتخب کریں';
   }
   if (btnContainer) btnContainer.innerHTML = '';
 }
@@ -468,7 +468,7 @@ function populateMeasurements(profile: any): void {
   (document.getElementById('ordDimChest') as HTMLInputElement).value = q.chest || '';
   (document.getElementById('ordDimSleeve') as HTMLInputElement).value = q.sleeve || '';
   (document.getElementById('ordDimCollar') as HTMLInputElement).value = q.collar || '';
-  (document.getElementById('ordDimGhera') as HTMLInputElement).value = q.ghera || '';
+  (document.getElementById('ordDimGhera') as HTMLInputElement).value = q.daman || q.ghera || '';
 
   (document.getElementById('ordDimShalwaarLength') as HTMLInputElement).value = s.length || '';
   (document.getElementById('ordDimPaincha') as HTMLInputElement).value = s.paincha || '';
@@ -547,7 +547,7 @@ function setupQuickAddCustomerModal(): void {
       });
 
       const newCustomer = res.data;
-      showToast(`Customer "${newCustomer.name}" registered! / گاہک درج ہو گیا`, 'success');
+      showToast(`Customer registered / کسٹمر محفوظ ہو گیا (${newCustomer.name})`, 'success');
       modal?.classList.add('hidden');
       (e.target as HTMLFormElement).reset();
 
@@ -587,7 +587,7 @@ function setupFormSubmission(): void {
       (document.getElementById('chkUpdateGarmentProfile') as HTMLInputElement)?.checked ?? true;
 
     if (!customerId) {
-      showToast('Please search and select a customer / گاہک منتخب کریں', 'warning');
+      showToast('Please search and select a customer / کسٹمر منتخب کریں', 'warning');
       (document.getElementById('inputSearchCust') as HTMLInputElement)?.focus();
       return;
     }
@@ -601,6 +601,7 @@ function setupFormSubmission(): void {
         sleeve: parseFloat((document.getElementById('ordDimSleeve') as HTMLInputElement).value) || undefined,
         collar: parseFloat((document.getElementById('ordDimCollar') as HTMLInputElement).value) || undefined,
         ghera: parseFloat((document.getElementById('ordDimGhera') as HTMLInputElement).value) || undefined,
+        daman: parseFloat((document.getElementById('ordDimGhera') as HTMLInputElement).value) || undefined,
       },
       shalwaar: {
         length: parseFloat((document.getElementById('ordDimShalwaarLength') as HTMLInputElement).value) || undefined,

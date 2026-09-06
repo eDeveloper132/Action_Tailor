@@ -14,7 +14,7 @@ if (form && submitBtn) {
     const password = passwordInput?.value || '';
 
     try {
-      setButtonLoading(submitBtn, true, 'Signing in...');
+      setButtonLoading(submitBtn, true, 'Signing in... / لاگ ان ہو رہا ہے...');
 
       const res = await (window as any).ActionTailor.apiFetch('/api/auth/signin', {
         method: 'POST',
@@ -30,14 +30,14 @@ if (form && submitBtn) {
 
       if (user?.role === 'admin' || user?.role === 'staff') {
         const adminPortalUrl = (import.meta as any).env?.VITE_ADMIN_PORTAL_URL || 'http://localhost:3001';
-        showToast('Shop Staff account detected. Redirecting to Master Tailor Desk...', 'info', { title: 'Staff Access' });
+        showToast('Staff account detected / سٹاف اکاؤنٹ شناخت ہو گیا', 'info');
         setTimeout(() => {
           window.location.href = adminPortalUrl;
         }, 800);
         return;
       }
 
-      showToast('Signed in successfully! Redirecting to Customer Portal...', 'success', { title: 'Welcome Back' });
+      showToast('Signed in successfully! / لاگ ان کامیاب!', 'success');
 
       const urlParams = new URLSearchParams(window.location.search);
       const redirect = urlParams.get('redirect') || '/index.html';
@@ -46,7 +46,7 @@ if (form && submitBtn) {
       }, 700);
     } catch (err: any) {
       setButtonLoading(submitBtn, false);
-      showToast(err.message || 'Invalid email or password', 'error', { title: 'Authentication Failed' });
+      showToast(err.message || 'Invalid email or password / غلط ای میل یا پاس ورڈ', 'error');
     }
   });
 }

@@ -88,22 +88,22 @@ function renderActiveSuits(orders: any[]): void {
 
 const GARMENT_LABELS: Record<string, string> = {
   shalwar_qameez: 'Shalwar Qameez / شلوار قمیض',
-  kurta_pajama: 'Kurta Pajama / کرتہ پاجامہ',
+  kurta_pajama: 'Kurta Pajama / کرتا پاجامہ',
   waistcoat: 'Waistcoat / واسکٹ',
   sherwani: 'Sherwani / شیروانی',
-  pant_shirt: 'Pant Shirt / پینٹ شرٹ',
+  pant_shirt: 'Trouser & Shirt / پینٹ شرٹ',
   coat: 'Coat / کوٹ',
   other: 'Custom Garment / کسٹم لباس',
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'Booked / بک ہوا',
+  pending: 'Pending / زیر التوا',
   confirmed: 'Confirmed / تصدیق شدہ',
   cutting: 'Cutting / کٹائی',
   stitching: 'Stitching / سلائی',
   quality_check: 'Quality Check / معائنہ',
-  ready: 'Ready for Pickup / تیار ہے',
-  delivered: 'Delivered / دیا گیا',
+  ready: 'Ready / تیار',
+  delivered: 'Delivered / حوالے کیا گیا',
   cancelled: 'Cancelled / منسوخ',
 };
 
@@ -131,10 +131,10 @@ function getStatusBadgeClass(status: string): string {
 
 function renderCustomerSuitCard(order: any): string {
   const steps = [
-    { key: 'pending', label: 'Booked / بک ہوا' },
+    { key: 'pending', label: 'Pending / زیر التوا' },
     { key: 'cutting', label: 'Cutting / کٹائی' },
     { key: 'stitching', label: 'Stitching / سلائی' },
-    { key: 'ready', label: 'Ready / تیار ہے' },
+    { key: 'ready', label: 'Ready / تیار' },
   ];
 
   const currentIdx = steps.findIndex((s) => s.key === order.status);
@@ -148,17 +148,17 @@ function renderCustomerSuitCard(order: any): string {
       <!-- Top Line: Order Number & Garment & Financials -->
       <div class="flex justify-between items-start flex-wrap gap-2">
         <div>
-          <div class="font-mono text-lg sm:text-xl font-extrabold text-slate-900">Order #${order.orderNumber}</div>
+          <div class="font-mono text-lg sm:text-xl font-extrabold text-slate-900">Order # / آرڈر نمبر: ${order.orderNumber}</div>
           <div class="text-xs sm:text-sm font-semibold text-emerald-700 mt-0.5">
             ${getGarmentName(order.clothingCategory)}
           </div>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-xs px-2.5 py-0.5 rounded font-semibold ${isPaid ? 'payment-paid' : 'payment-partial'}">
-            ${isPaid ? 'Paid in Full / مکمل ادا' : `Balance Due: ${order.remainingAmount} PKR`}
+            ${isPaid ? 'Paid / ادا شدہ' : `Due / بقایا: ${order.remainingAmount} PKR`}
           </span>
           <button class="btn-print-slip px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs border border-slate-300 font-semibold" data-id="${order._id}">
-            🖨 Slip
+            🖨 Slip / پرچی
           </button>
         </div>
       </div>
@@ -166,7 +166,7 @@ function renderCustomerSuitCard(order: any): string {
       <!-- Current Status & Expected Date Box -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200 gap-2 text-xs sm:text-sm">
         <div class="flex items-center gap-2">
-          <span class="text-slate-500 font-medium">Status:</span>
+          <span class="text-slate-500 font-medium">Status / حالت:</span>
           <span class="font-bold px-2.5 py-0.5 rounded-md ${getStatusBadgeClass(order.status)}">${getStatusLabel(order.status)}</span>
         </div>
         <div>
@@ -196,11 +196,10 @@ function renderCustomerSuitCard(order: any): string {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
         <div>
           <div><strong>Fabric / کپڑا:</strong> ${order.fabric?.fabricType || 'Standard'} (${order.fabric?.color || 'White'})</div>
-          <div><strong>Style:</strong> Collar: ${order.designOptions?.collarStyle || 'Ban'} | Cuff: ${order.designOptions?.cuffStyle || 'Single'}</div>
         </div>
         <div class="sm:text-right">
-          <div>Total Price: <strong class="text-slate-900">${order.totalAmount} PKR</strong> (Advance: ${order.advancePayment || 0} PKR)</div>
-          ${order.remainingAmount > 0 ? `<div class="text-amber-700 font-semibold">Remaining: ${order.remainingAmount} PKR</div>` : ''}
+          <div>Total / کل رقم: <strong class="text-slate-900">${order.totalAmount} PKR</strong> (Advance / پیشگی رقم: ${order.advancePayment || 0} PKR)</div>
+          ${order.remainingAmount > 0 ? `<div class="text-amber-700 font-semibold">Remaining / بقایا رقم: ${order.remainingAmount} PKR</div>` : ''}
         </div>
       </div>
     </div>
@@ -228,25 +227,25 @@ function renderMeasurementProfiles(profiles: any[]): void {
       <div class="tailor-card p-4 rounded-xl space-y-3 text-xs border border-slate-200 bg-white shadow-xs">
         <div class="flex justify-between items-center">
           <strong class="text-slate-900 text-sm font-bold">${p.title}</strong>
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-emerald-700 font-semibold border border-slate-200">${p.unit || 'inches'}</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-emerald-700 font-semibold border border-slate-200">${p.unit || 'inches / انچ'}</span>
         </div>
         
         <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Upper / قمیض</div>
+          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Upper Body / قمیض</div>
           <div class="grid grid-cols-3 gap-1.5 text-slate-800">
-            <div><span class="text-slate-400">Lambai:</span> <strong>${q.length || '--'}</strong></div>
-            <div><span class="text-slate-400">Teera:</span> <strong>${q.shoulder || '--'}</strong></div>
-            <div><span class="text-slate-400">Chhati:</span> <strong>${q.chest || '--'}</strong></div>
-            <div><span class="text-slate-400">Bazu:</span> <strong>${q.sleeve || '--'}</strong></div>
-            <div><span class="text-slate-400">Collar:</span> <strong>${q.collar || '--'}</strong></div>
-            <div><span class="text-slate-400">Ghera:</span> <strong>${q.ghera || '--'}</strong></div>
+            <div><span class="text-slate-400">Length / لمبائی:</span> <strong>${q.length || '--'}</strong></div>
+            <div><span class="text-slate-400">Shoulder / کندھا:</span> <strong>${q.shoulder || '--'}</strong></div>
+            <div><span class="text-slate-400">Chest / چھاتی:</span> <strong>${q.chest || '--'}</strong></div>
+            <div><span class="text-slate-400">Sleeve / آستین:</span> <strong>${q.sleeve || '--'}</strong></div>
+            <div><span class="text-slate-400">Collar / کالر:</span> <strong>${q.collar || '--'}</strong></div>
+            <div><span class="text-slate-400">Daman / دامن:</span> <strong>${q.daman || q.ghera || '--'}</strong></div>
           </div>
 
-          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider pt-2 border-t border-slate-200">Lower / شلوار</div>
+          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider pt-2 border-t border-slate-200">Lower Body / شلوار</div>
           <div class="grid grid-cols-3 gap-1.5 text-slate-800">
-            <div><span class="text-slate-400">Lambai:</span> <strong>${s.length || '--'}</strong></div>
-            <div><span class="text-slate-400">Paincha:</span> <strong>${s.paincha || '--'}</strong></div>
-            <div><span class="text-slate-400">Aasan:</span> <strong>${s.aasan || '--'}</strong></div>
+            <div><span class="text-slate-400">Length / لمبائی:</span> <strong>${s.length || '--'}</strong></div>
+            <div><span class="text-slate-400">Paincha / پانچہ:</span> <strong>${s.paincha || '--'}</strong></div>
+            <div><span class="text-slate-400">Aasan / آسن:</span> <strong>${s.aasan || '--'}</strong></div>
           </div>
         </div>
       </div>
@@ -262,7 +261,7 @@ function renderCompletedHistory(orders: any[]): void {
   if (orders.length === 0) {
     container.innerHTML = `
       <div class="p-4 text-center text-slate-500 text-xs bg-white rounded-xl border border-dashed border-slate-200">
-        No delivered suits history yet / کوئی مکمل سوٹ کا ریکارڈ نہیں ہے۔
+        No delivered orders history yet / کوئی ریکارڈ نہیں ہے
       </div>
     `;
     return;
@@ -273,13 +272,13 @@ function renderCompletedHistory(orders: any[]): void {
       (o: any) => `
     <div class="p-3.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs shadow-2xs flex-wrap gap-2">
       <div>
-        <span class="font-mono font-bold text-slate-900">Order #${o.orderNumber}</span>
+        <span class="font-mono font-bold text-slate-900">Order # / آرڈر نمبر: ${o.orderNumber}</span>
         <span class="text-emerald-700 ml-2 font-semibold">${getGarmentName(o.clothingCategory)}</span>
-        <span class="text-slate-400 ml-2">• Delivered: ${new Date(o.actualDeliveredDate || o.updatedAt).toLocaleDateString('en-GB')}</span>
+        <span class="text-slate-400 ml-2">• Delivered / تاریخ: ${new Date(o.actualDeliveredDate || o.updatedAt).toLocaleDateString('en-GB')}</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="text-slate-800 font-bold">${o.totalAmount} PKR</span>
-        <span class="status-badge status-delivered">Delivered / دیا گیا</span>
+        <span class="status-badge status-delivered">Delivered / حوالے کیا گیا</span>
       </div>
     </div>
   `
@@ -303,28 +302,25 @@ function printReceipt(orderId: string): void {
   const slip = document.getElementById('printSlipContent');
   if (!slip) return;
 
-  const q = order.measurementSnapshot?.qameez || {};
-  const s = order.measurementSnapshot?.shalwaar || {};
-
   slip.innerHTML = `
     <div style="font-family: monospace; font-size: 13px; line-height: 1.4; color: #000; padding: 10px;">
       <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 10px;">
         <h2 style="font-size: 18px; margin: 0; font-weight: bold;">ACTION TAILOR / ایکشن ٹیلرز</h2>
-        <p style="margin: 2px 0;">Customer Copy • Bespoke Pakistani Tailoring</p>
+        <p style="margin: 2px 0;">Customer Copy / کسٹمر کاپی</p>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <div><strong>Order #:</strong> ${order.orderNumber}</div>
-        <div><strong>Due:</strong> ${new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB')}</div>
+        <div><strong>Order # / آرڈر نمبر:</strong> ${order.orderNumber}</div>
+        <div><strong>Delivery / متوقع تاریخ:</strong> ${new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB')}</div>
       </div>
       <div style="margin-bottom: 8px;">
-        <div><strong>Item:</strong> ${order.clothingCategory.toUpperCase()}</div>
-        <div><strong>Fabric:</strong> ${order.fabric?.fabricType || 'Standard'} (${order.fabric?.color || 'Standard'})</div>
+        <div><strong>Item / لباس:</strong> ${getGarmentName(order.clothingCategory)}</div>
+        <div><strong>Fabric / کپڑا:</strong> ${order.fabric?.fabricType || 'Standard'} (${order.fabric?.color || 'Standard'})</div>
       </div>
       <div style="border-top: 1px dashed #000; padding-top: 6px;">
-        <div style="display: flex; justify-content: space-between;"><span>Total:</span> <strong>${order.totalAmount} PKR</strong></div>
-        <div style="display: flex; justify-content: space-between;"><span>Advance Paid:</span> <span>${order.advancePayment || 0} PKR</span></div>
+        <div style="display: flex; justify-content: space-between;"><span>Total / کل رقم:</span> <strong>${order.totalAmount} PKR</strong></div>
+        <div style="display: flex; justify-content: space-between;"><span>Advance / پیشگی رقم:</span> <span>${order.advancePayment || 0} PKR</span></div>
         <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid #000; margin-top: 4px;">
-          <span>Remaining Balance:</span> <span>${order.remainingAmount} PKR</span>
+          <span>Remaining / بقایا رقم:</span> <span>${order.remainingAmount} PKR</span>
         </div>
       </div>
     </div>
@@ -338,11 +334,11 @@ function setupSocketIO(): void {
     try {
       const socket = (window as any).io();
       socket.on('order:status_changed', () => {
-        showToast('Your suit status was just updated by the tailor!', 'info');
+        showToast('Your suit status was updated / آپ کے سوٹ کی حالت تبدیل ہوئی ہے', 'info');
         loadCustomerData();
       });
       socket.on('order:ready', () => {
-        showToast('Your suit is READY FOR PICKUP! / تیار ہے', 'success', { duration: 8000 });
+        showToast('Your suit is ready for pickup! / آپ کا سوٹ تیار ہے!', 'success', { duration: 8000 });
         loadCustomerData();
       });
     } catch (_e) {}

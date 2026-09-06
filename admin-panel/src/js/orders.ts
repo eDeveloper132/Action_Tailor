@@ -48,15 +48,26 @@ async function loadOrders(): Promise<void> {
   }
 }
 
+function getGarmentName(category: string): string {
+  const map: Record<string, string> = {
+    shalwar_qameez: 'Shalwar Qameez / شلوار قمیض',
+    kurta_pajama: 'Kurta Pajama / کرتا پاجامہ',
+    waistcoat: 'Waistcoat / واسکٹ',
+    trouser: 'Trouser / پینٹ',
+    sherwani: 'Sherwani / شیروانی',
+  };
+  return map[category] || `${category.replace('_', ' ').toUpperCase()}`;
+}
+
 function getStatusBadge(status: string): string {
   const labels: Record<string, { text: string; class: string }> = {
-    pending: { text: 'Pending / زیرِ التوا', class: 'status-pending' },
-    confirmed: { text: 'Confirmed / تصدیق', class: 'status-confirmed' },
+    pending: { text: 'Pending / زیر التوا', class: 'status-pending' },
+    confirmed: { text: 'Confirmed / تصدیق شدہ', class: 'status-confirmed' },
     cutting: { text: 'Cutting / کٹائی', class: 'status-cutting' },
     stitching: { text: 'Stitching / سلائی', class: 'status-stitching' },
-    quality_check: { text: 'Checking / معائنہ', class: 'status-quality_check' },
-    ready: { text: 'Ready / تیار ہے', class: 'status-ready' },
-    delivered: { text: 'Delivered / دیا گیا', class: 'status-delivered' },
+    quality_check: { text: 'Quality Check / معائنہ', class: 'status-quality_check' },
+    ready: { text: 'Ready / تیار', class: 'status-ready' },
+    delivered: { text: 'Delivered / حوالے کیا گیا', class: 'status-delivered' },
     cancelled: { text: 'Cancelled / منسوخ', class: 'status-cancelled' },
   };
 
@@ -91,7 +102,7 @@ function renderOrderRow(order: any): string {
           <span class="font-mono font-extrabold text-slate-900 text-base tracking-wider">${order.orderNumber}</span>
           ${getStatusBadge(order.status)}
           <span class="text-xs px-2 py-0.5 rounded font-semibold ${isPaid ? 'payment-paid' : 'payment-partial'}">
-            ${isPaid ? 'Paid / ادا شدہ' : `Due: ${order.remainingAmount} PKR`}
+            ${isPaid ? 'Paid / ادا شدہ' : `Due / بقایا: ${order.remainingAmount} PKR`}
           </span>
         </div>
         <div class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -105,8 +116,8 @@ function renderOrderRow(order: any): string {
           }
         </div>
         <div class="text-xs text-slate-500">
-          <span class="font-medium text-slate-700">${order.clothingCategory.replace('_', ' ').toUpperCase()}</span> •
-          <span>Delivery: <strong class="text-slate-800">${deliveryDate}</strong></span>
+          <span class="font-medium text-slate-700">${getGarmentName(order.clothingCategory)}</span> •
+          <span>Delivery / متوقع تاریخ: <strong class="text-slate-800">${deliveryDate}</strong></span>
           ${order.fabric?.fabricType ? ` • <span>${order.fabric.fabricType}</span>` : ''}
         </div>
       </div>
@@ -114,30 +125,30 @@ function renderOrderRow(order: any): string {
       <div class="flex flex-wrap items-center gap-2">
         <!-- Direct Status Selector -->
         <select class="row-status-select px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100" data-id="${order._id}">
-          <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
-          <option value="cutting" ${order.status === 'cutting' ? 'selected' : ''}>Cutting</option>
-          <option value="stitching" ${order.status === 'stitching' ? 'selected' : ''}>Stitching</option>
-          <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Ready</option>
-          <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-          <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+          <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending / زیر التوا</option>
+          <option value="cutting" ${order.status === 'cutting' ? 'selected' : ''}>Cutting / کٹائی</option>
+          <option value="stitching" ${order.status === 'stitching' ? 'selected' : ''}>Stitching / سلائی</option>
+          <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Ready / تیار</option>
+          <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered / حوالے کیا گیا</option>
+          <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled / منسوخ</option>
         </select>
 
         ${
           next
             ? `<button class="btn-advance-status px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs" data-id="${order._id}" data-next="${next}">
-                Move to ${next.toUpperCase()} ➔
+                ${next.toUpperCase()} / آگے بڑھائیں ➔
               </button>`
             : ''
         }
         ${
           !isPaid
             ? `<button class="btn-pay px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-semibold" data-id="${order._id}" data-num="${order.orderNumber}" data-rem="${order.remainingAmount}">
-                + Payment / وصولی
+                + Payment / رقم وصولی
               </button>`
             : ''
         }
         <button class="btn-print p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs border border-slate-300 font-semibold" data-id="${order._id}">
-          🖨 Slip
+          🖨 Slip / پرچی
         </button>
       </div>
     </div>
@@ -158,7 +169,7 @@ function attachRowActions(): void {
           method: 'PATCH',
           body: JSON.stringify({ status: next }),
         });
-        showToast(`Moved to ${next.toUpperCase()}`, 'success');
+        showToast(`Moved to ${next.toUpperCase()} / آگے بڑھا دیا گیا`, 'success');
         await loadOrders();
       } catch (err: any) {
         showToast(err.message, 'error');
@@ -179,7 +190,7 @@ function attachRowActions(): void {
           method: 'PATCH',
           body: JSON.stringify({ status }),
         });
-        showToast(`Order status updated to ${status.toUpperCase()}`, 'success');
+        showToast(`Status updated to ${status.toUpperCase()} / آرڈر کی حالت تبدیل ہو گئی`, 'success');
         await loadOrders();
       } catch (err: any) {
         showToast(err.message, 'error');
@@ -223,7 +234,7 @@ function setupEventListeners(): void {
         method: 'POST',
         body: JSON.stringify({ orderId, amount, method }),
       });
-      showToast('Payment recorded successfully', 'success');
+      showToast('Payment recorded successfully / رقم کامیابی سے محفوظ ہو گئی', 'success');
       modal?.classList.add('hidden');
       await loadOrders();
     } catch (err: any) {
@@ -237,7 +248,7 @@ function setupSocketIO(): void {
     try {
       const socket = (window as any).io();
       socket.on('order:created', (d: any) => {
-        showToast(`New Order #${d.orderNumber} Booked!`, 'info');
+        showToast(`New Order #${d.orderNumber} Booked! / نیا آرڈر بک ہو گیا!`, 'info');
         loadOrders();
       });
       socket.on('payment:recorded', () => {
@@ -275,34 +286,34 @@ function printSlip(orderId: string): void {
     <div style="font-family: monospace; font-size: 13px; line-height: 1.4; color: #000; padding: 10px;">
       <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 10px;">
         <h2 style="font-size: 18px; margin: 0; font-weight: bold;">ACTION TAILOR / ایکشن ٹیلرز</h2>
-        <p style="margin: 2px 0;">Quality Stitching & Bespoke Pakistani Suits</p>
+        <p style="margin: 2px 0;">Quality Stitching & Bespoke Pakistani Suits / معیاری سلائی</p>
         <p style="margin: 2px 0;">Phone: 0300-0000000 • Lahore</p>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <div><strong>Order #:</strong> ${order.orderNumber}</div>
-        <div><strong>Date:</strong> ${new Date(order.orderDate || Date.now()).toLocaleDateString('en-GB')}</div>
+        <div><strong>Order # / آرڈر نمبر:</strong> ${order.orderNumber}</div>
+        <div><strong>Date / تاریخ:</strong> ${new Date(order.orderDate || Date.now()).toLocaleDateString('en-GB')}</div>
       </div>
       <div style="margin-bottom: 8px;">
-        <div><strong>Customer:</strong> ${order.customer?.name || 'Customer'} (${order.customer?.phone || '--'})</div>
-        <div><strong>Delivery:</strong> <span style="font-size: 15px; font-weight: bold;">${new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB')}</span></div>
+        <div><strong>Customer / کسٹمر:</strong> ${order.customer?.name || 'Customer'} (${order.customer?.phone || '--'})</div>
+        <div><strong>Delivery / متوقع تاریخ:</strong> <span style="font-size: 15px; font-weight: bold;">${new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB')}</span></div>
       </div>
       <div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 6px 0; margin-bottom: 8px;">
-        <div><strong>Item:</strong> ${order.clothingCategory.toUpperCase()}</div>
-        <div><strong>Fabric:</strong> ${order.fabric?.fabricType || 'Customer Cloth'} (${order.fabric?.color || 'Standard'})</div>
+        <div><strong>Item / لباس:</strong> ${getGarmentName(order.clothingCategory)}</div>
+        <div><strong>Fabric / کپڑا:</strong> ${order.fabric?.fabricType || 'Customer Cloth'} (${order.fabric?.color || 'Standard'})</div>
       </div>
       <div style="margin-bottom: 10px;">
-        <div style="font-weight: bold; margin-bottom: 4px;">MEASUREMENTS (INCHES):</div>
+        <div style="font-weight: bold; margin-bottom: 4px;">MEASUREMENTS (INCHES) / ناپ (انچ):</div>
         <table style="width: 100%; border-collapse: collapse; font-size: 12px;" border="1">
           <tr style="background: #f0f0f0;">
-            <th>Lambai</th><th>Teera</th><th>Chhati</th><th>Bazu</th><th>Collar</th><th>Ghera</th>
+            <th>Length / لمبائی</th><th>Shoulder / کندھا</th><th>Chest / چھاتی</th><th>Sleeve / آستین</th><th>Collar / کالر</th><th>Daman / دامن</th>
           </tr>
           <tr style="text-align: center;">
-            <td>${q.length || '--'}</td><td>${q.shoulder || '--'}</td><td>${q.chest || '--'}</td><td>${q.sleeve || '--'}</td><td>${q.collar || '--'}</td><td>${q.ghera || '--'}</td>
+            <td>${q.length || '--'}</td><td>${q.shoulder || '--'}</td><td>${q.chest || '--'}</td><td>${q.sleeve || '--'}</td><td>${q.collar || '--'}</td><td>${q.daman || q.ghera || '--'}</td>
           </tr>
         </table>
         <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px;" border="1">
           <tr style="background: #f0f0f0;">
-            <th>Shalwaar</th><th>Paincha</th><th>Aasan</th><th>Ghera</th>
+            <th>Length / لمبائی</th><th>Paincha / پانچہ</th><th>Aasan / آسن</th><th>Ghera / گھیرا</th>
           </tr>
           <tr style="text-align: center;">
             <td>${s.length || '--'}</td><td>${s.paincha || '--'}</td><td>${s.aasan || '--'}</td><td>${s.ghera || s.waist || '--'}</td>
@@ -310,10 +321,10 @@ function printSlip(orderId: string): void {
         </table>
       </div>
       <div style="border-top: 1px dashed #000; padding-top: 6px;">
-        <div style="display: flex; justify-content: space-between;"><span>Total:</span> <strong>${order.totalAmount} PKR</strong></div>
-        <div style="display: flex; justify-content: space-between;"><span>Advance:</span> <span>${order.advancePayment || 0} PKR</span></div>
+        <div style="display: flex; justify-content: space-between;"><span>Total / کل رقم:</span> <strong>${order.totalAmount} PKR</strong></div>
+        <div style="display: flex; justify-content: space-between;"><span>Advance / پیشگی رقم:</span> <span>${order.advancePayment || 0} PKR</span></div>
         <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; border-top: 1px solid #000; margin-top: 4px;">
-          <span>Remaining:</span> <span>${order.remainingAmount} PKR</span>
+          <span>Remaining / بقایا رقم:</span> <span>${order.remainingAmount} PKR</span>
         </div>
       </div>
     </div>

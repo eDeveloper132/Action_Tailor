@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Profile - Action Tailor / اکاؤنٹ پروفائل</title>
+  <title>Profile - Action Tailor / پروفائل</title>
 
   <!-- Tailwind CSS CDN & Configuration -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,14 +20,14 @@
     <div class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex justify-between items-center">
       <div>
         <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Account Profile / اکاؤنٹ کی تفصیلات
+          Profile / پروفائل
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-1">
-          Manage your credentials, role privileges, and account settings
+          Manage your credentials and account information / اپنے اکاؤنٹ کی تفصیلات دیکھیں
         </p>
       </div>
       <button id="btnSignOutProfile" class="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold shadow-2xs">
-        Sign Out / لاگ آؤٹ
+        Logout / لاگ آؤٹ
       </button>
     </div>
 
@@ -41,7 +41,7 @@
           <h2 class="text-xl font-bold text-slate-900" id="profileName">Loading user...</h2>
           <div class="text-xs text-slate-500" id="profileEmail">--</div>
           <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            Valued Customer / کسٹمر
+            Customer / کسٹمر
           </span>
         </div>
       </div>
@@ -52,24 +52,24 @@
           <div class="font-bold text-slate-800" id="profilePhone">--</div>
         </div>
         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-          <div class="text-slate-500 text-xs mb-1">Home Address / پتہ:</div>
+          <div class="text-slate-500 text-xs mb-1">Home Address / گھر کا پتہ:</div>
           <div class="font-bold text-slate-800" id="profileAddress">--</div>
         </div>
         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-          <div class="text-slate-500 text-xs mb-1">Email Address / ای میل:</div>
+          <div class="text-slate-500 text-xs mb-1">Email Address / ای میل پتہ:</div>
           <div class="font-bold text-slate-800" id="profileEmailDetail">--</div>
         </div>
         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-          <div class="text-slate-500 text-xs mb-1">Account Role:</div>
+          <div class="text-slate-500 text-xs mb-1">Role / عہدہ:</div>
           <div class="font-bold text-emerald-700">Customer / کسٹمر</div>
         </div>
       </div>
 
       <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 text-xs text-emerald-900 space-y-1.5">
         <h3 class="font-bold text-emerald-950 flex items-center gap-1.5">
-          <span>🔒</span> Account Privacy & Security
+          <span>🔒</span> Privacy & Security / پرائیویسی اور سیکیورٹی
         </h3>
-        <p>Your session is cryptographically secured with JWT authentication. Only you can view your tailoring orders and measurement records.</p>
+        <p>Your session is secured with token authentication / آپ کا سیشن محفوظ ہے۔</p>
       </div>
     </div>
   </main>

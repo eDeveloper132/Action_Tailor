@@ -37,20 +37,20 @@ async function initProfilePage(): Promise<void> {
     if (roleText) roleText.textContent = user.role || 'customer';
 
     if (roleBadge) {
-      roleBadge.textContent = user.role === 'admin' ? 'Master Tailor (Admin)' : user.role === 'staff' ? 'Karigar / Staff' : 'Customer';
+      roleBadge.textContent = user.role === 'admin' ? 'Admin / ایڈمن' : user.role === 'manager' ? 'Manager / مینیجر' : user.role === 'staff' ? 'Staff / کاریگر' : 'Customer / کسٹمر';
     }
 
     if (permsEl) {
       if (user.role === 'admin') {
-        permsEl.textContent = 'Full Master Access: You can create & delete customers, book suits, advance order workflows, record payments, and view shop operational metrics.';
+        permsEl.textContent = 'Admin / ایڈمن: Full Access';
       } else if (user.role === 'staff') {
-        permsEl.textContent = 'Staff Access: You can book suits, record measurements, update order cutting/stitching statuses, and record advance/balance payments.';
+        permsEl.textContent = 'Staff / کاریگر: Tailoring Access';
       } else {
-        permsEl.textContent = 'Customer Access: You can track your suit progress, view your saved measurements, and inspect your order receipts.';
+        permsEl.textContent = 'Customer / کسٹمر: Personal Access';
       }
     }
   } catch (err: any) {
-    showToast('Failed to load profile details', 'error');
+    showToast('Failed to load profile / پروفائل لوڈ کرنے میں خرابی', 'error');
   }
 }
 

@@ -31,7 +31,7 @@ export const createButton = (options: ButtonOptions): HTMLButtonElement => {
   return btn;
 };
 
-export const setButtonLoading = (button: HTMLButtonElement, loading: boolean, loadingText = 'Please wait...'): void => {
+export const setButtonLoading = (button: HTMLButtonElement, loading: boolean, loadingText = 'Please wait... / انتظار فرمائیں...'): void => {
   if (loading) {
     button.disabled = true;
     button.dataset.originalText = button.textContent || '';

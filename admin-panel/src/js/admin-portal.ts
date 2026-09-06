@@ -55,11 +55,11 @@ function renderMetricCards(metrics: any): void {
   if (!container) return;
 
   const cards = [
-    { title: "Today's / آج کے آرڈرز", val: metrics.todayOrdersCount || 0, color: 'text-emerald-700', icon: '✂' },
-    { title: 'Cutting / کٹائی پر', val: metrics.statusCounts?.cutting || 0, color: 'text-sky-700', icon: '📐' },
-    { title: 'In Stitching / سلائی پر', val: metrics.statusCounts?.stitching || 0, color: 'text-purple-700', icon: '🧵' },
-    { title: 'Ready / تیار سوٹ', val: metrics.statusCounts?.ready || 0, color: 'text-emerald-600', icon: '✓' },
-    { title: 'Due Balance / بقایا', val: `${(metrics.totalRemainingPayments || 0).toLocaleString()} PKR`, color: 'text-amber-700', icon: '💰' },
+    { title: 'Total Orders / کل آرڈرز', val: metrics.totalOrders || 0, color: 'text-slate-900', icon: '📋' },
+    { title: 'In Cutting / کٹائی میں', val: metrics.statusCounts?.cutting || 0, color: 'text-sky-700', icon: '✂' },
+    { title: 'In Stitching / سلائی میں', val: metrics.statusCounts?.stitching || 0, color: 'text-purple-700', icon: '🧵' },
+    { title: 'Ready / تیار', val: metrics.statusCounts?.ready || 0, color: 'text-emerald-600', icon: '✓' },
+    { title: 'Balance Due / بقایا رقم', val: `${(metrics.totalRemainingPayments || 0).toLocaleString()} PKR`, color: 'text-amber-700', icon: '💰' },
   ];
 
   container.innerHTML = cards
@@ -96,7 +96,7 @@ async function loadOrders(): Promise<void> {
     if (orders.length === 0) {
       container.innerHTML = `
         <div class="p-8 text-center rounded-2xl bg-white border border-dashed border-slate-200 text-slate-400 text-sm">
-          No orders found matching criteria / کوئی آرڈر نہیں ملا
+          No Orders Found / کوئی آرڈر نہیں ملا
         </div>
       `;
       return;
@@ -111,14 +111,14 @@ async function loadOrders(): Promise<void> {
 
 function getStatusBadge(status: string): string {
   const labels: Record<string, { text: string; class: string }> = {
-    pending: { text: 'Pending / زیرِ التوا', class: 'status-pending' },
+    pending: { text: 'Pending / زیر التوا', class: 'status-pending' },
     confirmed: { text: 'Confirmed / تصدیق', class: 'status-confirmed' },
     cutting: { text: 'Cutting / کٹائی', class: 'status-cutting' },
     stitching: { text: 'Stitching / سلائی', class: 'status-stitching' },
     quality_check: { text: 'Checking / معائنہ', class: 'status-quality_check' },
-    ready: { text: 'Ready / تیار ہے', class: 'status-ready' },
-    delivered: { text: 'Delivered / دیا گیا', class: 'status-delivered' },
-    cancelled: { text: 'Cancelled / منسوخ', class: 'status-cancelled' },
+    ready: { text: 'Ready / تیار', class: 'status-ready' },
+    delivered: { text: 'Delivered / حوالے کیا گیا', class: 'status-delivered' },
+    cancelled: { text: 'Cancelled / منسوخ کریں', class: 'status-cancelled' },
   };
 
   const item = labels[status] || { text: status, class: 'status-pending' };
@@ -176,19 +176,19 @@ function renderOrderCard(order: any): string {
         ${
           next
             ? `<button class="btn-advance-status px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs" data-id="${order._id}" data-next="${next}">
-                Move to ${next.toUpperCase()} ➔
+                ${next.toUpperCase()} / آگے بڑھائیں ➔
               </button>`
             : ''
         }
         ${
           !isPaid
             ? `<button class="btn-quick-pay px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 text-xs font-semibold" data-id="${order._id}" data-num="${order.orderNumber}" data-rem="${order.remainingAmount}">
-                + Payment / وصولی
+                + Payment / رقم وصولی
               </button>`
             : ''
         }
         <button class="btn-print-slip p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs border border-slate-300 font-semibold" data-id="${order._id}">
-          🖨 Slip
+          🖨 Slip / پرچی
         </button>
       </div>
     </div>
@@ -288,26 +288,26 @@ function printSlip(orderId: string): void {
         <p style="margin: 2px 0;">Quality Stitching & Bespoke Pakistani Suits</p>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <div><strong>Order #:</strong> ${order.orderNumber}</div>
-        <div><strong>Due Date:</strong> ${new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB')}</div>
+        <div><strong>Order # / آرڈر نمبر:</strong> ${order.orderNumber}</div>
+        <div><strong>Delivery Date / متوقع تاریخ:</strong> ${new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB')}</div>
       </div>
       <div style="margin-bottom: 8px;">
-        <div><strong>Customer:</strong> ${order.customer?.name || 'Customer'} (${order.customer?.phone || '--'})</div>
+        <div><strong>Customer / کسٹمر:</strong> ${order.customer?.name || 'Customer'} (${order.customer?.phone || '--'})</div>
       </div>
       <div style="margin-bottom: 10px;">
-        <div style="font-weight: bold; margin-bottom: 4px;">MEASUREMENTS (INCHES):</div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 12px;" border="1">
-          <tr style="background: #f0f0f0;"><th>Lambai</th><th>Teera</th><th>Chhati</th><th>Bazu</th><th>Collar</th><th>Ghera</th></tr>
+        <div style="font-weight: bold; margin-bottom: 4px;">Measurements / ناپ (Inches / انچ):</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px;" border="1">
+          <tr style="background: #f0f0f0;"><th>Length / لمبائی</th><th>Shoulder / کندھا</th><th>Chest / چھاتی</th><th>Sleeve / آستین</th><th>Collar / کالر</th><th>Daman / دامن</th></tr>
           <tr style="text-align: center;"><td>${q.length || '--'}</td><td>${q.shoulder || '--'}</td><td>${q.chest || '--'}</td><td>${q.sleeve || '--'}</td><td>${q.collar || '--'}</td><td>${q.ghera || '--'}</td></tr>
         </table>
-        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px;" border="1">
-          <tr style="background: #f0f0f0;"><th>Shalwaar</th><th>Paincha</th><th>Aasan</th></tr>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 4px;" border="1">
+          <tr style="background: #f0f0f0;"><th>Shalwar / شلوار</th><th>Paincha / پائنچہ</th><th>Aasan / آسن</th></tr>
           <tr style="text-align: center;"><td>${s.length || '--'}</td><td>${s.paincha || '--'}</td><td>${s.aasan || '--'}</td></tr>
         </table>
       </div>
       <div style="border-top: 1px dashed #000; padding-top: 6px;">
-        <div style="display: flex; justify-content: space-between;"><span>Total:</span> <strong>${order.totalAmount} PKR</strong></div>
-        <div style="display: flex; justify-content: space-between;"><span>Remaining:</span> <strong>${order.remainingAmount} PKR</strong></div>
+        <div style="display: flex; justify-content: space-between;"><span>Total / کل رقم:</span> <strong>${order.totalAmount} PKR</strong></div>
+        <div style="display: flex; justify-content: space-between;"><span>Balance Due / بقایا رقم:</span> <strong>${order.remainingAmount} PKR</strong></div>
       </div>
     </div>
   `;

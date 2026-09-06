@@ -21,8 +21,8 @@ export const showModal = (options: ModalOptions): ModalInstance => {
   const {
     title,
     content,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
+    confirmText = 'Confirm / تصدیق کریں',
+    cancelText = 'Cancel / منسوخ کریں',
     onConfirm,
     onCancel,
   } = options;
@@ -55,7 +55,7 @@ export const showModal = (options: ModalOptions): ModalInstance => {
   modal.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
       <h2 style="font-size: 1.25rem; font-weight: 700; color: #f8fafc; margin: 0;">${title}</h2>
-      <button class="ui-modal-close" style="background: none; border: none; color: #64748b; font-size: 1.25rem; cursor: pointer;">&times;</button>
+      <button class="ui-modal-close" title="Close / بند کریں" style="background: none; border: none; color: #64748b; font-size: 1.25rem; cursor: pointer;">&times;</button>
     </div>
     <div class="ui-modal-body" style="color: #cbd5e1; margin-bottom: 1.5rem; line-height: 1.5;"></div>
     <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
