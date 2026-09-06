@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders - Action Tailor / میرے آرڈرز</title>
+
+  <!-- Tailwind CSS CDN & Configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/tailwind-config.js"></script>
+
+  <!-- Socket.IO for Live Status Updates -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+  <!-- Centralized & View-Specific Custom CSS -->
+  <link rel="stylesheet" href="/src/css/global.css">
+  <link rel="stylesheet" href="/src/css/dashboard.css">
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+  <!-- Dynamic Mount for Customer Navigation Bar -->
+  <div id="navbarMount" class="no-print"></div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 no-print space-y-6">
+
+    <!-- Top Header -->
+    <div class="tailor-card p-6 sm:p-8 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Order Tracking / آرڈر ٹریکنگ
+          </span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          My Tailoring Orders / میرے آرڈرز
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+          Track cutting, stitching progress, promised delivery dates, and payment balances
+        </p>
+      </div>
+
+      <a
+        href="https://wa.me/923001234567?text=Hello%20Action%20Tailor,%20I%20have%20a%20question%20about%20my%20order"
+        target="_blank"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition-all"
+      >
+        <span>💬</span>
+        <span>Contact Tailor / رابطہ</span>
+      </a>
+    </div>
+
+    <!-- Filters & Search Bar -->
+    <div class="tailor-card p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+      <!-- Status Filter Tabs -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" id="filterTabs">
+        <button data-filter="all" class="filter-tab px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow-2xs">
+          All / تمام (<span id="countAll">0</span>)
+        </button>
+        <button data-filter="active" class="filter-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">
+          In Stitching / زیرِ عمل (<span id="countActive">0</span>)
+        </button>
+        <button data-filter="ready" class="filter-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">
+          Ready for Pickup / تیار (<span id="countReady">0</span>)
+        </button>
+        <button data-filter="delivered" class="filter-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">
+          Delivered / مکمل (<span id="countDelivered">0</span>)
+        </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="w-full sm:w-64">
+        <input
+          type="text"
+          id="searchOrdersInput"
+          placeholder="Search Order # or Garment..."
+          class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-emerald-500 transition-all"
+        />
+      </div>
+    </div>
+
+    <!-- Orders List Container -->
+    <div id="ordersContainer" class="space-y-4">
+      <div class="p-10 text-center text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
+        Loading your orders...
+      </div>
+    </div>
+  </main>
+
+  <!-- Printable Slip Container -->
+  <div id="printableSlipArea" class="hidden print:block font-mono text-black bg-white p-6 max-w-xl mx-auto border border-dashed border-slate-300">
+    <div id="printSlipContent"></div>
+  </div>
+
+  <script type="module" src="/src/js/orders.ts"></script>
+</body>
+</html>
+

@@ -86,6 +86,49 @@ function renderActiveSuits(orders: any[]): void {
   attachPrintButtons();
 }
 
+const GARMENT_LABELS: Record<string, string> = {
+  shalwar_qameez: 'Shalwar Qameez / شلوار قمیض',
+  kurta_pajama: 'Kurta Pajama / کرتہ پاجامہ',
+  waistcoat: 'Waistcoat / واسکٹ',
+  sherwani: 'Sherwani / شیروانی',
+  pant_shirt: 'Pant Shirt / پینٹ شرٹ',
+  coat: 'Coat / کوٹ',
+  other: 'Custom Garment / کسٹم لباس',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Booked / بک ہوا',
+  confirmed: 'Confirmed / تصدیق شدہ',
+  cutting: 'Cutting / کٹائی',
+  stitching: 'Stitching / سلائی',
+  quality_check: 'Quality Check / معائنہ',
+  ready: 'Ready for Pickup / تیار ہے',
+  delivered: 'Delivered / دیا گیا',
+  cancelled: 'Cancelled / منسوخ',
+};
+
+const STATUS_CLASSES: Record<string, string> = {
+  pending: 'bg-amber-100 text-amber-800 border border-amber-300',
+  confirmed: 'bg-indigo-100 text-indigo-800 border border-indigo-300',
+  cutting: 'bg-sky-100 text-sky-800 border border-sky-300',
+  stitching: 'bg-purple-100 text-purple-800 border border-purple-300',
+  quality_check: 'bg-pink-100 text-pink-800 border border-pink-300',
+  ready: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+  delivered: 'bg-slate-100 text-slate-700 border border-slate-300',
+};
+
+function getGarmentName(category: string): string {
+  return GARMENT_LABELS[category] || category.replace('_', ' ').toUpperCase();
+}
+
+function getStatusLabel(status: string): string {
+  return STATUS_LABELS[status] || status;
+}
+
+function getStatusBadgeClass(status: string): string {
+  return STATUS_CLASSES[status] || 'bg-slate-100 text-slate-700 border border-slate-200';
+}
+
 function renderCustomerSuitCard(order: any): string {
   const steps = [
     { key: 'pending', label: 'Booked / بک ہوا' },
@@ -102,13 +145,13 @@ function renderCustomerSuitCard(order: any): string {
 
   return `
     <div class="tailor-card p-5 sm:p-6 rounded-2xl space-y-4 border border-slate-200 bg-white shadow-xs">
-      <!-- Top Line: Order Number & Status -->
-      <div class="flex justify-between items-center flex-wrap gap-2">
-        <div class="flex items-center gap-2">
-          <span class="font-mono text-lg sm:text-xl font-extrabold text-slate-900">${order.orderNumber}</span>
-          <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            ${order.clothingCategory.replace('_', ' ').toUpperCase()}
-          </span>
+      <!-- Top Line: Order Number & Garment & Financials -->
+      <div class="flex justify-between items-start flex-wrap gap-2">
+        <div>
+          <div class="font-mono text-lg sm:text-xl font-extrabold text-slate-900">Order #${order.orderNumber}</div>
+          <div class="text-xs sm:text-sm font-semibold text-emerald-700 mt-0.5">
+            ${getGarmentName(order.clothingCategory)}
+          </div>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-xs px-2.5 py-0.5 rounded font-semibold ${isPaid ? 'payment-paid' : 'payment-partial'}">
@@ -117,6 +160,18 @@ function renderCustomerSuitCard(order: any): string {
           <button class="btn-print-slip px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs border border-slate-300 font-semibold" data-id="${order._id}">
             🖨 Slip
           </button>
+        </div>
+      </div>
+
+      <!-- Current Status & Expected Date Box -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200 gap-2 text-xs sm:text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-slate-500 font-medium">Status:</span>
+          <span class="font-bold px-2.5 py-0.5 rounded-md ${getStatusBadgeClass(order.status)}">${getStatusLabel(order.status)}</span>
+        </div>
+        <div>
+          <span class="text-slate-500 font-medium">Expected Date / متوقع تاریخ:</span>
+          <strong class="text-slate-900 ml-1 font-mono">${deliveryFormatted}</strong>
         </div>
       </div>
 
@@ -137,15 +192,15 @@ function renderCustomerSuitCard(order: any): string {
           .join('')}
       </div>
 
-      <!-- Suit Specifications & Financials Details -->
+      <!-- Suit Specifications Details -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-xs text-slate-600">
         <div>
           <div><strong>Fabric / کپڑا:</strong> ${order.fabric?.fabricType || 'Standard'} (${order.fabric?.color || 'White'})</div>
           <div><strong>Style:</strong> Collar: ${order.designOptions?.collarStyle || 'Ban'} | Cuff: ${order.designOptions?.cuffStyle || 'Single'}</div>
         </div>
         <div class="sm:text-right">
-          <div>Promised Delivery: <strong class="text-slate-900 text-sm">${deliveryFormatted}</strong></div>
           <div>Total Price: <strong class="text-slate-900">${order.totalAmount} PKR</strong> (Advance: ${order.advancePayment || 0} PKR)</div>
+          ${order.remainingAmount > 0 ? `<div class="text-amber-700 font-semibold">Remaining: ${order.remainingAmount} PKR</div>` : ''}
         </div>
       </div>
     </div>
@@ -173,7 +228,7 @@ function renderMeasurementProfiles(profiles: any[]): void {
       <div class="tailor-card p-4 rounded-xl space-y-3 text-xs border border-slate-200 bg-white shadow-xs">
         <div class="flex justify-between items-center">
           <strong class="text-slate-900 text-sm font-bold">${p.title}</strong>
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-emerald-700 font-semibold border border-slate-200">${p.unit}</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-emerald-700 font-semibold border border-slate-200">${p.unit || 'inches'}</span>
         </div>
         
         <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
@@ -207,7 +262,7 @@ function renderCompletedHistory(orders: any[]): void {
   if (orders.length === 0) {
     container.innerHTML = `
       <div class="p-4 text-center text-slate-500 text-xs bg-white rounded-xl border border-dashed border-slate-200">
-        No delivered suits history yet.
+        No delivered suits history yet / کوئی مکمل سوٹ کا ریکارڈ نہیں ہے۔
       </div>
     `;
     return;
@@ -216,14 +271,14 @@ function renderCompletedHistory(orders: any[]): void {
   container.innerHTML = orders
     .map(
       (o: any) => `
-    <div class="p-3.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs shadow-2xs">
+    <div class="p-3.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs shadow-2xs flex-wrap gap-2">
       <div>
-        <span class="font-mono font-bold text-slate-900">${o.orderNumber}</span>
-        <span class="text-slate-500 ml-2 font-medium">${o.clothingCategory.toUpperCase()}</span>
-        <span class="text-slate-400 ml-2">• Delivered: ${new Date(o.actualDeliveredDate || o.updatedAt).toLocaleDateString()}</span>
+        <span class="font-mono font-bold text-slate-900">Order #${o.orderNumber}</span>
+        <span class="text-emerald-700 ml-2 font-semibold">${getGarmentName(o.clothingCategory)}</span>
+        <span class="text-slate-400 ml-2">• Delivered: ${new Date(o.actualDeliveredDate || o.updatedAt).toLocaleDateString('en-GB')}</span>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-emerald-700 font-bold">${o.totalAmount} PKR</span>
+        <span class="text-slate-800 font-bold">${o.totalAmount} PKR</span>
         <span class="status-badge status-delivered">Delivered / دیا گیا</span>
       </div>
     </div>

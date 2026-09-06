@@ -21,6 +21,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
+        orders: resolve(import.meta.dirname, 'orders.html'),
+        measurements: resolve(import.meta.dirname, 'measurements.html'),
         signin: resolve(import.meta.dirname, 'signin.html'),
         signup: resolve(import.meta.dirname, 'signup.html'),
         profile: resolve(import.meta.dirname, 'profile.html'),

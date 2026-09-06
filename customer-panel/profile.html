@@ -40,26 +40,36 @@
         <div>
           <h2 class="text-xl font-bold text-slate-900" id="profileName">Loading user...</h2>
           <div class="text-xs text-slate-500" id="profileEmail">--</div>
-          <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" id="profileRoleBadge">
-            Role
+          <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Valued Customer / کسٹمر
           </span>
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100 text-xs sm:text-sm">
         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-          <div class="text-slate-500 text-xs mb-1">User Identifier:</div>
-          <div class="font-mono font-bold text-slate-800" id="profileUserId">--</div>
+          <div class="text-slate-500 text-xs mb-1">Phone Number / فون نمبر:</div>
+          <div class="font-bold text-slate-800" id="profilePhone">--</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="text-slate-500 text-xs mb-1">Home Address / پتہ:</div>
+          <div class="font-bold text-slate-800" id="profileAddress">--</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="text-slate-500 text-xs mb-1">Email Address / ای میل:</div>
+          <div class="font-bold text-slate-800" id="profileEmailDetail">--</div>
         </div>
         <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
           <div class="text-slate-500 text-xs mb-1">Account Role:</div>
-          <div class="font-bold text-slate-800 capitalize" id="profileRoleText">--</div>
+          <div class="font-bold text-emerald-700">Customer / کسٹمر</div>
         </div>
       </div>
 
-      <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
-        <h3 class="font-bold text-slate-800">Security & Authentication Info</h3>
-        <p>Your session is protected with cryptographically signed JSON Web Tokens (JWT) stored in HTTP-only cookies and local storage. Role-based access control guarantees strict separation between shop operations and customer records.</p>
+      <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 text-xs text-emerald-900 space-y-1.5">
+        <h3 class="font-bold text-emerald-950 flex items-center gap-1.5">
+          <span>🔒</span> Account Privacy & Security
+        </h3>
+        <p>Your session is cryptographically secured with JWT authentication. Only you can view your tailoring orders and measurement records.</p>
       </div>
     </div>
   </main>

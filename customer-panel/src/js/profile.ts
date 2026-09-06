@@ -19,36 +19,32 @@ async function initProfilePage(): Promise<void> {
   });
 
   try {
-    const res = await (window as any).ActionTailor.apiFetch('/api/auth/me');
-    const user = res.data;
+    const [authRes, dashboardRes] = await Promise.all([
+      (window as any).ActionTailor.apiFetch('/api/auth/me'),
+      (window as any).ActionTailor.apiFetch('/api/dashboard/customer').catch(() => ({ data: {} })),
+    ]);
+
+    const user = authRes.data;
+    const customer = dashboardRes.data?.customerProfile || {};
 
     const nameEl = document.getElementById('profileName');
     const emailEl = document.getElementById('profileEmail');
-    const roleBadge = document.getElementById('profileRoleBadge');
-    const roleText = document.getElementById('profileRoleText');
-    const userIdEl = document.getElementById('profileUserId');
+    const emailDetailEl = document.getElementById('profileEmailDetail');
+    const phoneEl = document.getElementById('profilePhone');
+    const addressEl = document.getElementById('profileAddress');
     const avatar = document.getElementById('avatarLetter');
-    const permsEl = document.getElementById('profilePermsDescription');
 
-    if (nameEl) nameEl.textContent = user.name || 'Tailor User';
-    if (emailEl) emailEl.textContent = user.email || '--';
-    if (avatar && user.name) avatar.textContent = user.name.charAt(0).toUpperCase();
-    if (userIdEl) userIdEl.textContent = user._id || user.userId || '--';
-    if (roleText) roleText.textContent = user.role || 'customer';
+    const displayName = customer.name || user.name || 'Customer';
+    const displayPhone = customer.phone || '--';
+    const displayAddress = customer.address || customer.city || 'Lahore, Pakistan';
+    const displayEmail = customer.email || user.email || 'Not provided / درج نہیں ہے';
 
-    if (roleBadge) {
-      roleBadge.textContent = user.role === 'admin' ? 'Master Tailor (Admin)' : user.role === 'staff' ? 'Karigar / Staff' : 'Customer';
-    }
-
-    if (permsEl) {
-      if (user.role === 'admin') {
-        permsEl.textContent = 'Full Master Access: You can create & delete customers, book suits, advance order workflows, record payments, and view shop operational metrics.';
-      } else if (user.role === 'staff') {
-        permsEl.textContent = 'Staff Access: You can book suits, record measurements, update order cutting/stitching statuses, and record advance/balance payments.';
-      } else {
-        permsEl.textContent = 'Customer Access: You can track your suit progress, view your saved measurements, and inspect your order receipts.';
-      }
-    }
+    if (nameEl) nameEl.textContent = displayName;
+    if (emailEl) emailEl.textContent = displayEmail;
+    if (emailDetailEl) emailDetailEl.textContent = displayEmail;
+    if (phoneEl) phoneEl.textContent = displayPhone;
+    if (addressEl) addressEl.textContent = displayAddress;
+    if (avatar && displayName) avatar.textContent = displayName.charAt(0).toUpperCase();
   } catch (err: any) {
     showToast('Failed to load profile details', 'error');
   }
