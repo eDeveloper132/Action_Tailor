@@ -37,6 +37,7 @@
     "@types/express": "^5.0.6",
     "@types/mongoose": "^5.11.96",
     "@types/node": "^26.4.1",
-    "@types/socket.io": "^3.0.1"
+    "@types/socket.io": "^3.0.1",
+    "typescript": "^7.0.2"
   }
 }
