@@ -46,6 +46,14 @@ export async function runSeeder(): Promise<void> {
       phone: '03001234567',
     });
 
+    const managerUser = await User.create({
+      name: 'Manager Farhan / منیجر فرحان',
+      email: 'manager@actiontailor.pk',
+      password: 'Password123',
+      role: 'manager',
+      phone: '03009876543',
+    });
+
     const staffUser = await User.create({
       name: 'Karigar Rasheed / کاریگر رشید',
       email: 'staff@actiontailor.pk',
@@ -70,7 +78,7 @@ export async function runSeeder(): Promise<void> {
       phone: '03455566778',
     });
 
-    console.log(chalk.green(`✓ Created 4 Users (Admin: ${adminUser.email}, Staff: ${staffUser.email}).\n`));
+    console.log(chalk.green(`✓ Created 5 Users (Admin: ${adminUser.email}, Manager: ${managerUser.email}, Staff: ${staffUser.email}).\n`));
 
     // ==========================================
     // 3. SEED CUSTOMER PROFILES
@@ -522,6 +530,7 @@ export async function runSeeder(): Promise<void> {
     console.log(chalk.cyan.bold('======================================================\n'));
     console.log(chalk.white('Demo Login Credentials:'));
     console.log(chalk.white('  • Master Tailor (Admin): ') + chalk.bold.yellow('admin@actiontailor.pk') + ' / ' + chalk.bold.yellow('Password123'));
+    console.log(chalk.white('  • Shop Manager:          ') + chalk.bold.yellow('manager@actiontailor.pk') + ' / ' + chalk.bold.yellow('Password123'));
     console.log(chalk.white('  • Karigar / Staff:       ') + chalk.bold.yellow('staff@actiontailor.pk') + ' / ' + chalk.bold.yellow('Password123'));
     console.log(chalk.white('  • Customer Account 1:    ') + chalk.bold.yellow('tariq@gmail.com') + ' / ' + chalk.bold.yellow('Password123'));
     console.log(chalk.white('  • Customer Account 2:    ') + chalk.bold.yellow('zubair@gmail.com') + ' / ' + chalk.bold.yellow('Password123'));

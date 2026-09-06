@@ -14,6 +14,7 @@ import measurementRoutes from './routes/measurement.routes.ts';
 import orderRoutes from './routes/order.routes.ts';
 import paymentRoutes from './routes/payment.routes.ts';
 import dashboardRoutes from './routes/dashboard.routes.ts';
+import notificationRoutes from './routes/notification.routes.ts';
 import { requestLogger, notFoundHandler, errorHandler } from './middlewares/index.ts';
 
 dotenv.config();
@@ -101,6 +102,7 @@ app.use('/api/measurements', measurementRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api', apiRoutes);
 
 // Error Middlewares

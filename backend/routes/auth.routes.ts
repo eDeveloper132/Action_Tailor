@@ -46,6 +46,14 @@ router.post('/signin', async (req: Request, res: Response<ApiResponse<AuthRespon
         return;
       }
 
+      if (user.isActive === false) {
+        res.status(403).json({
+          status: 'error',
+          message: 'Account is deactivated. Please contact administration / اکاؤنٹ معطل ہے',
+        });
+        return;
+      }
+
       const tokenPayload: JwtUserPayload = {
         userId: user._id.toString(),
         email: user.email,

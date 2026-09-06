@@ -8,21 +8,21 @@ const router = Router();
 router.use(authenticate);
 
 // Search customers (fast query by name or phone)
-router.get('/search', requireRole('admin', 'staff'), CustomerController.search);
+router.get('/search', requireRole('admin', 'manager', 'staff'), CustomerController.search);
 
 // List all customers (paginated)
-router.get('/', requireRole('admin', 'staff'), CustomerController.list);
+router.get('/', requireRole('admin', 'manager', 'staff'), CustomerController.list);
 
-// Single customer details with measurements and orders
+// Single customer details with measurements and orders (IDOR protected in controller)
 router.get('/:id', CustomerController.getById);
 
-// Register new customer
-router.post('/', requireRole('admin', 'staff'), CustomerController.create);
+// Register new customer (Staff or above)
+router.post('/', requireRole('admin', 'manager', 'staff'), CustomerController.create);
 
-// Update customer details
-router.patch('/:id', requireRole('admin', 'staff'), CustomerController.update);
+// Update customer details (Staff or above)
+router.patch('/:id', requireRole('admin', 'manager', 'staff'), CustomerController.update);
 
-// Delete customer
+// Delete customer (Admin only)
 router.delete('/:id', requireRole('admin'), CustomerController.delete);
 
 export default router;

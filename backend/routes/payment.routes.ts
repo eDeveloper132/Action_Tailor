@@ -7,8 +7,8 @@ const router = Router();
 
 router.use(authenticate);
 
-// Record payment
-router.post('/', requireRole('admin', 'staff'), PaymentController.record);
+// Record payment (Staff or above)
+router.post('/', requireRole('admin', 'manager', 'staff'), PaymentController.record);
 
 // Get payment history for an order
 router.get('/order/:orderId', PaymentController.getByOrder);

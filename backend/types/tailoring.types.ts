@@ -6,7 +6,7 @@
 // ==========================================
 // 1. Roles & Permissions
 // ==========================================
-export type UserRole = 'admin' | 'staff' | 'customer';
+export type UserRole = 'admin' | 'manager' | 'staff' | 'customer';
 
 // ==========================================
 // 2. Pakistani Clothing Categories

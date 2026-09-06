@@ -8,11 +8,11 @@ const router = Router();
 // Pakistani clothing categories list (public/accessible)
 router.get('/clothing-types', DashboardController.getClothingTypes);
 
-// Admin dashboard operational metrics
-router.get('/admin', authenticate, requireRole('admin', 'staff'), DashboardController.getAdminData);
+// Admin dashboard operational metrics (Admin, Manager, Staff only)
+router.get('/admin', authenticate, requireRole('admin', 'manager', 'staff'), DashboardController.getAdminData);
 
-// Customer portal dashboard
-router.get('/customer', authenticate, DashboardController.getCustomerData);
+// Customer portal dashboard (Customer only)
+router.get('/customer', authenticate, requireRole('customer'), DashboardController.getCustomerData);
 
 export default router;
 

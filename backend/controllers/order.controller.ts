@@ -11,10 +11,15 @@ export class OrderController {
       // If logged in as customer, enforce only viewing their own orders
       let resolvedCustomerId = typeof customerId === 'string' ? customerId : undefined;
       if (req.user && req.user.role === 'customer') {
-        const customerProfileId = (req.user as any).customerProfile;
-        if (customerProfileId) {
-          resolvedCustomerId = customerProfileId.toString();
+        const customerProfileId = (req.user as any).customerProfile?.toString();
+        if (!customerProfileId) {
+          res.json({
+            status: 'success',
+            data: { orders: [], total: 0, page: 1, totalPages: 0 },
+          });
+          return;
         }
+        resolvedCustomerId = customerProfileId;
       }
 
       const result = await OrderService.listOrders({
@@ -40,12 +45,15 @@ export class OrderController {
         return;
       }
 
-      // IDOR protection: if user is customer, ensure order belongs to them
+      // IDOR protection: if user is customer, strictly ensure order belongs to them
       if (req.user && req.user.role === 'customer') {
         const userCustId = (req.user as any).customerProfile?.toString();
-        const orderCustId = (order.customer as any)._id?.toString() || order.customer?.toString();
-        if (userCustId && orderCustId && userCustId !== orderCustId) {
-          res.status(403).json({ status: 'error', message: 'Access denied to this order' });
+        const orderCustId = (order.customer as any)?._id?.toString() || order.customer?.toString();
+        if (!userCustId || !orderCustId || userCustId !== orderCustId) {
+          res.status(403).json({
+            status: 'error',
+            message: 'Access denied: You can only access your own orders / صرف اپنے آرڈر تک رسائی کی اجازت ہے',
+          });
           return;
         }
       }
