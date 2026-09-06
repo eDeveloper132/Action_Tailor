@@ -93,6 +93,7 @@ const MeasurementProfileSchema = new Schema<IMeasurementProfile>(
 );
 
 MeasurementProfileSchema.index({ customer: 1, isDefault: -1 });
+MeasurementProfileSchema.index({ customer: 1, clothingCategory: 1 });
 
 export const MeasurementProfile: Model<IMeasurementProfile> =
   mongoose.models.MeasurementProfile ||

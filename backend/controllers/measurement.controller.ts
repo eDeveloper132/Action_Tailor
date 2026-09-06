@@ -29,6 +29,50 @@ export class MeasurementController {
     }
   }
 
+  static async getByCustomerAndGarment(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
+    try {
+      const customerId = Array.isArray(req.params.customerId)
+        ? req.params.customerId[0]
+        : req.params.customerId;
+      const clothingCategory = Array.isArray(req.params.clothingCategory)
+        ? req.params.clothingCategory[0]
+        : req.params.clothingCategory;
+
+      // IDOR Protection: Customer can only view their own measurements
+      if (req.user && req.user.role === 'customer') {
+        const userCustId = (req.user as any).customerProfile?.toString();
+        if (!userCustId || userCustId !== customerId) {
+          res.status(403).json({
+            status: 'error',
+            message: 'Access denied: You can only view your own measurements / صرف اپنے ناپ دیکھنے کی اجازت ہے',
+          });
+          return;
+        }
+      }
+
+      const profile = await MeasurementService.getProfileByCustomerAndGarment(customerId, clothingCategory);
+      res.json({
+        status: 'success',
+        data: profile,
+      });
+    } catch (err: any) {
+      res.status(500).json({ status: 'error', message: err.message });
+    }
+  }
+
+  static async saveGarmentMeasurement(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
+    try {
+      const profile = await MeasurementService.upsertProfileForCustomerAndGarment(req.body);
+      res.json({
+        status: 'success',
+        message: 'Measurement profile updated / ناپ اپڈیٹ ہو گیا ہے',
+        data: profile,
+      });
+    } catch (err: any) {
+      res.status(400).json({ status: 'error', message: err.message });
+    }
+  }
+
   static async getById(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;

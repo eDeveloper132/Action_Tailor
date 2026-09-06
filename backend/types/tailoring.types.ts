@@ -20,6 +20,24 @@ export type ClothingCategory =
   | 'safari_suit'
   | 'custom';
 
+export function normalizeClothingCategory(category: string): ClothingCategory {
+  if (!category) return 'shalwaar_qameez';
+  const clean = category.toLowerCase().trim();
+  if (clean === 'shalwar_qameez' || clean === 'shalwaar_kameez' || clean === 'shalwar_kameez' || clean === 'shalwaar_qameez') {
+    return 'shalwaar_qameez';
+  }
+  if (clean === 'kurta' || clean === 'kurta_pajama' || clean === 'kurta_shalwar') {
+    return 'kurta_pajama';
+  }
+  if (clean === 'trouser' || clean === 'pant' || clean === 'pant_shirt' || clean === 'trouser_shirt') {
+    return 'trouser_shirt';
+  }
+  if (clean === 'waistcoat') return 'waistcoat';
+  if (clean === 'sherwani') return 'sherwani';
+  if (clean === 'safari_suit') return 'safari_suit';
+  return 'custom';
+}
+
 export interface ClothingTypeDefinition {
   key: ClothingCategory;
   nameEn: string;

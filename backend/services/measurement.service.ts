@@ -1,5 +1,10 @@
 import { MeasurementProfile, type IMeasurementProfile } from '../models/index.ts';
-import type { ClothingCategory, MeasurementUnit, MeasurementData } from '../types/index.ts';
+import {
+  type ClothingCategory,
+  type MeasurementUnit,
+  type MeasurementData,
+  normalizeClothingCategory,
+} from '../types/index.ts';
 
 export class MeasurementService {
   /**
@@ -16,6 +21,66 @@ export class MeasurementService {
    */
   static async getProfileById(id: string): Promise<IMeasurementProfile | null> {
     return MeasurementProfile.findById(id).lean() as unknown as Promise<IMeasurementProfile | null>;
+  }
+
+  /**
+   * Get the current/latest measurement profile for a customer and specific garment type
+   */
+  static async getProfileByCustomerAndGarment(
+    customerId: string,
+    clothingCategory: string
+  ): Promise<IMeasurementProfile | null> {
+    const normalizedCategory = normalizeClothingCategory(clothingCategory);
+    return MeasurementProfile.findOne({
+      customer: customerId,
+      clothingCategory: normalizedCategory,
+    })
+      .sort({ updatedAt: -1 })
+      .lean() as unknown as Promise<IMeasurementProfile | null>;
+  }
+
+  /**
+   * Upsert measurement profile for customer and garment type:
+   * Exactly one current/latest measurement per: Customer + Garment Type.
+   * Updates existing profile if present, else creates new profile.
+   */
+  static async upsertProfileForCustomerAndGarment(data: {
+    customer: string;
+    clothingCategory: string;
+    title?: string;
+    unit?: MeasurementUnit;
+    measurements: MeasurementData;
+    isDefault?: boolean;
+    notes?: string;
+  }): Promise<IMeasurementProfile> {
+    const normalizedCategory = normalizeClothingCategory(data.clothingCategory);
+    const existing = await MeasurementProfile.findOne({
+      customer: data.customer,
+      clothingCategory: normalizedCategory,
+    }).sort({ updatedAt: -1 });
+
+    const defaultTitle = `${normalizedCategory.replace('_', ' ').toUpperCase()} Fit`;
+    const title = data.title?.trim() || existing?.title || defaultTitle;
+
+    if (existing) {
+      existing.title = title;
+      existing.measurements = data.measurements;
+      if (data.unit) existing.unit = data.unit;
+      if (data.notes !== undefined) existing.notes = data.notes?.trim();
+      if (data.isDefault !== undefined) existing.isDefault = !!data.isDefault;
+      await existing.save();
+      return existing;
+    }
+
+    return MeasurementProfile.create({
+      customer: data.customer,
+      title,
+      clothingCategory: normalizedCategory,
+      unit: data.unit || 'inches',
+      measurements: data.measurements,
+      isDefault: !!data.isDefault,
+      notes: data.notes?.trim(),
+    });
   }
 
   /**

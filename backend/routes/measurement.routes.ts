@@ -10,6 +10,12 @@ router.use(authenticate);
 // Get all measurement profiles for a customer
 router.get('/customer/:customerId', MeasurementController.getByCustomer);
 
+// Get measurement profile for specific customer and garment type
+router.get('/customer/:customerId/garment/:clothingCategory', MeasurementController.getByCustomerAndGarment);
+
+// Upsert latest measurement for customer and garment type (Staff or above)
+router.post('/upsert-garment', requireRole('admin', 'manager', 'staff'), MeasurementController.saveGarmentMeasurement);
+
 // Get single measurement profile
 router.get('/:id', MeasurementController.getById);
 

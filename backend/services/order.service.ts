@@ -9,11 +9,13 @@ import {
   AuditLog,
 } from '../models/index.ts';
 import { getIO } from '../sockets/socket.ts';
-import type {
-  OrderStatus,
-  ClothingCategory,
-  MeasurementData,
-  GarmentDesignOptions,
+import { MeasurementService } from './measurement.service.ts';
+import {
+  type OrderStatus,
+  type ClothingCategory,
+  type MeasurementData,
+  type GarmentDesignOptions,
+  normalizeClothingCategory,
 } from '../types/index.ts';
 
 export interface OrderFilterOptions {
@@ -42,6 +44,7 @@ export class OrderService {
       customer: string;
       measurementProfileId?: string;
       customMeasurements?: MeasurementData;
+      saveMeasurementProfile?: boolean;
       clothingCategory: ClothingCategory;
       quantity?: number;
       fabric?: {
@@ -60,6 +63,8 @@ export class OrderService {
     },
     createdByUserId?: string
   ): Promise<IOrder> {
+    const normalizedCategory = normalizeClothingCategory(data.clothingCategory);
+
     // 1. Resolve Measurement Snapshot
     let snapshot: MeasurementData | undefined = data.customMeasurements;
 
@@ -71,19 +76,47 @@ export class OrderService {
     }
 
     if (!snapshot) {
-      // Look for customer's default profile
-      const defaultProfile = await MeasurementProfile.findOne({
-        customer: data.customer,
-        isDefault: true,
-      });
-      if (defaultProfile) {
-        snapshot = defaultProfile.measurements;
+      // Look for customer's latest profile for this specific garment
+      const garmentProfile = await MeasurementService.getProfileByCustomerAndGarment(
+        data.customer,
+        normalizedCategory
+      );
+      if (garmentProfile) {
+        snapshot = garmentProfile.measurements;
       } else {
-        snapshot = { qameez: {}, shalwaar: {} };
+        // Fallback to customer's default profile
+        const defaultProfile = await MeasurementProfile.findOne({
+          customer: data.customer,
+          isDefault: true,
+        });
+        if (defaultProfile) {
+          snapshot = defaultProfile.measurements;
+        } else {
+          snapshot = { qameez: {}, shalwaar: {} };
+        }
       }
     }
 
-    // 2. Generate unique order number
+    // Crucial: Deep clone snapshot so that subsequent profile edits never alter this order's record
+    const immutableSnapshot: MeasurementData = JSON.parse(JSON.stringify(snapshot || { qameez: {}, shalwaar: {} }));
+
+    // 2. If requested or measurements provided, update/create the latest measurement for this garment
+    if (data.saveMeasurementProfile !== false && data.customMeasurements) {
+      const q = data.customMeasurements.qameez || {};
+      const s = data.customMeasurements.shalwaar || {};
+      const hasAnyValue = Object.values(q).some((v) => v !== undefined && v !== null && v !== '') ||
+                          Object.values(s).some((v) => v !== undefined && v !== null && v !== '');
+      if (hasAnyValue) {
+        await MeasurementService.upsertProfileForCustomerAndGarment({
+          customer: data.customer,
+          clothingCategory: normalizedCategory,
+          measurements: immutableSnapshot,
+          unit: 'inches',
+        });
+      }
+    }
+
+    // 3. Generate unique order number
     let orderNumber = await this.generateOrderNumber();
     let exists = await Order.findOne({ orderNumber });
     let salt = 1;
@@ -92,13 +125,13 @@ export class OrderService {
       exists = await Order.findOne({ orderNumber });
     }
 
-    // 3. Create Order
+    // 4. Create Order with immutable measurement snapshot
     const newOrder = await Order.create({
       orderNumber,
       customer: data.customer,
       measurementProfile: data.measurementProfileId,
-      measurementSnapshot: snapshot,
-      clothingCategory: data.clothingCategory || 'shalwaar_qameez',
+      measurementSnapshot: immutableSnapshot,
+      clothingCategory: normalizedCategory,
       quantity: data.quantity || 1,
       fabric: data.fabric || { providedBy: 'customer' },
       designOptions: data.designOptions || {},

@@ -2,8 +2,23 @@ import { renderNavbar, showToast } from '../ui_components/index.ts';
 import '../utils/api.ts';
 
 let customersList: any[] = [];
-let customerProfilesMap: Record<string, any[]> = {};
 let selectedCategory = 'shalwaar_qameez';
+let currentGarmentProfile: any = null;
+let isEditingMeasurement: boolean = false;
+
+const GARMENT_NAMES: Record<string, string> = {
+  shalwaar_qameez: 'Shalwar Qameez / شلوار قمیض',
+  kurta_pajama: 'Kurta Pajama / کرتہ پاجامہ',
+  waistcoat: 'Waistcoat / واسکٹ',
+  trouser_shirt: 'Trouser & Shirt / پینٹ شرٹ',
+  sherwani: 'Sherwani / شیروانی',
+  safari_suit: 'Safari Suit / سفاری سوٹ',
+  custom: 'Custom Garment / کسٹم لباس',
+};
+
+function getGarmentDisplay(cat: string): string {
+  return GARMENT_NAMES[cat] || cat.replace('_', ' ').toUpperCase();
+}
 
 async function initNewOrderStudio(): Promise<void> {
   renderNavbar('navbarMount', {
@@ -20,21 +35,19 @@ async function initNewOrderStudio(): Promise<void> {
 
   const urlParams = new URLSearchParams(window.location.search);
   const targetCustomerId = urlParams.get('customerId') || '';
-  const targetProfileId = urlParams.get('profileId') || '';
 
   await loadClothingCategories();
   await loadCustomers(targetCustomerId);
   setupSearchFilter();
   setupQuickAddCustomerModal();
   setupCustomerChangeListener();
-  setupProfileChangeListener();
   setupFormSubmission();
 
   if (targetCustomerId) {
     const selectCustomer = document.getElementById('selectCustomer') as HTMLSelectElement;
     if (selectCustomer) {
       selectCustomer.value = targetCustomerId;
-      await onCustomerSelected(targetCustomerId, targetProfileId);
+      await onCustomerSelected(targetCustomerId);
     }
   }
 }
@@ -63,7 +76,7 @@ async function loadClothingCategories(): Promise<void> {
       .join('');
 
     grid.querySelectorAll('.cat-card').forEach((card) => {
-      card.addEventListener('click', (e) => {
+      card.addEventListener('click', async (e) => {
         const target = e.currentTarget as HTMLElement;
         selectedCategory = target.dataset.key || 'shalwaar_qameez';
         (document.getElementById('selectedCategoryInput') as HTMLInputElement).value = selectedCategory;
@@ -75,6 +88,12 @@ async function loadClothingCategories(): Promise<void> {
 
         target.className =
           'cat-card p-3 rounded-xl border cursor-pointer transition-all bg-emerald-50 border-emerald-600 text-emerald-900 shadow-xs ring-1 ring-emerald-600';
+
+        // When category changes, auto-load garment-specific measurement for selected customer
+        const customerId = (document.getElementById('selectCustomer') as HTMLSelectElement)?.value;
+        if (customerId) {
+          await checkAndLoadGarmentMeasurement(customerId, selectedCategory);
+        }
       });
     });
   } catch (err: any) {
@@ -152,70 +171,171 @@ function setupCustomerChangeListener(): void {
     } else {
       clearCustomerPreview();
       clearMeasurements();
+      resetMeasurementStatusBanner();
     }
   });
 }
 
-async function onCustomerSelected(customerId: string, preferredProfileId: string = ''): Promise<void> {
+async function onCustomerSelected(customerId: string): Promise<void> {
   const customer = customersList.find((c) => c._id === customerId);
   updateCustomerPreview(customer);
+  await checkAndLoadGarmentMeasurement(customerId, selectedCategory);
+}
 
-  const selectMeasurement = document.getElementById('selectMeasurementProfile') as HTMLSelectElement;
+/**
+ * Core Workflow: Garment-Specific Measurement Resolution
+ * Checks if measurement exists for Customer + Garment Type
+ * Shows "Previous Measurement Found" vs "No Previous Measurement"
+ */
+async function checkAndLoadGarmentMeasurement(customerId: string, category: string): Promise<void> {
+  const banner = document.getElementById('measurementStatusBanner');
+  const iconEl = document.getElementById('measStatusIcon');
+  const titleEl = document.getElementById('measStatusTitle');
+  const subEl = document.getElementById('measStatusSubtitle');
+  const btnContainer = document.getElementById('measActionButtons');
+  const updateChk = document.getElementById('chkUpdateGarmentProfile') as HTMLInputElement | null;
+
+  if (!customerId) {
+    resetMeasurementStatusBanner();
+    clearMeasurements();
+    currentGarmentProfile = null;
+    return;
+  }
 
   try {
-    const res = await (window as any).ActionTailor.apiFetch(`/api/measurements/customer/${customerId}`);
-    const profiles = res.data || [];
-    customerProfilesMap[customerId] = profiles;
+    const res = await (window as any).ActionTailor.apiFetch(
+      `/api/measurements/customer/${customerId}/garment/${category}`
+    );
+    const profile = res.data;
+    currentGarmentProfile = profile;
+    isEditingMeasurement = false;
 
-    if (profiles.length === 0) {
-      selectMeasurement.innerHTML = '<option value="">No saved profile (Enter custom measurements below)</option>';
-      clearMeasurements();
-    } else {
-      selectMeasurement.innerHTML =
-        '<option value="">Select Measurement Profile...</option>' +
-        profiles
-          .map(
-            (p: any) =>
-              `<option value="${p._id}" ${p.isDefault || p._id === preferredProfileId ? 'selected' : ''}>${p.title} (${p.clothingCategory?.toUpperCase() || 'SUIT'})</option>`
-          )
-          .join('');
-
-      // Auto-load preferred profile or default or first profile
-      const activeProfile =
-        (preferredProfileId ? profiles.find((p: any) => p._id === preferredProfileId) : null) ||
-        profiles.find((p: any) => p.isDefault) ||
-        profiles[0];
-
-      if (activeProfile) {
-        selectMeasurement.value = activeProfile._id;
-        populateMeasurements(activeProfile);
+    if (profile && profile.measurements) {
+      // PREVIOUS MEASUREMENT FOUND / پچھلا ناپ موجود ہے
+      if (banner) {
+        banner.className =
+          'p-3.5 rounded-xl border border-emerald-300 bg-emerald-50/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all';
       }
+      if (iconEl) iconEl.textContent = '✓';
+      if (titleEl) {
+        titleEl.className = 'text-xs sm:text-sm font-extrabold text-emerald-950';
+        titleEl.textContent = 'Previous Measurement Found / پچھلا ناپ موجود ہے';
+      }
+      const updatedDate = profile.updatedAt
+        ? new Date(profile.updatedAt).toLocaleDateString('en-GB')
+        : '';
+      if (subEl) {
+        subEl.className = 'text-[11px] text-emerald-800 font-medium';
+        subEl.textContent = `${getGarmentDisplay(category)} • Last updated: ${updatedDate || 'On file'}`;
+      }
+
+      if (btnContainer) {
+        btnContainer.innerHTML = `
+          <button type="button" id="btnUseExisting" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-xs hover:bg-emerald-800 transition-all flex items-center gap-1">
+            <span>✓</span> <span>Use Existing / پرانا ناپ استعمال کریں</span>
+          </button>
+          <button type="button" id="btnEditMeasurement" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-all flex items-center gap-1">
+            <span>✏️</span> <span>Edit Measurement / ناپ میں ترمیم کریں</span>
+          </button>
+        `;
+
+        document.getElementById('btnUseExisting')?.addEventListener('click', () => {
+          populateMeasurements(profile);
+          isEditingMeasurement = false;
+          highlightButtons('existing');
+          showToast('Loaded existing measurement / محفوظ شدہ ناپ لاگو ہو گیا', 'info');
+        });
+
+        document.getElementById('btnEditMeasurement')?.addEventListener('click', () => {
+          isEditingMeasurement = true;
+          highlightButtons('editing');
+          if (updateChk) updateChk.checked = true;
+          showToast('Editing measurement. Changes will update the latest profile.', 'info');
+          (document.getElementById('ordDimLength') as HTMLInputElement)?.focus();
+        });
+      }
+
+      // Automatically load the existing measurements into the inputs
+      populateMeasurements(profile);
+      if (updateChk) updateChk.checked = false; // Unchecked by default for clean existing usage
+    } else {
+      // NO PREVIOUS MEASUREMENT / پچھلا ناپ موجود نہیں
+      if (banner) {
+        banner.className =
+          'p-3.5 rounded-xl border border-amber-300 bg-amber-50/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all';
+      }
+      if (iconEl) iconEl.textContent = '⚠';
+      if (titleEl) {
+        titleEl.className = 'text-xs sm:text-sm font-extrabold text-amber-950';
+        titleEl.textContent = 'No Previous Measurement / پچھلا ناپ موجود نہیں';
+      }
+      if (subEl) {
+        subEl.className = 'text-[11px] text-amber-800 font-medium';
+        subEl.textContent = `No recorded measurement for ${getGarmentDisplay(category)}. Enter new measurements below.`;
+      }
+
+      if (btnContainer) {
+        btnContainer.innerHTML = `
+          <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white shadow-xs">
+            + Create New Measurement / نیا ناپ بنائیں
+          </span>
+        `;
+      }
+
+      clearMeasurements();
+      isEditingMeasurement = true;
+      if (updateChk) updateChk.checked = true;
     }
   } catch (err: any) {
-    console.error('Error fetching measurements for customer:', err);
-    selectMeasurement.innerHTML = '<option value="">Failed to load measurements</option>';
+    console.error('Failed to load garment measurement:', err);
   }
 }
 
-function setupProfileChangeListener(): void {
-  const selectCustomer = document.getElementById('selectCustomer') as HTMLSelectElement;
-  const selectMeasurement = document.getElementById('selectMeasurementProfile') as HTMLSelectElement;
+function highlightButtons(mode: 'existing' | 'editing'): void {
+  const btnUse = document.getElementById('btnUseExisting');
+  const btnEdit = document.getElementById('btnEditMeasurement');
+  const updateChk = document.getElementById('chkUpdateGarmentProfile') as HTMLInputElement | null;
 
-  selectMeasurement?.addEventListener('change', () => {
-    const customerId = selectCustomer.value;
-    const profileId = selectMeasurement.value;
+  if (mode === 'existing') {
+    btnUse?.classList.remove('bg-white', 'text-emerald-800', 'border');
+    btnUse?.classList.add('bg-emerald-700', 'text-white');
 
-    if (!profileId) {
-      clearMeasurements();
-      return;
-    }
+    btnEdit?.classList.remove('bg-emerald-700', 'text-white');
+    btnEdit?.classList.add('bg-white', 'text-emerald-800', 'border');
 
-    const profiles = customerProfilesMap[customerId] || [];
-    const profile = profiles.find((p: any) => p._id === profileId);
-    if (profile) {
-      populateMeasurements(profile);
-    }
-  });
+    if (updateChk) updateChk.checked = false;
+  } else {
+    btnEdit?.classList.remove('bg-white', 'text-emerald-800', 'border');
+    btnEdit?.classList.add('bg-emerald-700', 'text-white');
+
+    btnUse?.classList.remove('bg-emerald-700', 'text-white');
+    btnUse?.classList.add('bg-white', 'text-emerald-800', 'border');
+
+    if (updateChk) updateChk.checked = true;
+  }
+}
+
+function resetMeasurementStatusBanner(): void {
+  const banner = document.getElementById('measurementStatusBanner');
+  const iconEl = document.getElementById('measStatusIcon');
+  const titleEl = document.getElementById('measStatusTitle');
+  const subEl = document.getElementById('measStatusSubtitle');
+  const btnContainer = document.getElementById('measActionButtons');
+
+  if (banner) {
+    banner.className =
+      'p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all';
+  }
+  if (iconEl) iconEl.textContent = 'ℹ️';
+  if (titleEl) {
+    titleEl.className = 'text-xs sm:text-sm font-bold text-slate-800';
+    titleEl.textContent = 'Select a customer to load garment measurements';
+  }
+  if (subEl) {
+    subEl.className = 'text-[11px] text-slate-500';
+    subEl.textContent = 'Please select customer and garment type above';
+  }
+  if (btnContainer) btnContainer.innerHTML = '';
 }
 
 function populateMeasurements(profile: any): void {
@@ -260,7 +380,9 @@ function updateCustomerPreview(customer: any): void {
 
   (document.getElementById('previewCustName') as HTMLElement).textContent = customer.name;
   (document.getElementById('previewCustPhone') as HTMLElement).textContent = `📞 ${customer.phone}`;
-  (document.getElementById('previewCustAddress') as HTMLElement).textContent = customer.address ? `📍 ${customer.address}` : '';
+  (document.getElementById('previewCustAddress') as HTMLElement).textContent = customer.address
+    ? `📍 ${customer.address}`
+    : '';
   (document.getElementById('previewCustOrders') as HTMLElement).textContent = `${customer.totalOrders || 0} Previous Suits`;
 
   previewBox.classList.remove('hidden');
@@ -321,8 +443,6 @@ function setupFormSubmission(): void {
     e.preventDefault();
 
     const customer = (document.getElementById('selectCustomer') as HTMLSelectElement).value;
-    const measurementProfileId =
-      (document.getElementById('selectMeasurementProfile') as HTMLSelectElement).value || undefined;
     const clothingCategory = (document.getElementById('selectedCategoryInput') as HTMLInputElement).value;
     const quantity = parseInt((document.getElementById('orderQtyInput') as HTMLInputElement).value, 10);
     const expectedDeliveryDate = (document.getElementById('orderDeliveryDateInput') as HTMLInputElement).value;
@@ -340,6 +460,9 @@ function setupFormSubmission(): void {
     const stitchingPrice = parseFloat((document.getElementById('priceStitching') as HTMLInputElement).value);
     const advancePayment = parseFloat((document.getElementById('priceAdvance') as HTMLInputElement).value) || 0;
     const paymentMethod = (document.getElementById('pricePaymentMethod') as HTMLSelectElement).value;
+
+    const saveMeasurementProfile =
+      (document.getElementById('chkUpdateGarmentProfile') as HTMLInputElement)?.checked ?? true;
 
     if (!customer) {
       showToast('Please select a customer / گاہک منتخب کریں', 'warning');
@@ -371,8 +494,9 @@ function setupFormSubmission(): void {
           customer,
           clothingCategory,
           quantity,
-          measurementProfileId,
+          measurementProfileId: currentGarmentProfile?._id,
           customMeasurements,
+          saveMeasurementProfile,
           fabric: { providedBy, fabricType, color },
           designOptions: { collarStyle, cuffStyle, damanStyle, shalwaarStyle, specialInstructions },
           stitchingPrice,
@@ -393,4 +517,3 @@ function setupFormSubmission(): void {
 }
 
 initNewOrderStudio();
-
