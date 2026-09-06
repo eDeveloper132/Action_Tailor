@@ -17,10 +17,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Root route
 app.get("/", (req, res) => {
-  res.json({
-    status: "success",
-    message: "Action Tailor API is running on Vercel 🚀",
-  });
+  res.sendFile(path.join(__dirname, "public", "unprotected", "index.html"));
 });
 
 // API health route
