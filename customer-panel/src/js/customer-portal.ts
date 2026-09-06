@@ -75,7 +75,7 @@ function renderActiveSuits(orders: any[]): void {
 
   if (orders.length === 0) {
     container.innerHTML = `
-      <div class="p-8 text-center text-slate-500 text-sm bg-slate-900/40 rounded-2xl border border-dashed border-slate-800">
+      <div class="p-8 text-center text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
         You currently have no active suits in stitching / آپ کا کوئی سوٹ زیرِ عمل نہیں ہے۔
       </div>
     `;
@@ -108,13 +108,13 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_CLASSES: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-800 border border-amber-300',
-  confirmed: 'bg-indigo-100 text-indigo-800 border border-indigo-300',
-  cutting: 'bg-sky-100 text-sky-800 border border-sky-300',
-  stitching: 'bg-purple-100 text-purple-800 border border-purple-300',
-  quality_check: 'bg-pink-100 text-pink-800 border border-pink-300',
-  ready: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
-  delivered: 'bg-slate-100 text-slate-700 border border-slate-300',
+  pending: 'bg-amber-50 text-amber-800 border border-amber-200',
+  confirmed: 'bg-blue-50 text-blue-800 border border-blue-200',
+  cutting: 'bg-sky-50 text-sky-800 border border-sky-200',
+  stitching: 'bg-purple-50 text-purple-800 border border-purple-200',
+  quality_check: 'bg-pink-50 text-pink-800 border border-pink-200',
+  ready: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+  delivered: 'bg-slate-100 text-slate-700 border border-slate-200',
 };
 
 function getGarmentName(category: string): string {

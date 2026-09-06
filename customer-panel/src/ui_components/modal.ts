@@ -32,8 +32,7 @@ export const showModal = (options: ModalOptions): ModalInstance => {
   overlay.style.cssText = `
     position: fixed;
     inset: 0;
-    background-color: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(4px);
+    background-color: rgba(15, 23, 42, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -48,18 +47,22 @@ export const showModal = (options: ModalOptions): ModalInstance => {
   modal.style.cssText = `
     max-width: 500px;
     width: 100%;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
     transform: scale(0.95);
     transition: transform 0.2s ease-out;
   `;
 
   modal.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-      <h2 style="font-size: 1.25rem; font-weight: 700; color: #f8fafc; margin: 0;">${title}</h2>
-      <button class="ui-modal-close" title="Close / بند کریں" style="background: none; border: none; color: #64748b; font-size: 1.25rem; cursor: pointer;">&times;</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
+      <h2 style="font-size: 1.125rem; font-weight: 700; color: #0f172a; margin: 0;">${title}</h2>
+      <button class="ui-modal-close" title="Close / بند کریں" style="background: none; border: none; color: #94a3b8; font-size: 1.25rem; cursor: pointer;">&times;</button>
     </div>
-    <div class="ui-modal-body" style="color: #cbd5e1; margin-bottom: 1.5rem; line-height: 1.5;"></div>
+    <div class="ui-modal-body" style="color: #334155; margin-bottom: 1.5rem; line-height: 1.5; font-size: 0.875rem;"></div>
     <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-      <button class="btn ui-modal-cancel" style="background: transparent; border: 1px solid #334155; color: #cbd5e1;">${cancelText}</button>
+      <button class="btn btn-secondary ui-modal-cancel" style="background-color: #ffffff; border: 1px solid #cbd5e1; color: #334155;">${cancelText}</button>
       <button class="btn ui-modal-confirm">${confirmText}</button>
     </div>
   `;

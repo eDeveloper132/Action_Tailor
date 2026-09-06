@@ -1,0 +1,27 @@
+{
+  "name": "action-tailor",
+  "version": "1.0.0",
+  "description": "Action Tailor - Bespoke Tailoring Management System",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "backend",
+    "admin-panel",
+    "customer-panel"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"BACKEND,ADMIN,CUSTOMER\" -c \"magenta,blue,green\" \"npm --workspace=action-tailor-backend run dev\" \"npm --workspace=action-tailor-admin run dev\" \"npm --workspace=action-tailor-customer run dev\"",
+    "dev:backend": "npm --workspace=action-tailor-backend run dev",
+    "dev:admin": "npm --workspace=action-tailor-admin run dev",
+    "dev:customer": "npm --workspace=action-tailor-customer run dev",
+    "build": "npm --workspace=action-tailor-backend run typecheck && npm --workspace=action-tailor-admin run build && npm --workspace=action-tailor-customer run build",
+    "build:backend": "npm --workspace=action-tailor-backend run typecheck",
+    "build:admin": "npm --workspace=action-tailor-admin run build",
+    "build:customer": "npm --workspace=action-tailor-customer run build",
+    "typecheck": "npm --workspace=action-tailor-backend run typecheck && npm --workspace=action-tailor-admin run typecheck && npm --workspace=action-tailor-customer run typecheck",
+    "seed": "npm --workspace=action-tailor-backend run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -19,7 +19,7 @@ export const createButton = (options: ButtonOptions): HTMLButtonElement => {
   btn.textContent = text;
 
   if (variant === 'secondary') {
-    btn.style.cssText = 'background: transparent; border: 1px solid #334155; color: #cbd5e1;';
+    btn.style.cssText = 'background-color: #ffffff; border: 1px solid #cbd5e1; color: #334155;';
   } else if (variant === 'danger') {
     btn.style.cssText = 'background-color: #dc2626; color: #ffffff;';
   }

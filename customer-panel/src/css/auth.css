@@ -1,20 +1,19 @@
 /* ==========================================
    Action Tailor - Authentication Views Stylesheet
-   Custom CSS augmenting Tailwind utilities
+   Bright, Professional & Modern Authentication UI
    ========================================== */
 
 .auth-card {
-  backdrop-filter: blur(12px);
-  background-color: rgba(30, 41, 59, 0.85);
-  border: 1px solid rgba(51, 65, 85, 0.8);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-  animation: authFadeIn 0.35s ease-out;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  animation: authFadeIn 0.3s ease-out;
 }
 
 @keyframes authFadeIn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -23,17 +22,20 @@
 }
 
 .auth-input {
-  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 .auth-input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-  background-color: #0f172a;
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+  background-color: #ffffff;
 }
 
-.auth-brand-glow {
-  text-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+.auth-input::placeholder {
+  color: #94a3b8;
 }
 
 /* Real-time Password Checklist & Status Styles */
@@ -46,32 +48,34 @@
 }
 
 .rule-item.valid {
-  color: #34d399;
-  font-weight: 500;
+  color: #047857;
+  font-weight: 600;
 }
 
 .rule-item.valid .rule-icon {
-  background-color: rgba(16, 185, 129, 0.2);
-  border-color: #10b981;
-  color: #34d399;
+  background-color: #ecfdf5;
+  border-color: #059669;
+  color: #047857;
 }
 
 .rule-item.invalid {
-  color: #94a3b8;
-}
-
-.rule-item.invalid .rule-icon {
-  border-color: #475569;
   color: #64748b;
 }
 
+.rule-item.invalid .rule-icon {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #94a3b8;
+}
+
 .auth-input.input-valid {
-  border-color: #10b981 !important;
-  box-shadow: 0 0 0 1px #10b981;
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15);
 }
 
 .auth-input.input-invalid {
-  border-color: #f43f5e !important;
-  box-shadow: 0 0 0 1px #f43f5e;
+  border-color: #e11d48 !important;
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.15);
 }
+
 

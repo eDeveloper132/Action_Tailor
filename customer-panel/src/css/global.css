@@ -8,18 +8,22 @@
   --primary-hover: #047857;      /* Deep Emerald */
   --primary-light: #ecfdf5;      /* Emerald Tint */
   --secondary-color: #0284c7;    /* Soft Tailor Blue */
+  --secondary-light: #f0f9ff;    /* Soft Sky Tint */
   --accent-warm: #d97706;        /* Warm Amber */
+  --accent-warm-light: #fffbeb;  /* Warm Amber Tint */
 
   --background-color: #f8fafc;   /* Soft Crisp Light Surface */
   --surface-color: #ffffff;      /* Pure White Surface */
   --surface-muted: #f1f5f9;      /* Neutral Slate 100 */
   
   --text-primary: #0f172a;       /* Deep Slate / Near Black */
-  --text-secondary: #475569;     /* Slate 600 */
-  --text-muted: #94a3b8;         /* Slate 400 */
+  --text-secondary: #334155;     /* Slate 700 */
+  --text-muted: #64748b;         /* Slate 500 */
+  --text-subtle: #94a3b8;        /* Slate 400 */
   
   --border-color: #e2e8f0;       /* Soft Slate 200 Border */
   --border-subtle: #f1f5f9;      /* Slate 100 */
+  --border-focus: #059669;       /* Emerald Focus Border */
 
   --success-color: #10b981;
   --warning-color: #f59e0b;
@@ -40,8 +44,9 @@ body {
   font-family: var(--font-family);
   background-color: var(--background-color);
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.5;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -65,7 +70,7 @@ a:hover {
   border: 1px solid var(--border-color);
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
 }
 
 .btn {
@@ -94,6 +99,7 @@ a:hover {
   background-color: #ffffff;
   color: var(--text-primary);
   border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
 .btn-secondary:hover {
@@ -101,8 +107,32 @@ a:hover {
   border-color: #cbd5e1;
 }
 
-/* Urdu typography */
-.urdu-text {
+/* Urdu typography with generous vertical rhythm */
+.urdu-text, .lang-ur {
   font-family: var(--font-urdu);
-  direction: rtl;
+  line-height: 1.8;
+  letter-spacing: 0;
 }
+
+/* Subtle clean form controls */
+.form-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+}
+
+.form-input::placeholder {
+  color: var(--text-subtle);
+}
+

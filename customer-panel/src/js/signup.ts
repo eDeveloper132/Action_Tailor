@@ -47,15 +47,15 @@ const updateRuleChip = (element: HTMLElement | null, valid: boolean): void => {
   const icon = element.querySelector('.rule-icon');
 
   if (valid) {
-    element.className = 'rule-item valid p-2 rounded-lg bg-emerald-950/40 border border-emerald-600/50';
+    element.className = 'rule-item valid p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800';
     if (icon) {
-      icon.className = 'rule-icon w-4 h-4 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-400 flex items-center justify-center text-[9px] font-bold';
+      icon.className = 'rule-icon w-4 h-4 rounded-full bg-emerald-100 border border-emerald-500 text-emerald-700 flex items-center justify-center text-[9px] font-bold';
       icon.textContent = '✓';
     }
   } else {
-    element.className = 'rule-item invalid p-2 rounded-lg bg-slate-900/60 border border-slate-800';
+    element.className = 'rule-item invalid p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-500';
     if (icon) {
-      icon.className = 'rule-icon w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold text-slate-500';
+      icon.className = 'rule-icon w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[9px] font-bold text-slate-400';
       icon.textContent = '○';
     }
   }
@@ -76,13 +76,13 @@ const updateConfirmPasswordMatch = (): void => {
   matchIndicator.classList.remove('hidden');
 
   if (password && password === confirmPassword) {
-    matchIndicator.className = 'mt-2 text-xs flex items-center gap-1.5 text-emerald-400 font-medium';
+    matchIndicator.className = 'mt-2 text-xs flex items-center gap-1.5 text-emerald-700 font-medium';
     matchIcon.textContent = '✓';
     matchText.textContent = 'Passwords match / پاس ورڈ مل گئے';
     confirmPasswordInput.classList.add('input-valid');
     confirmPasswordInput.classList.remove('input-invalid');
   } else {
-    matchIndicator.className = 'mt-2 text-xs flex items-center gap-1.5 text-rose-400 font-medium';
+    matchIndicator.className = 'mt-2 text-xs flex items-center gap-1.5 text-rose-600 font-medium';
     matchIcon.textContent = '✕';
     matchText.textContent = 'Passwords do not match / پاس ورڈ مطابقت نہیں رکھتے';
     confirmPasswordInput.classList.add('input-invalid');

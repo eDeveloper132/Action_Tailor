@@ -26,8 +26,8 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
   const isAuthenticated = !!token;
 
   const {
-    brandName = 'Action Tailor • Admin Desk',
-    logoIcon = '⚡',
+    brandName = 'Action Tailor / ماسٹر ٹیلر',
+    logoIcon = '✂',
     showAuthButton = true,
     activeLink = 'dashboard',
   } = options;

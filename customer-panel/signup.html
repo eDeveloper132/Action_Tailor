@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,29 +13,29 @@
   <link rel="stylesheet" href="/src/css/global.css">
   <link rel="stylesheet" href="/src/css/auth.css">
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col justify-between">
   <div class="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-    <div class="w-full max-w-md auth-card rounded-2xl p-8 sm:p-10">
+    <div class="w-full max-w-md auth-card rounded-2xl p-8 sm:p-10 border border-slate-200 bg-white shadow-sm">
 
       <!-- Brand & Title Header -->
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-600/20 text-emerald-400 mb-4 border border-emerald-500/30">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 mb-4 border border-emerald-200 shadow-2xs">
           <span class="text-2xl font-bold">✂</span>
         </div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Create Account / نیا اکاؤنٹ بنائیں</h1>
-        <p class="text-sm text-slate-400 mt-2">Get started with Action Tailor today / ایکشن ٹیلرز میں خوش آمدید</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Create Account / نیا اکاؤنٹ بنائیں</h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1.5">Get started with Action Tailor today / ایکشن ٹیلرز میں خوش آمدید</p>
       </div>
 
       <!-- Registration Form -->
       <form id="signupForm" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2" for="fullname">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2" for="fullname">
             Customer Name / کسٹمر کا نام
           </label>
           <input
             type="text"
             id="fullname"
-            class="w-full px-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 auth-input focus:outline-none text-sm"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 auth-input focus:outline-none focus:border-emerald-600 focus:bg-white text-sm"
             placeholder="Tariq Mehmood"
             required
             autocomplete="name"
@@ -43,13 +43,13 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2" for="email">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2" for="email">
             Email Address / ای میل پتہ
           </label>
           <input
             type="email"
             id="email"
-            class="w-full px-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 auth-input focus:outline-none text-sm"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 auth-input focus:outline-none focus:border-emerald-600 focus:bg-white text-sm"
             placeholder="customer@example.com"
             required
             autocomplete="email"
@@ -57,13 +57,13 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2" for="password">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2" for="password">
             Password / پاس ورڈ
           </label>
           <input
             type="password"
             id="password"
-            class="w-full px-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 auth-input focus:outline-none text-sm"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 auth-input focus:outline-none focus:border-emerald-600 focus:bg-white text-sm"
             placeholder="••••••••"
             required
             autocomplete="new-password"
@@ -71,43 +71,43 @@
           
           <!-- Real-time Strength Meter & Label -->
           <div class="flex items-center justify-between text-xs mt-2.5 mb-1.5">
-            <span class="text-slate-400">Password strength / معیار:</span>
-            <span id="strengthLabel" class="font-semibold text-slate-500">Not entered / درج نہیں</span>
+            <span class="text-slate-500">Password strength / معیار:</span>
+            <span id="strengthLabel" class="font-semibold text-slate-400">Not entered / درج نہیں</span>
           </div>
-          <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-            <div id="strengthBar" class="h-full w-0 transition-all duration-300 rounded-full bg-slate-700"></div>
+          <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+            <div id="strengthBar" class="h-full w-0 transition-all duration-300 rounded-full bg-slate-400"></div>
           </div>
 
           <!-- Real-time Requirement Checklist Chips -->
           <div id="passwordRequirements" class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div id="ruleLetter" class="rule-item invalid p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-              <span class="rule-icon w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold">○</span>
+            <div id="ruleLetter" class="rule-item invalid p-2 rounded-lg bg-slate-50 border border-slate-200">
+              <span class="rule-icon w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[9px] font-bold">○</span>
               <span>1+ Letter / حرف</span>
             </div>
-            <div id="ruleNumber" class="rule-item invalid p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-              <span class="rule-icon w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold">○</span>
+            <div id="ruleNumber" class="rule-item invalid p-2 rounded-lg bg-slate-50 border border-slate-200">
+              <span class="rule-icon w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[9px] font-bold">○</span>
               <span>1+ Number / نمبر</span>
             </div>
-            <div id="ruleLength" class="rule-item invalid p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-              <span class="rule-icon w-4 h-4 rounded-full border border-slate-600 flex items-center justify-center text-[9px] font-bold">○</span>
+            <div id="ruleLength" class="rule-item invalid p-2 rounded-lg bg-slate-50 border border-slate-200">
+              <span class="rule-icon w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[9px] font-bold">○</span>
               <span id="ruleLengthText">8+ Chars / حروف</span>
             </div>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2" for="confirmPassword">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2" for="confirmPassword">
             Confirm Password / پاس ورڈ کی تصدیق
           </label>
           <input
             type="password"
             id="confirmPassword"
-            class="w-full px-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 auth-input focus:outline-none text-sm"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 auth-input focus:outline-none focus:border-emerald-600 focus:bg-white text-sm"
             placeholder="••••••••"
             required
             autocomplete="new-password"
           >
-          <div id="matchIndicator" class="mt-2 text-xs flex items-center gap-1.5 transition-colors duration-200 text-slate-500">
+          <div id="matchIndicator" class="mt-2 text-xs flex items-center gap-1.5 transition-colors duration-200 text-slate-400">
             <span id="matchIcon" class="font-bold">○</span>
             <span id="matchText">Confirm password to match / پاس ورڈ ملائیں</span>
           </div>
@@ -115,16 +115,16 @@
 
         <button
           type="submit"
-          class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/25 transition-all duration-200 flex items-center justify-center text-sm mt-2"
+          class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-xs transition-all flex items-center justify-center text-sm mt-2"
         >
           Register / رجسٹر کریں
         </button>
       </form>
 
       <!-- Switch to Sign In -->
-      <div class="text-center mt-8 pt-6 border-t border-slate-800 text-sm text-slate-400">
+      <div class="text-center mt-8 pt-6 border-t border-slate-100 text-xs sm:text-sm text-slate-500">
         Already have an account? / کیا پہلے سے اکاؤنٹ ہے؟
-        <a href="/signin.html" class="text-emerald-400 hover:text-emerald-300 font-semibold ml-1 transition-colors">
+        <a href="/signin.html" class="text-emerald-700 hover:text-emerald-800 font-semibold ml-1 transition-colors">
           Login / لاگ ان کریں
         </a>
       </div>

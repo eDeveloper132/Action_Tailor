@@ -328,12 +328,12 @@ function setupTabs(): void {
         const btnEl = document.getElementById(t.btn);
         const contentEl = document.getElementById(t.content);
         if (t.btn === tab.btn) {
-          btnEl?.classList.add('active', 'bg-brand-600', 'text-white');
-          btnEl?.classList.remove('text-slate-400');
+          btnEl?.classList.add('active', 'bg-emerald-600', 'text-white', 'shadow-xs');
+          btnEl?.classList.remove('text-slate-600', 'hover:text-slate-900');
           contentEl?.classList.remove('hidden');
         } else {
-          btnEl?.classList.remove('active', 'bg-brand-600', 'text-white');
-          btnEl?.classList.add('text-slate-400');
+          btnEl?.classList.remove('active', 'bg-emerald-600', 'text-white', 'shadow-xs');
+          btnEl?.classList.add('text-slate-600', 'hover:text-slate-900');
           contentEl?.classList.add('hidden');
         }
       });
