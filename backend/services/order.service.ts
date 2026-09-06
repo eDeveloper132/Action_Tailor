@@ -63,7 +63,7 @@ export class OrderService {
     // 1. Resolve Measurement Snapshot
     let snapshot: MeasurementData | undefined = data.customMeasurements;
 
-    if (data.measurementProfileId) {
+    if (!snapshot && data.measurementProfileId) {
       const profile = await MeasurementProfile.findById(data.measurementProfileId);
       if (profile) {
         snapshot = profile.measurements;

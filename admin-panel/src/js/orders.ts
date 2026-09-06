@@ -12,6 +12,7 @@ async function initOrdersPage(): Promise<void> {
   });
 
   setupEventListeners();
+  setupSocketIO();
   await loadOrders();
 }
 
@@ -33,7 +34,7 @@ async function loadOrders(): Promise<void> {
 
     if (orders.length === 0) {
       container.innerHTML = `
-        <div class="p-8 text-center rounded-2xl bg-slate-900/40 border border-dashed border-slate-800 text-slate-500 text-sm">
+        <div class="p-8 text-center rounded-2xl bg-white border border-dashed border-slate-200 text-slate-400 text-sm">
           No orders found matching criteria / کوئی آرڈر نہیں ملا
         </div>
       `;
@@ -43,7 +44,7 @@ async function loadOrders(): Promise<void> {
     container.innerHTML = orders.map((o: any) => renderOrderRow(o)).join('');
     attachRowActions();
   } catch (err: any) {
-    container.innerHTML = `<div class="text-rose-400 p-4 text-sm">Error loading orders: ${err.message}</div>`;
+    container.innerHTML = `<div class="text-rose-500 p-4 text-sm">Error loading orders: ${err.message}</div>`;
   }
 }
 
@@ -84,9 +85,9 @@ function renderOrderRow(order: any): string {
     : '--';
 
   return `
-    <div class="tailor-card p-4 rounded-xl border border-slate-200 bg-white shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="tailor-card p-5 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="space-y-1">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <span class="font-mono font-extrabold text-slate-900 text-base tracking-wider">${order.orderNumber}</span>
           ${getStatusBadge(order.status)}
           <span class="text-xs px-2 py-0.5 rounded font-semibold ${isPaid ? 'payment-paid' : 'payment-partial'}">
@@ -111,6 +112,16 @@ function renderOrderRow(order: any): string {
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        <!-- Direct Status Selector -->
+        <select class="row-status-select px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100" data-id="${order._id}">
+          <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+          <option value="cutting" ${order.status === 'cutting' ? 'selected' : ''}>Cutting</option>
+          <option value="stitching" ${order.status === 'stitching' ? 'selected' : ''}>Stitching</option>
+          <option value="ready" ${order.status === 'ready' ? 'selected' : ''}>Ready</option>
+          <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+          <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+
         ${
           next
             ? `<button class="btn-advance-status px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs" data-id="${order._id}" data-next="${next}">
@@ -134,6 +145,7 @@ function renderOrderRow(order: any): string {
 }
 
 function attachRowActions(): void {
+  // Move to Next Status
   document.querySelectorAll('.btn-advance-status').forEach((b) => {
     b.addEventListener('click', async (e) => {
       const el = e.currentTarget as HTMLElement;
@@ -147,6 +159,27 @@ function attachRowActions(): void {
           body: JSON.stringify({ status: next }),
         });
         showToast(`Moved to ${next.toUpperCase()}`, 'success');
+        await loadOrders();
+      } catch (err: any) {
+        showToast(err.message, 'error');
+      }
+    });
+  });
+
+  // Direct Status Changer
+  document.querySelectorAll('.row-status-select').forEach((sel) => {
+    sel.addEventListener('change', async (e) => {
+      const el = e.currentTarget as HTMLSelectElement;
+      const orderId = el.dataset.id;
+      const status = el.value;
+      if (!orderId || !status) return;
+
+      try {
+        await (window as any).ActionTailor.apiFetch(`/api/orders/${orderId}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status }),
+        });
+        showToast(`Order status updated to ${status.toUpperCase()}`, 'success');
         await loadOrders();
       } catch (err: any) {
         showToast(err.message, 'error');
@@ -197,6 +230,24 @@ function setupEventListeners(): void {
       showToast(err.message, 'error');
     }
   });
+}
+
+function setupSocketIO(): void {
+  if (typeof (window as any).io !== 'undefined') {
+    try {
+      const socket = (window as any).io();
+      socket.on('order:created', (d: any) => {
+        showToast(`New Order #${d.orderNumber} Booked!`, 'info');
+        loadOrders();
+      });
+      socket.on('payment:recorded', () => {
+        loadOrders();
+      });
+      socket.on('order:status_changed', () => {
+        loadOrders();
+      });
+    } catch (_e) {}
+  }
 }
 
 function openPayModal(orderId: string, orderNumber: string, remaining: string): void {
@@ -251,10 +302,10 @@ function printSlip(orderId: string): void {
         </table>
         <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px;" border="1">
           <tr style="background: #f0f0f0;">
-            <th>Shalwaar</th><th>Paincha</th><th>Aasan</th><th>Kamar</th>
+            <th>Shalwaar</th><th>Paincha</th><th>Aasan</th><th>Ghera</th>
           </tr>
           <tr style="text-align: center;">
-            <td>${s.length || '--'}</td><td>${s.paincha || '--'}</td><td>${s.aasan || '--'}</td><td>${s.waist || '--'}</td>
+            <td>${s.length || '--'}</td><td>${s.paincha || '--'}</td><td>${s.aasan || '--'}</td><td>${s.ghera || s.waist || '--'}</td>
           </tr>
         </table>
       </div>

@@ -80,6 +80,7 @@ export class CustomerService {
     alternatePhone?: string;
     address?: string;
     city?: string;
+    email?: string;
     notes?: string;
     user?: string;
   }): Promise<ICustomerProfile> {
@@ -98,6 +99,7 @@ export class CustomerService {
       alternatePhone: data.alternatePhone?.trim(),
       address: data.address?.trim(),
       city: data.city?.trim() || 'Lahore',
+      email: data.email?.trim()?.toLowerCase(),
       notes: data.notes?.trim(),
       user: data.user,
     });
@@ -117,6 +119,7 @@ export class CustomerService {
       alternatePhone: string;
       address: string;
       city: string;
+      email: string;
       notes: string;
     }>
   ): Promise<ICustomerProfile | null> {

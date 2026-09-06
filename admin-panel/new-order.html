@@ -23,7 +23,7 @@
           Book Stitching Order / نیا سوٹ بک کریں
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-1">
-          Complete Pakistani garment specifications, measurements snapshot & advance recording
+          Search customer, auto-load measurements, adjust dimensions inline & record advance
         </p>
       </div>
       <a href="/orders.html" class="text-xs text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg border border-slate-300 bg-slate-50 font-medium">
@@ -32,38 +32,139 @@
     </div>
 
     <form id="formNewOrderStudio" class="space-y-6">
-      <!-- 1. Customer Card & Selection -->
+      <!-- 1. Customer Search & Selection -->
       <section class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
         <div class="flex justify-between items-center pb-2 border-b border-slate-100">
           <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-            1. Customer Selection / گاہک منتخب کریں
+            1. Search & Select Customer / گاہک تلاش اور انتخاب
           </h2>
-          <span class="text-xs text-slate-400">Step 1 of 5</span>
+          <span class="text-xs text-slate-400">Step 1 of 6</span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Select Customer <span class="text-rose-500">*</span></label>
-            <select id="selectCustomer" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-emerald-600 focus:bg-white" required>
-              <option value="">Loading customer directory...</option>
-            </select>
+        <div class="space-y-3">
+          <!-- Search Row & Quick Register -->
+          <div class="flex flex-col sm:flex-row gap-2">
+            <div class="relative flex-1">
+              <input
+                type="text"
+                id="inputSearchCust"
+                placeholder="Type customer name or phone to filter list... / نام یا فون لکھیں"
+                class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white"
+              >
+            </div>
+            <button
+              type="button"
+              id="btnOpenQuickAddCust"
+              class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-300 flex items-center justify-center gap-1.5 shrink-0"
+            >
+              <span>👤</span>
+              <span>+ New Customer / نیا گاہک</span>
+            </button>
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Saved Measurement</label>
-            <select id="selectMeasurementProfile" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-emerald-600 focus:bg-white">
-              <option value="">Default measurements / بنیادی ناپ</option>
-            </select>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Select Customer <span class="text-rose-500">*</span></label>
+              <select id="selectCustomer" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-emerald-600 focus:bg-white" required>
+                <option value="">Loading customers...</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Saved Measurement Profile / ناپ کا کھاتہ</label>
+              <select id="selectMeasurementProfile" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-emerald-600 focus:bg-white">
+                <option value="">Default measurements / بنیادی ناپ</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Customer info preview -->
+          <div id="customerInfoPreview" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex justify-between items-center">
+            <div>
+              <span class="font-bold" id="previewCustName">--</span>
+              <span class="ml-2 text-emerald-700" id="previewCustPhone">--</span>
+              <span class="ml-2 text-emerald-600 truncate" id="previewCustAddress">--</span>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-200/60 font-bold" id="previewCustOrders">0 Orders</span>
           </div>
         </div>
       </section>
 
-      <!-- 2. Clothing Type & Quantity -->
+      <!-- 2. Measurements Studio (Auto-loaded & Editable) -->
+      <section class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+          <div>
+            <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+              2. Suit Measurements Snapshot / سوٹ کا ناپ (Inches)
+            </h2>
+            <p class="text-[11px] text-slate-400 mt-0.5">
+              Auto-loaded from selected customer profile. You can tweak any dimension for this specific suit.
+            </p>
+          </div>
+          <span class="text-xs text-slate-400">Step 2 of 6</span>
+        </div>
+
+        <!-- Upper Body (Qameez) -->
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="font-bold text-slate-600 text-xs uppercase tracking-wider">Upper Body / قمیض / کرتہ</div>
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Lambai / لمبائی</label>
+              <input type="number" step="0.25" id="ordDimLength" placeholder="40" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Teera / تیرا</label>
+              <input type="number" step="0.25" id="ordDimShoulder" placeholder="17.5" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Chhati / چھاتی</label>
+              <input type="number" step="0.25" id="ordDimChest" placeholder="21" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Bazu / بازو</label>
+              <input type="number" step="0.25" id="ordDimSleeve" placeholder="24" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Collar / کالر</label>
+              <input type="number" step="0.25" id="ordDimCollar" placeholder="15.5" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Ghera / دامن</label>
+              <input type="number" step="0.25" id="ordDimGhera" placeholder="23" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+          </div>
+        </div>
+
+        <!-- Lower Body (Shalwaar) -->
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="font-bold text-slate-600 text-xs uppercase tracking-wider">Lower Body / شلوار / پاجامہ</div>
+          <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Shalwaar Lambai</label>
+              <input type="number" step="0.25" id="ordDimShalwaarLength" placeholder="38.5" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Paincha / پائینچہ</label>
+              <input type="number" step="0.25" id="ordDimPaincha" placeholder="8.5" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Aasan / آسن</label>
+              <input type="number" step="0.25" id="ordDimAasan" placeholder="17" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 font-medium">Ghera / گھیرا</label>
+              <input type="number" step="0.25" id="ordDimShalwaarGhera" placeholder="22" class="w-full p-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-bold text-xs sm:text-sm">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Clothing Type & Quantity -->
       <section class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
         <div class="flex justify-between items-center pb-2 border-b border-slate-100">
           <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-            2. Garment Category / لباس کی قسم
+            3. Garment Category / لباس کی قسم
           </h2>
-          <span class="text-xs text-slate-400">Step 2 of 5</span>
+          <span class="text-xs text-slate-400">Step 3 of 6</span>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="clothingCategoriesGrid"></div>
@@ -81,10 +182,10 @@
         </div>
       </section>
 
-      <!-- 3. Fabric & Cloth Details -->
+      <!-- 4. Fabric & Cloth Details -->
       <section class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
         <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider pb-2 border-b border-slate-100">
-          3. Fabric & Cloth / کپڑے کی تفصیل
+          4. Fabric & Cloth / کپڑے کی تفصیل
         </h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -106,10 +207,10 @@
         </div>
       </section>
 
-      <!-- 4. Pakistani Tailoring Styles & Cut -->
+      <!-- 5. Pakistani Tailoring Styles & Cut -->
       <section class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
         <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider pb-2 border-b border-slate-100">
-          4. Cut & Style Options / سلائی اور کٹائی کا سٹائل
+          5. Cut & Style Options / سلائی اور کٹائی کا سٹائل
         </h2>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -154,10 +255,10 @@
         </div>
       </section>
 
-      <!-- 5. Financials & Advance Payment -->
+      <!-- 6. Financials & Advance Payment -->
       <section class="tailor-card p-6 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
         <h2 class="text-xs font-bold text-emerald-700 uppercase tracking-wider pb-2 border-b border-slate-100">
-          5. Pricing & Advance / رقم اور ایڈوانس
+          6. Pricing & Advance / رقم اور ایڈوانس
         </h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -192,6 +293,49 @@
       </div>
     </form>
   </main>
+
+  <!-- Quick Add Customer Modal -->
+  <div id="modalQuickAddCustomer" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl text-slate-900">
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>👤</span> Quick Add Customer / نیا گاہک درج کریں
+        </h2>
+        <button id="closeQuickCustModal" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="formQuickAddCustomer" class="space-y-3.5 text-xs sm:text-sm">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Full Name / پورا نام <span class="text-rose-500">*</span></label>
+          <input type="text" id="quickCustName" placeholder="e.g. Tariq Mehmood" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Phone Number / فون نمبر <span class="text-rose-500">*</span></label>
+          <input type="tel" id="quickCustPhone" placeholder="03001234567" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Home Address / گھر کا پتہ</label>
+          <input type="text" id="quickCustAddress" placeholder="e.g. Model Town, Lahore" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address / ای میل پتہ (Optional)</label>
+          <input type="email" id="quickCustEmail" placeholder="customer@example.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:bg-white focus:border-emerald-600">
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2 border-t border-slate-100">
+          <button type="button" id="btnCancelQuickCust" class="px-3.5 py-1.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-semibold text-white">
+            Save & Select / محفوظ اور منتخب کریں
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script type="module" src="/src/js/new-order.ts"></script>
 </body>

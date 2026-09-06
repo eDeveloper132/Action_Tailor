@@ -7,6 +7,7 @@ export interface ICustomerProfile extends Document {
   alternatePhone?: string;
   address?: string;
   city?: string;
+  email?: string;
   user?: mongoose.Types.ObjectId;
   notes?: string;
   totalOrders: number;
@@ -46,6 +47,12 @@ const CustomerProfileSchema = new Schema<ICustomerProfile>(
       type: String,
       trim: true,
       default: 'Lahore',
+    },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      sparse: true,
     },
     user: {
       type: Schema.Types.ObjectId,
