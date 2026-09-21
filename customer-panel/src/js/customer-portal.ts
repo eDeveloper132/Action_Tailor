@@ -5,7 +5,11 @@ let portalData: any = null;
 let activeOrdersList: any[] = [];
 
 async function initCustomerPortal(): Promise<void> {
-  if (!localStorage.getItem('token')) {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  if (!token || !userStr) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/signin.html';
     return;
   }
@@ -18,6 +22,15 @@ async function initCustomerPortal(): Promise<void> {
     showAuthButton: true,
   });
 
+  // Welcome user immediately from cached info to avoid layout shift
+  try {
+    const user = JSON.parse(userStr);
+    const custNameEl = document.getElementById('custWelcomeName');
+    if (custNameEl && user?.name) {
+      custNameEl.textContent = `خوش آمدید، ${user.name}`;
+    }
+  } catch (_e) {}
+
   setupSocketIO();
   await loadCustomerData();
 }
@@ -25,25 +38,34 @@ async function initCustomerPortal(): Promise<void> {
 async function loadCustomerData(): Promise<void> {
   try {
     const res = await (window as any).ActionTailor.apiFetch('/api/dashboard/customer');
-    portalData = res.data;
+    portalData = res?.data || {};
 
-    const { customerProfile, activeOrders, completedOrders, measurementProfiles } = portalData;
-    activeOrdersList = activeOrders || [];
+    const customerProfile = portalData.customerProfile || null;
+    const activeOrders = Array.isArray(portalData.activeOrders) ? portalData.activeOrders : [];
+    const completedOrders = Array.isArray(portalData.completedOrders) ? portalData.completedOrders : [];
+    const measurementProfiles = Array.isArray(portalData.measurementProfiles) ? portalData.measurementProfiles : [];
+    activeOrdersList = activeOrders;
 
     // Header & Welcome
     const custNameEl = document.getElementById('custWelcomeName');
     const phoneEl = document.getElementById('customerPhoneDisplay');
-    if (custNameEl && customerProfile) {
-      custNameEl.textContent = `خوش آمدید، ${customerProfile.name || 'Customer'}`;
+    const userCached = JSON.parse(localStorage.getItem('user') || '{}');
+    if (custNameEl) {
+      const displayName = customerProfile?.name || userCached.name || 'Customer';
+      custNameEl.textContent = `خوش آمدید، ${displayName}`;
     }
-    if (phoneEl && customerProfile) {
-      phoneEl.textContent = `📞 ${customerProfile.phone} • ${customerProfile.city || 'Lahore'}`;
+    if (phoneEl) {
+      const displayPhone = customerProfile?.phone || userCached.phone || '';
+      const displayCity = customerProfile?.city || 'Lahore';
+      if (displayPhone) {
+        phoneEl.textContent = `📞 ${displayPhone} • ${displayCity}`;
+      }
     }
 
-    // Compute Stats
+    // Compute Stats safely
     const activeCount = activeOrders.length;
-    const readyOrders = activeOrders.filter((o: any) => o.status === 'ready');
-    const totalRemaining = activeOrders.reduce((acc: number, o: any) => acc + (o.remainingAmount || 0), 0);
+    const readyOrders = activeOrders.filter((o: any) => o && o.status === 'ready');
+    const totalRemaining = activeOrders.reduce((acc: number, o: any) => acc + (Number(o?.remainingAmount) || 0), 0);
 
     const statActive = document.getElementById('statActiveSuits');
     const statReady = document.getElementById('statReadySuits');
@@ -53,7 +75,7 @@ async function loadCustomerData(): Promise<void> {
     if (statActive) statActive.textContent = activeCount.toString();
     if (statReady) statReady.textContent = readyOrders.length.toString();
     if (statDue) statDue.textContent = `${totalRemaining.toLocaleString()} PKR`;
-    if (statCompleted) statCompleted.textContent = (completedOrders || []).length.toString();
+    if (statCompleted) statCompleted.textContent = completedOrders.length.toString();
 
     // Ready for pickup celebratory alert
     const readyAlert = document.getElementById('readyPickupAlert');
@@ -66,19 +88,20 @@ async function loadCustomerData(): Promise<void> {
     }
 
     renderActiveSuits(activeOrders);
-    renderMeasurementProfiles(measurementProfiles || []);
-    renderCompletedHistory(completedOrders || []);
+    renderMeasurementProfiles(measurementProfiles);
+    renderCompletedHistory(completedOrders);
   } catch (err: any) {
     console.error('Portal load error:', err);
-    showToast('Failed to load customer portal data', 'error');
+    showToast(err.message || 'Failed to load customer portal data', 'error');
   }
 }
 
-function renderActiveSuits(orders: any[]): void {
+function renderActiveSuits(orders: any[] = []): void {
   const container = document.getElementById('activeSuitsContainer');
   if (!container) return;
 
-  if (orders.length === 0) {
+  const safeOrders = Array.isArray(orders) ? orders : [];
+  if (safeOrders.length === 0) {
     container.innerHTML = `
       <div class="p-8 text-center text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
         You currently have no active suits in stitching / آپ کا کوئی سوٹ زیرِ عمل نہیں ہے۔
@@ -87,7 +110,7 @@ function renderActiveSuits(orders: any[]): void {
     return;
   }
 
-  container.innerHTML = orders.map((o: any) => renderCustomerSuitCard(o)).join('');
+  container.innerHTML = safeOrders.map((o: any) => renderCustomerSuitCard(o)).join('');
   attachPrintButtons();
 }
 

@@ -4,9 +4,13 @@ import '../utils/api.ts';
 let ordersCache: any[] = [];
 
 async function initAdminPortal(): Promise<void> {
+  const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   const userCached = userStr ? JSON.parse(userStr) : null;
-  if (!userCached || userCached.role === 'customer') {
+
+  if (!token || !userCached || userCached.role === 'customer') {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/signin.html';
     return;
   }
@@ -23,50 +27,63 @@ async function initAdminPortal(): Promise<void> {
   setupEventListeners();
   setupSocketIO();
 
+  const titleEl = document.getElementById('adminDeskTitle');
+  if (titleEl && userCached) {
+    titleEl.textContent = `Master Tailor Desk • ${userCached.name || 'استاد جی'}`;
+  }
+
   try {
-    const meRes = await (window as any).ActionTailor.apiFetch('/api/auth/me');
-    const user = meRes.data;
-
-    // Check if user is customer - customer accounts cannot access admin portal
-    if (!user || user.role === 'customer') {
-      window.location.href = '/signin.html';
-      return;
-    }
-
-    const titleEl = document.getElementById('adminDeskTitle');
-    if (titleEl && user) {
-      titleEl.textContent = `Master Tailor Desk • ${user.name || 'استاد جی'}`;
+    const meRes = await (window as any).ActionTailor.apiFetch('/api/auth/me').catch(() => null);
+    if (meRes && meRes.data) {
+      const user = meRes.data;
+      if (user.role === 'customer') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/signin.html';
+        return;
+      }
+      if (titleEl && user.name) {
+        titleEl.textContent = `Master Tailor Desk • ${user.name}`;
+      }
     }
 
     await loadMetrics();
     await loadOrders();
   } catch (err: any) {
-    showToast('Failed to initialize admin desk', 'error');
+    console.error('Failed to initialize admin desk:', err);
+    showToast(err.message || 'Failed to initialize admin desk', 'error');
   }
 }
 
 async function loadMetrics(): Promise<void> {
   try {
     const res = await (window as any).ActionTailor.apiFetch('/api/dashboard/admin');
-    const data = res.data;
+    const data = res?.data || {};
 
     renderMetricCards(data);
     renderDeliveries(data.upcomingDeliveries || []);
   } catch (err: any) {
-    console.error(err);
+    console.error('Failed to load metrics:', err);
   }
 }
 
-function renderMetricCards(metrics: any): void {
+function renderMetricCards(metrics: any = {}): void {
   const container = document.getElementById('metricsRow');
   if (!container) return;
 
+  const m = metrics || {};
+  const statusCounts = m.statusCounts || {};
+  const totalOrdersCalc =
+    m.totalOrders ||
+    Object.values(statusCounts).reduce((a: number, b: any) => a + (Number(b) || 0), 0) ||
+    0;
+
   const cards = [
-    { title: 'Total Orders / کل آرڈرز', val: metrics.totalOrders || 0, color: 'text-slate-900', icon: '📋' },
-    { title: 'In Cutting / کٹائی میں', val: metrics.statusCounts?.cutting || 0, color: 'text-sky-700', icon: '✂' },
-    { title: 'In Stitching / سلائی میں', val: metrics.statusCounts?.stitching || 0, color: 'text-purple-700', icon: '🧵' },
-    { title: 'Ready / تیار', val: metrics.statusCounts?.ready || 0, color: 'text-emerald-600', icon: '✓' },
-    { title: 'Balance Due / بقایا رقم', val: `${(metrics.totalRemainingPayments || 0).toLocaleString()} PKR`, color: 'text-amber-700', icon: '💰' },
+    { title: 'Total Orders / کل آرڈرز', val: totalOrdersCalc, color: 'text-slate-900', icon: '📋' },
+    { title: 'In Cutting / کٹائی میں', val: statusCounts.cutting || 0, color: 'text-sky-700', icon: '✂' },
+    { title: 'In Stitching / سلائی میں', val: statusCounts.stitching || 0, color: 'text-purple-700', icon: '🧵' },
+    { title: 'Ready / تیار', val: statusCounts.ready || 0, color: 'text-emerald-600', icon: '✓' },
+    { title: 'Balance Due / بقایا رقم', val: `${(Number(m.totalRemainingPayments) || 0).toLocaleString()} PKR`, color: 'text-amber-700', icon: '💰' },
   ];
 
   container.innerHTML = cards

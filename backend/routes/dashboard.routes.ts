@@ -11,8 +11,8 @@ router.get('/clothing-types', DashboardController.getClothingTypes);
 // Admin dashboard operational metrics (Admin, Manager, Staff only)
 router.get('/admin', authenticate, requireRole('admin', 'manager', 'staff'), DashboardController.getAdminData);
 
-// Customer portal dashboard (Customer only)
-router.get('/customer', authenticate, requireRole('customer'), DashboardController.getCustomerData);
+// Customer portal dashboard (Customer, Admin, Manager, Staff)
+router.get('/customer', authenticate, requireRole('customer', 'admin', 'manager', 'staff'), DashboardController.getCustomerData);
 
 export default router;
 

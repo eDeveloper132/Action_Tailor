@@ -3,7 +3,14 @@
  * High-performance fetch client with JWT injection, credentials, in-flight deduplication, and GET micro-caching
  */
 
-export const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || '';
+export const API_BASE_URL =
+  (import.meta as any).env?.VITE_API_URL ||
+  (typeof window !== 'undefined' && (window as any).ACTION_TAILOR_API_URL) ||
+  (typeof window !== 'undefined' &&
+   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+   window.location.port !== '5000'
+    ? 'http://localhost:5000'
+    : '');
 
 // In-flight request deduplication map (prevents duplicate simultaneous calls to same endpoint)
 const inFlightRequests = new Map<string, Promise<any>>();
@@ -56,18 +63,39 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
   const executeFetch = async (): Promise<any> => {
     try {
       const response = await fetch(url, config);
-      const data = await response.json();
 
-      if (!response.ok) {
-        if (response.status === 401 && !window.location.pathname.includes('signin.html')) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          window.location.href = '/signin.html';
+      let data: any = null;
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (_jsonErr) {
+          data = null;
         }
-        throw new Error(data.message || data.error || 'Network request failed');
+      } else {
+        try {
+          const rawText = await response.text();
+          data = { message: rawText };
+        } catch (_textErr) {
+          data = null;
+        }
       }
 
-      if (isGet) {
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          if (!window.location.pathname.includes('signin.html')) {
+            window.location.href = '/signin.html';
+            return { status: 'error', message: 'Authentication required' };
+          }
+        }
+        const errorMsg =
+          data?.message || data?.error || (response.status === 404 ? 'Resource not found' : `Request failed with status ${response.status}`);
+        throw new Error(errorMsg);
+      }
+
+      if (isGet && data) {
         getCache.set(url, {
           data,
           expiresAt: Date.now() + 3000, // 3-second micro-cache

@@ -1,10 +1,12 @@
 import { Order, CustomerProfile, MeasurementProfile, User } from '../models/index.ts';
+import { normalizePakistaniPhone } from '../types/tailoring.types.ts';
 
 export class DashboardService {
   /**
    * Fast, lean operational metrics for Pakistani tailor shop admin/staff
    */
   static async getAdminMetrics(): Promise<{
+    totalOrders: number;
     todayOrdersCount: number;
     statusCounts: Record<string, number>;
     upcomingDeliveries: any[];
@@ -80,7 +82,10 @@ export class DashboardService {
       totalRemainingPayments += row.remainingDue || 0;
     }
 
+    const totalOrders = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+
     return {
+      totalOrders,
       todayOrdersCount,
       statusCounts,
       upcomingDeliveries,
@@ -99,8 +104,8 @@ export class DashboardService {
     completedOrders: any[];
     measurementProfiles: any[];
   }> {
-    const user = await User.findById(userId).populate('customerProfile').lean();
-    if (!user || !user.customerProfile) {
+    const user = await User.findById(userId).populate('customerProfile');
+    if (!user) {
       return {
         customerProfile: null,
         activeOrders: [],
@@ -109,7 +114,28 @@ export class DashboardService {
       };
     }
 
-    const customerId = (user.customerProfile as any)._id;
+    let customerProfile = user.customerProfile as any;
+    if (!customerProfile) {
+      const phoneNorm = user.phone ? normalizePakistaniPhone(user.phone) : '';
+      if (phoneNorm) {
+        customerProfile = await CustomerProfile.findOne({ phone: phoneNorm });
+      }
+      if (!customerProfile && user.email) {
+        customerProfile = await CustomerProfile.findOne({ email: user.email.toLowerCase() });
+      }
+      if (!customerProfile) {
+        customerProfile = await CustomerProfile.create({
+          name: user.name || 'Customer',
+          phone: phoneNorm || ('0300' + Math.floor(1000000 + Math.random() * 9000000)),
+          email: user.email,
+          user: user._id,
+        });
+      }
+      user.customerProfile = customerProfile._id;
+      await user.save();
+    }
+
+    const customerId = customerProfile._id;
 
     const [activeOrders, completedOrders, measurementProfiles] = await Promise.all([
       Order.find({
@@ -131,10 +157,10 @@ export class DashboardService {
     ]);
 
     return {
-      customerProfile: user.customerProfile,
-      activeOrders,
-      completedOrders,
-      measurementProfiles,
+      customerProfile,
+      activeOrders: activeOrders || [],
+      completedOrders: completedOrders || [],
+      measurementProfiles: measurementProfiles || [],
     };
   }
 }
