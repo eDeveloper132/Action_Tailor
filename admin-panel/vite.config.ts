@@ -42,6 +42,7 @@ export default defineConfig({
         customers: resolve(import.meta.dirname, 'customers.html'),
         measurements: resolve(import.meta.dirname, 'measurements.html'),
         profile: resolve(import.meta.dirname, 'profile.html'),
+        notFound: resolve(import.meta.dirname, '404.html'),
       },
     },
   },

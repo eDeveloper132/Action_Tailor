@@ -41,6 +41,7 @@ export default defineConfig({
         signin: resolve(import.meta.dirname, 'signin.html'),
         signup: resolve(import.meta.dirname, 'signup.html'),
         profile: resolve(import.meta.dirname, 'profile.html'),
+        notFound: resolve(import.meta.dirname, '404.html'),
       },
     },
   },
