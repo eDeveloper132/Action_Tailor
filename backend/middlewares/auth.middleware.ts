@@ -29,11 +29,6 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     token = (req as any).cookies.token || (req as any).cookies.jwt;
   }
 
-  // 3. Check query string (optional fallback)
-  if (!token && typeof req.query.token === 'string') {
-    token = req.query.token;
-  }
-
   if (!token) {
     handleUnauthenticated(req, res);
     return;
@@ -48,12 +43,19 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
   // Attach decoded user to request
   req.user = decoded;
 
-  // If customer without customerProfile in token, resolve from DB for IDOR safety
-  if (decoded.role === 'customer' && !decoded.customerProfile && mongoose.connection.readyState >= 1) {
+  // Verify user still exists and is active, and ensure customerProfile is populated
+  if (mongoose.connection.readyState >= 1) {
     try {
-      const u = await User.findById(decoded.userId).select('customerProfile');
-      if (u && u.customerProfile) {
-        req.user.customerProfile = u.customerProfile.toString();
+      const userRecord = await User.findById(decoded.userId).select('isActive customerProfile');
+      if (!userRecord || userRecord.isActive === false) {
+        res.status(403).json({
+          status: 'error',
+          message: 'Account is inactive or has been disabled / اکاؤنٹ معطل ہے',
+        });
+        return;
+      }
+      if (decoded.role === 'customer' && !req.user.customerProfile && userRecord.customerProfile) {
+        req.user.customerProfile = userRecord.customerProfile.toString();
       }
     } catch (_e) {}
   }

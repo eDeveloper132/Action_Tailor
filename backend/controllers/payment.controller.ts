@@ -19,12 +19,15 @@ export class PaymentController {
         return;
       }
 
+      const idempotencyKey = (req.headers['idempotency-key'] as string) || req.body.idempotencyKey;
+
       const result = await PaymentService.recordPayment({
         orderId,
         amount: Number(amount),
         type,
         method,
         transactionReference,
+        idempotencyKey,
         receivedByUserId: req.user?.userId,
         notes,
       });

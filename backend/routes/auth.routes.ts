@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import mongoose from 'mongoose';
 import { generateToken } from '../utils/jwt.ts';
-import { authenticate, type AuthRequest } from '../middlewares/auth.middleware.ts';
+import { authenticate, type AuthRequest, authRateLimiter, validateSignin, validateSignup } from '../middlewares/index.ts';
 import { User, CustomerProfile } from '../models/index.ts';
 import type { ApiResponse, AuthResponse, JwtUserPayload } from '../types/index.ts';
 
@@ -11,7 +11,7 @@ const router = Router();
  * POST /api/auth/signin
  * Authenticates user against MongoDB with bcrypt, issues JWT, sets HTTP-only cookie
  */
-router.post('/signin', async (req: Request, res: Response<ApiResponse<AuthResponse>>) => {
+router.post('/signin', authRateLimiter, validateSignin, async (req: Request, res: Response<ApiResponse<AuthResponse>>) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -25,72 +25,50 @@ router.post('/signin', async (req: Request, res: Response<ApiResponse<AuthRespon
   const normalizedEmail = email.trim().toLowerCase();
 
   try {
-    // If MongoDB is connected, authenticate against real database
-    if (mongoose.connection.readyState >= 1) {
-      const user = await User.findOne({ email: normalizedEmail }).select('+password');
-
-      if (!user) {
-        res.status(401).json({
-          status: 'error',
-          message: 'Invalid email or password / ای میل یا پاس ورڈ درست نہیں ہے',
-        });
-        return;
-      }
-
-      const isMatch = await user.comparePassword(password);
-      if (!isMatch) {
-        res.status(401).json({
-          status: 'error',
-          message: 'Invalid email or password / ای میل یا پاس ورڈ درست نہیں ہے',
-        });
-        return;
-      }
-
-      if (user.isActive === false) {
-        res.status(403).json({
-          status: 'error',
-          message: 'Account is deactivated. Please contact administration / اکاؤنٹ معطل ہے',
-        });
-        return;
-      }
-
-      const tokenPayload: JwtUserPayload = {
-        userId: user._id.toString(),
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        customerProfile: user.customerProfile ? user.customerProfile.toString() : undefined,
-      };
-
-      const token = generateToken(tokenPayload);
-
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      res.json({
-        status: 'success',
-        message: 'Authenticated successfully / لاگ ان کامیاب',
-        data: {
-          token,
-          user: tokenPayload,
-        },
+    if (mongoose.connection.readyState < 1) {
+      res.status(503).json({
+        status: 'error',
+        message: 'Database is currently unavailable. Please try again later / ڈیٹا بیس دستیاب نہیں ہے',
       });
       return;
     }
 
-    // Fallback if database is offline (demo mode)
-    const mockUser = {
-      userId: 'usr_' + Buffer.from(normalizedEmail).toString('hex').slice(0, 8),
-      email: normalizedEmail,
-      name: normalizedEmail.split('@')[0],
-      role: 'customer',
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+
+    if (!user) {
+      res.status(401).json({
+        status: 'error',
+        message: 'Invalid email or password / ای میل یا پاس ورڈ درست نہیں ہے',
+      });
+      return;
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      res.status(401).json({
+        status: 'error',
+        message: 'Invalid email or password / ای میل یا پاس ورڈ درست نہیں ہے',
+      });
+      return;
+    }
+
+    if (user.isActive === false) {
+      res.status(403).json({
+        status: 'error',
+        message: 'Account is deactivated. Please contact administration / اکاؤنٹ معطل ہے',
+      });
+      return;
+    }
+
+    const tokenPayload: JwtUserPayload = {
+      userId: user._id.toString(),
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      customerProfile: user.customerProfile ? user.customerProfile.toString() : undefined,
     };
 
-    const token = generateToken(mockUser);
+    const token = generateToken(tokenPayload);
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -101,10 +79,10 @@ router.post('/signin', async (req: Request, res: Response<ApiResponse<AuthRespon
 
     res.json({
       status: 'success',
-      message: 'Authenticated successfully (Offline fallback)',
+      message: 'Authenticated successfully / لاگ ان کامیاب',
       data: {
         token,
-        user: mockUser,
+        user: tokenPayload,
       },
     });
   } catch (err: any) {
@@ -119,7 +97,7 @@ router.post('/signin', async (req: Request, res: Response<ApiResponse<AuthRespon
  * POST /api/auth/signup
  * Registers new user in MongoDB and auto-creates linked CustomerProfile
  */
-router.post('/signup', async (req: Request, res: Response<ApiResponse<AuthResponse>>) => {
+router.post('/signup', authRateLimiter, validateSignup, async (req: Request, res: Response<ApiResponse<AuthResponse>>) => {
   const { fullname, email, password, phone } = req.body;
 
   if (!email || !password) {
@@ -146,74 +124,53 @@ router.post('/signup', async (req: Request, res: Response<ApiResponse<AuthRespon
   const userPhone = (phone || '').trim();
 
   try {
-    if (mongoose.connection.readyState >= 1) {
-      // Check if user already exists
-      const existingUser = await User.findOne({ email: normalizedEmail });
-      if (existingUser) {
-        res.status(409).json({
-          status: 'error',
-          message: 'An account with this email already exists / یہ ای میل پہلے سے موجود ہے',
-        });
-        return;
-      }
-
-      // Create linked CustomerProfile
-      const customerProfile = await CustomerProfile.create({
-        name: userName,
-        phone: userPhone || '0300-0000000',
-        whatsapp: userPhone || '0300-0000000',
-      });
-
-      // Create User
-      const newUser = await User.create({
-        name: userName,
-        email: normalizedEmail,
-        password,
-        phone: userPhone,
-        role: 'customer',
-        customerProfile: customerProfile._id,
-      });
-
-      customerProfile.user = newUser._id;
-      await customerProfile.save();
-
-      const tokenPayload: JwtUserPayload = {
-        userId: newUser._id.toString(),
-        email: newUser.email,
-        name: newUser.name,
-        role: newUser.role,
-        customerProfile: customerProfile._id.toString(),
-      };
-
-      const token = generateToken(tokenPayload);
-
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      res.status(201).json({
-        status: 'success',
-        message: 'Account created successfully / اکاؤنٹ کامیابی سے بن گیا ہے',
-        data: {
-          token,
-          user: tokenPayload,
-        },
+    if (mongoose.connection.readyState < 1) {
+      res.status(503).json({
+        status: 'error',
+        message: 'Database is currently unavailable. Please try again later / ڈیٹا بیس دستیاب نہیں ہے',
       });
       return;
     }
 
-    // Fallback if DB offline
-    const newUser = {
-      userId: 'usr_' + Date.now().toString(36),
-      email: normalizedEmail,
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      res.status(409).json({
+        status: 'error',
+        message: 'An account with this email already exists / یہ ای میل پہلے سے موجود ہے',
+      });
+      return;
+    }
+
+    // Create linked CustomerProfile
+    const customerProfile = await CustomerProfile.create({
       name: userName,
+      phone: userPhone || '0300-0000000',
+      whatsapp: userPhone || '0300-0000000',
+    });
+
+    // Create User
+    const newUser = await User.create({
+      name: userName,
+      email: normalizedEmail,
+      password,
+      phone: userPhone,
       role: 'customer',
+      customerProfile: customerProfile._id,
+    });
+
+    customerProfile.user = newUser._id;
+    await customerProfile.save();
+
+    const tokenPayload: JwtUserPayload = {
+      userId: newUser._id.toString(),
+      email: newUser.email,
+      name: newUser.name,
+      role: newUser.role,
+      customerProfile: customerProfile._id.toString(),
     };
 
-    const token = generateToken(newUser);
+    const token = generateToken(tokenPayload);
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -224,10 +181,10 @@ router.post('/signup', async (req: Request, res: Response<ApiResponse<AuthRespon
 
     res.status(201).json({
       status: 'success',
-      message: 'Account created successfully',
+      message: 'Account created successfully / اکاؤنٹ کامیابی سے بن گیا ہے',
       data: {
         token,
-        user: newUser,
+        user: tokenPayload,
       },
     });
   } catch (err: any) {
@@ -287,6 +244,5 @@ const signOutHandler = (_req: Request, res: Response<ApiResponse>) => {
 };
 
 router.post('/signout', signOutHandler);
-router.get('/signout', signOutHandler);
 
 export default router;

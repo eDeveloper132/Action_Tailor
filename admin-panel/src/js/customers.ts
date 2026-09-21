@@ -1,4 +1,5 @@
 import { renderNavbar, showToast } from '../ui_components/index.ts';
+import { escapeHtml } from '../utils/sanitize.ts';
 import '../utils/api.ts';
 
 let customersCache: any[] = [];
@@ -103,23 +104,28 @@ function setupPaginationListeners(): void {
 
 function renderCustomerCard(c: any): string {
   const cleanPhone = (c.phone || '').replace(/\D/g, '').replace(/^0/, '');
+  const safeName = escapeHtml(c.name);
+  const safePhone = escapeHtml(c.phone);
+  const safeAddress = escapeHtml(c.address);
+  const safeEmail = escapeHtml(c.email);
+
   return `
     <div class="tailor-card p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3 hover:border-emerald-300 transition-all">
       <div class="flex justify-between items-start">
         <div>
           <h3 class="font-bold text-slate-900 text-base flex items-center gap-1.5 cursor-pointer hover:text-emerald-700 btn-view-cust" data-id="${c._id}">
-            <span>${c.name}</span>
+            <span>${safeName}</span>
             <span class="text-xs text-slate-400 font-normal">🔍</span>
           </h3>
-          <div class="text-xs text-slate-500 mt-0.5">📞 ${c.phone}</div>
+          <div class="text-xs text-slate-500 mt-0.5">📞 ${safePhone}</div>
         </div>
         <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-          ${c.totalOrders || 0} Suits / سوٹ
+          ${Number(c.totalOrders) || 0} Suits / سوٹ
         </span>
       </div>
 
-      ${c.address ? `<div class="text-xs text-slate-600 truncate">📍 ${c.address}</div>` : '<div class="text-xs text-slate-400 italic">No Address / پتہ درج نہیں</div>'}
-      ${c.email ? `<div class="text-xs text-slate-500 truncate">✉️ ${c.email}</div>` : ''}
+      ${safeAddress ? `<div class="text-xs text-slate-600 truncate">📍 ${safeAddress}</div>` : '<div class="text-xs text-slate-400 italic">No Address / پتہ درج نہیں</div>'}
+      ${safeEmail ? `<div class="text-xs text-slate-500 truncate">✉️ ${safeEmail}</div>` : ''}
 
       <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
         <div class="flex items-center gap-3">

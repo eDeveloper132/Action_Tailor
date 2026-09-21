@@ -15,9 +15,10 @@ import orderRoutes from './routes/order.routes.ts';
 import paymentRoutes from './routes/payment.routes.ts';
 import dashboardRoutes from './routes/dashboard.routes.ts';
 import notificationRoutes from './routes/notification.routes.ts';
+import { OrderService } from './services/order.service.ts';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { requestLogger, notFoundHandler, errorHandler } from './middlewares/index.ts';
+import { requestLogger, notFoundHandler, errorHandler, securityHeaders, apiRateLimiter } from './middlewares/index.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,6 +53,7 @@ app.use(
   })
 );
 
+app.use(securityHeaders);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -59,15 +61,20 @@ app.use(cookieParser());
 // Request Logger
 app.use(requestLogger);
 
-// Ensure MongoDB is connected before handling requests
-app.use(async (_req: Request, _res: Response, next: NextFunction) => {
-  try {
-    await connectDB();
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
+// In serverless / on-demand environments like Vercel, ensure DB connection
+if (process.env.VERCEL) {
+  app.use(async (_req: Request, _res: Response, next: NextFunction) => {
+    try {
+      await connectDB();
+      next();
+    } catch (err) {
+      next(err);
+    }
+  });
+}
+
+// Global API rate limiting
+app.use('/api', apiRateLimiter);
 
 // Browser Migration Compatibility Redirects
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -127,6 +134,7 @@ if (!process.env.VERCEL) {
     });
 
     await connectDB();
+    await OrderService.initializeOrderCounter();
   };
 
   const gracefulShutdown = async (signal: string) => {

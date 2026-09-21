@@ -14,7 +14,7 @@ export class CustomerService {
   static async searchCustomers(query: string, limit = 20): Promise<ICustomerProfile[]> {
     const trimmed = query.trim();
     if (!trimmed) {
-      return CustomerProfile.find()
+      return CustomerProfile.find({ isDeleted: { $ne: true } })
         .sort({ updatedAt: -1 })
         .limit(limit)
         .lean() as unknown as Promise<ICustomerProfile[]>;
@@ -26,6 +26,7 @@ export class CustomerService {
     // Fast path: If search query is numeric phone, search indexed phone field first
     if (isNumeric && normPhone && normPhone.length >= 4) {
       const phoneMatches = await CustomerProfile.find({
+        isDeleted: { $ne: true },
         $or: [
           { phone: normPhone },
           { phone: new RegExp('^' + normPhone) },
@@ -57,7 +58,10 @@ export class CustomerService {
       orConditions.push({ whatsapp: normPhone });
     }
 
-    return CustomerProfile.find({ $or: orConditions })
+    return CustomerProfile.find({
+      isDeleted: { $ne: true },
+      $or: orConditions,
+    })
       .sort({ updatedAt: -1 })
       .limit(limit)
       .lean() as unknown as Promise<ICustomerProfile[]>;
@@ -68,15 +72,16 @@ export class CustomerService {
    */
   static async listCustomers(page = 1, limit = 20): Promise<{ customers: ICustomerProfile[]; total: number; pages: number }> {
     const skip = (page - 1) * limit;
+    const filter = { isDeleted: { $ne: true } };
     const [customers, total] = await Promise.all([
-      CustomerProfile.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      CustomerProfile.countDocuments(),
+      CustomerProfile.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      CustomerProfile.countDocuments(filter),
     ]);
 
     return {
       customers: customers as unknown as ICustomerProfile[],
       total,
-      pages: Math.ceil(total / limit),
+      pages: Math.ceil(total / limit) || 1,
     };
   }
 
@@ -88,8 +93,8 @@ export class CustomerService {
     measurementProfiles: any[];
     recentOrders: any[];
   }> {
-    const customer = await CustomerProfile.findById(id).lean();
-    if (!customer) {
+    const customer = await CustomerProfile.findById(id).lean() as any;
+    if (!customer || customer.isDeleted) {
       return { customer: null, measurementProfiles: [], recentOrders: [] };
     }
 
@@ -180,20 +185,20 @@ export class CustomerService {
       data.whatsapp = normalizePakistaniPhone(data.whatsapp);
     }
 
-    const updated = await CustomerProfile.findByIdAndUpdate(id, { $set: data }, { new: true, runValidators: true });
+    const updated = await CustomerProfile.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true });
     return updated;
   }
 
   /**
-   * Delete customer profile and associated measurement profiles
+   * Soft-delete customer profile, preserving historical orders and measurement records
    */
   static async deleteCustomer(id: string): Promise<boolean> {
-    const deleted = await CustomerProfile.findByIdAndDelete(id);
-    if (deleted) {
-      await MeasurementProfile.deleteMany({ customer: id });
-      return true;
-    }
-    return false;
+    const updated = await CustomerProfile.findByIdAndUpdate(
+      id,
+      { $set: { isDeleted: true, deletedAt: new Date() } },
+      { returnDocument: 'after' }
+    );
+    return !!updated;
   }
 }
 

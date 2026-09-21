@@ -7,6 +7,7 @@ import {
   Payment,
   Notification,
   AuditLog,
+  Counter,
 } from '../models/index.ts';
 import { getIO } from '../sockets/socket.ts';
 import { MeasurementService } from './measurement.service.ts';
@@ -29,16 +30,48 @@ export interface OrderFilterOptions {
 
 export class OrderService {
   /**
-   * Generates readable order code e.g. AT-2045
+   * Initializes the atomic counter sequence from existing orders if not already set
    */
-  static async generateOrderNumber(): Promise<string> {
-    const count = await Order.countDocuments();
-    const nextNum = 1001 + count;
-    return `AT-${nextNum}`;
+  static async initializeOrderCounter(): Promise<void> {
+    const orders = await Order.find({ orderNumber: /^AT-\d+$/ })
+      .select('orderNumber')
+      .lean();
+
+    let maxSeq = 1000;
+    for (const ord of orders) {
+      if (ord.orderNumber) {
+        const parsed = parseInt(ord.orderNumber.replace('AT-', ''), 10);
+        if (!isNaN(parsed) && parsed > maxSeq) {
+          maxSeq = parsed;
+        }
+      }
+    }
+
+    const existing = await Counter.findById('orderNumber');
+    if (!existing || existing.seq < maxSeq) {
+      await Counter.findByIdAndUpdate(
+        'orderNumber',
+        { $max: { seq: maxSeq } },
+        { upsert: true, returnDocument: 'after' }
+      );
+    }
   }
 
   /**
-   * Create a new stitching order
+   * Generates readable, gapless, concurrency-safe order code e.g. AT-1045
+   */
+  static async generateOrderNumber(): Promise<string> {
+    const counter = await Counter.findByIdAndUpdate(
+      'orderNumber',
+      { $inc: { seq: 1 } },
+      { returnDocument: 'after', upsert: true }
+    );
+    return `AT-${counter.seq}`;
+  }
+
+  /**
+   * Create a new stitching order with atomic number generation,
+   * immutable measurement snapshots, and transaction-backed payment + customer stats.
    */
   static async createOrder(
     data: {
@@ -64,6 +97,12 @@ export class OrderService {
     },
     createdByUserId?: string
   ): Promise<IOrder> {
+    // 0. Validate customer existence and active status (reject soft-deleted customers)
+    const customer = await CustomerProfile.findById(data.customer);
+    if (!customer || (customer as any).isDeleted) {
+      throw new Error('Customer profile not found or has been deactivated / گاہک موجود نہیں ہے یا معطل ہے');
+    }
+
     const normalizedCategory = normalizeClothingCategory(data.clothingCategory);
 
     // 1. Resolve Measurement Snapshot
@@ -117,72 +156,122 @@ export class OrderService {
       }
     }
 
-    // 3. Generate unique order number
-    let orderNumber = await this.generateOrderNumber();
-    let exists = await Order.findOne({ orderNumber });
-    let salt = 1;
-    while (exists) {
-      orderNumber = `AT-${1001 + (await Order.countDocuments()) + salt++}`;
-      exists = await Order.findOne({ orderNumber });
+    // 3. Generate atomic unique order number
+    const orderNumber = await this.generateOrderNumber();
+
+    // 4. Wrap multi-document write in session transaction with retry on transient write conflict
+    const MAX_RETRIES = 5;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      let session: mongoose.ClientSession | null = null;
+      let useTransaction = false;
+      try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+        useTransaction = true;
+      } catch (_err) {
+        session = null;
+        useTransaction = false;
+      }
+
+      try {
+        const orderDocs = await Order.create(
+          [
+            {
+              orderNumber,
+              customer: data.customer,
+              measurementProfile: data.measurementProfileId,
+              measurementSnapshot: immutableSnapshot,
+              clothingCategory: normalizedCategory,
+              quantity: data.quantity || 1,
+              fabric: data.fabric || { providedBy: 'customer' },
+              designOptions: data.designOptions || {},
+              stitchingPrice: data.stitchingPrice,
+              fabricPrice: data.fabricPrice || 0,
+              advancePayment: data.advancePayment || 0,
+              status: 'pending',
+              statusHistory: [
+                {
+                  status: 'pending',
+                  updatedAt: new Date(),
+                  updatedBy: createdByUserId || 'Staff',
+                  notes: 'Order initiated / نیا آرڈر بک ہوا',
+                },
+              ],
+              expectedDeliveryDate: new Date(data.expectedDeliveryDate),
+              createdBy: (createdByUserId && mongoose.Types.ObjectId.isValid(createdByUserId)) ? createdByUserId : undefined,
+              notes: data.notes?.trim(),
+            },
+          ],
+          session ? { session } : {}
+        );
+
+        const newOrder = orderDocs[0];
+
+        // If advance payment was made, record it in Payments
+        if (data.advancePayment && data.advancePayment > 0) {
+          await Payment.create(
+            [
+              {
+                order: newOrder._id,
+                customer: data.customer,
+                amount: data.advancePayment,
+                type: 'advance',
+                method: data.paymentMethod || 'cash',
+                receivedBy: (createdByUserId && mongoose.Types.ObjectId.isValid(createdByUserId)) ? createdByUserId : undefined,
+                notes: 'Advance recorded at order creation',
+              },
+            ],
+            session ? { session } : {}
+          );
+        }
+
+        if (session && useTransaction) {
+          await session.commitTransaction();
+        }
+
+        // Customer tally update is performed as an atomic single-document operation
+        // outside the multi-document transaction to prevent cross-transaction WriteConflict
+        await CustomerProfile.findByIdAndUpdate(data.customer, { $inc: { totalOrders: 1 } });
+
+        // Broadcast Real-Time Event via Socket.IO
+        try {
+          const io = getIO();
+          io.emit('order:created', {
+            orderId: newOrder._id.toString(),
+            orderNumber: newOrder.orderNumber,
+            customer: data.customer,
+            totalAmount: newOrder.totalAmount,
+          });
+        } catch (_err) {}
+
+        return newOrder;
+      } catch (error: any) {
+        if (session && useTransaction) {
+          try {
+            await session.abortTransaction();
+          } catch (_abortErr) {}
+        }
+
+        const isTransient =
+          error?.hasErrorLabel?.('TransientTransactionError') ||
+          error?.hasErrorLabel?.('UnknownTransactionCommitResult') ||
+          error?.code === 112 ||
+          error?.message?.includes('WriteConflict');
+
+        if (isTransient && attempt < MAX_RETRIES) {
+          await new Promise((r) => setTimeout(r, 40 * attempt + Math.random() * 40));
+          continue;
+        }
+
+        throw error;
+      } finally {
+        if (session) {
+          await session.endSession();
+        }
+      }
     }
 
-    // 4. Create Order with immutable measurement snapshot
-    const newOrder = await Order.create({
-      orderNumber,
-      customer: data.customer,
-      measurementProfile: data.measurementProfileId,
-      measurementSnapshot: immutableSnapshot,
-      clothingCategory: normalizedCategory,
-      quantity: data.quantity || 1,
-      fabric: data.fabric || { providedBy: 'customer' },
-      designOptions: data.designOptions || {},
-      stitchingPrice: data.stitchingPrice,
-      fabricPrice: data.fabricPrice || 0,
-      advancePayment: data.advancePayment || 0,
-      status: 'pending',
-      statusHistory: [
-        {
-          status: 'pending',
-          updatedAt: new Date(),
-          updatedBy: createdByUserId || 'Staff',
-          notes: 'Order initiated / نیا آرڈر بک ہوا',
-        },
-      ],
-      expectedDeliveryDate: new Date(data.expectedDeliveryDate),
-      createdBy: (createdByUserId && mongoose.Types.ObjectId.isValid(createdByUserId)) ? createdByUserId : undefined,
-      notes: data.notes?.trim(),
-    });
-
-    // 4. If advance payment was made, record it in Payments
-    if (data.advancePayment && data.advancePayment > 0) {
-      await Payment.create({
-        order: newOrder._id,
-        customer: data.customer,
-        amount: data.advancePayment,
-        type: 'advance',
-        method: data.paymentMethod || 'cash',
-        receivedBy: (createdByUserId && mongoose.Types.ObjectId.isValid(createdByUserId)) ? createdByUserId : undefined,
-        notes: 'Advance recorded at order creation',
-      });
-    }
-
-    // 5. Increment customer totalOrders tally
-    await CustomerProfile.findByIdAndUpdate(data.customer, { $inc: { totalOrders: 1 } });
-
-    // 6. Broadcast Real-Time Event via Socket.IO
-    try {
-      const io = getIO();
-      io.emit('order:created', {
-        orderId: newOrder._id.toString(),
-        orderNumber: newOrder.orderNumber,
-        customer: data.customer,
-        totalAmount: newOrder.totalAmount,
-      });
-    } catch (_err) {
-      // Serverless or socket not initialized
-    }
-
-    return newOrder;
+    throw new Error('Failed to create order after multiple retry attempts');
   }
 
   /**
@@ -273,6 +362,27 @@ export class OrderService {
     if (!order) return null;
 
     const oldStatus = order.status;
+
+    if (oldStatus !== newStatus) {
+      const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+        pending: ['confirmed', 'cutting', 'cancelled'],
+        confirmed: ['cutting', 'cancelled'],
+        cutting: ['stitching', 'cancelled'],
+        stitching: ['quality_check', 'ready', 'cancelled'],
+        quality_check: ['ready', 'stitching', 'cancelled'],
+        ready: ['delivered', 'cancelled'],
+        delivered: [],
+        cancelled: [],
+      };
+
+      const allowed = ALLOWED_TRANSITIONS[oldStatus] || [];
+      if (!allowed.includes(newStatus)) {
+        throw new Error(
+          `Cannot transition order status from "${oldStatus}" to "${newStatus}". Allowed: [${allowed.join(', ')}] / اس حالت میں تبدیلی ممکن نہیں ہے`
+        );
+      }
+    }
+
     order.status = newStatus;
 
     if (newStatus === 'delivered') {
@@ -286,7 +396,11 @@ export class OrderService {
       notes: notes || `Status changed from ${oldStatus} to ${newStatus}`,
     });
 
-    await order.save();
+    if (!order.measurementSnapshot) {
+      order.measurementSnapshot = { qameez: {}, shalwaar: {} };
+    }
+
+    await order.save({ validateModifiedOnly: true });
 
     // Audit Log
     await AuditLog.create({

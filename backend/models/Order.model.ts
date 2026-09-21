@@ -62,6 +62,7 @@ const OrderSchema = new Schema<IOrder>(
     },
     measurementSnapshot: {
       type: Schema.Types.Mixed,
+      default: () => ({ qameez: {}, shalwaar: {} }),
       required: [true, 'Measurement snapshot is required for order integrity'],
     },
     clothingCategory: {
@@ -204,6 +205,7 @@ const OrderSchema = new Schema<IOrder>(
   },
   {
     timestamps: true,
+    minimize: false,
   }
 );
 

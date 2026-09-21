@@ -49,7 +49,7 @@ router.patch('/:id/read', async (req: AuthRequest, res: Response<ApiResponse>): 
     const updated = await Notification.findOneAndUpdate(
       { _id: id, recipient: req.user.userId },
       { isRead: true },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updated) {

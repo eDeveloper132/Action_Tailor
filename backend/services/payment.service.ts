@@ -13,6 +13,7 @@ export class PaymentService {
     type?: PaymentType;
     method?: PaymentMethod;
     transactionReference?: string;
+    idempotencyKey?: string;
     receivedByUserId?: string;
     notes?: string;
   }): Promise<{ payment: IPayment; order: any }> {
@@ -22,64 +23,128 @@ export class PaymentService {
     }
 
     if (data.amount <= 0) {
-      throw new Error('Payment amount must be greater than 0');
+      throw new Error('Payment amount must be greater than 0 / رقم صفر سے زیادہ ہونی چاہیے');
+    }
+
+    const txRef = (data.idempotencyKey || data.transactionReference)?.trim();
+
+    // Idempotency check: if payment with this key already recorded for this order, return existing
+    if (txRef) {
+      const existing = await Payment.findOne({
+        order: order._id,
+        transactionReference: txRef,
+      });
+      if (existing) {
+        return { payment: existing, order };
+      }
+    }
+
+    // Overpayment prevention: payment cannot exceed outstanding balance
+    if (data.type !== 'refund' && data.amount > order.remainingAmount) {
+      throw new Error(
+        `Payment amount (Rs. ${data.amount}) cannot exceed remaining balance (Rs. ${order.remainingAmount}) / ادا کی جانے والی رقم واجب الادا رقم سے زیادہ نہیں ہو سکتی`
+      );
     }
 
     const validUserId = (data.receivedByUserId && mongoose.Types.ObjectId.isValid(data.receivedByUserId))
       ? data.receivedByUserId
       : undefined;
 
-    // 1. Create Payment Record
-    const payment = await Payment.create({
-      order: order._id,
-      customer: order.customer,
-      amount: data.amount,
-      type: data.type || (order.advancePayment === 0 ? 'advance' : 'partial'),
-      method: data.method || 'cash',
-      transactionReference: data.transactionReference?.trim(),
-      receivedBy: validUserId,
-      notes: data.notes?.trim(),
-    });
-
-    // 2. Update Order Advance & Remaining Balance
-    order.advancePayment = (order.advancePayment || 0) + data.amount;
-    order.remainingAmount = Math.max(0, order.totalAmount - order.advancePayment);
-
-    if (order.remainingAmount === 0) {
-      order.paymentStatus = 'paid';
-    } else {
-      order.paymentStatus = 'partially_paid';
+    let session: mongoose.ClientSession | null = null;
+    let useTransaction = false;
+    try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+      useTransaction = true;
+    } catch (_err) {
+      session = null;
+      useTransaction = false;
     }
 
-    await order.save();
-
-    // 3. Audit Log
-    await AuditLog.create({
-      action: 'PAYMENT_RECORDED',
-      performedBy: validUserId,
-      entityType: 'payment',
-      entityId: payment._id.toString(),
-      details: {
-        orderNumber: order.orderNumber,
-        amount: data.amount,
-        method: payment.method,
-        remainingBalance: order.remainingAmount,
-      },
-    });
-
-    // 4. Socket.IO Broadcast
     try {
-      const io = getIO();
-      io.emit('payment:recorded', {
-        orderId: order._id.toString(),
-        orderNumber: order.orderNumber,
-        amount: data.amount,
-        remainingAmount: order.remainingAmount,
-        paymentStatus: order.paymentStatus,
-      });
-    } catch (_e) {}
+      // 1. Create Payment Record
+      const paymentDocs = await Payment.create(
+        [
+          {
+            order: order._id,
+            customer: order.customer,
+            amount: data.amount,
+            type: data.type || (order.advancePayment === 0 ? 'advance' : 'partial'),
+            method: data.method || 'cash',
+            transactionReference: txRef,
+            receivedBy: validUserId,
+            notes: data.notes?.trim(),
+          },
+        ],
+        session ? { session } : {}
+      );
+      const payment = paymentDocs[0];
 
-    return { payment, order };
+      // 2. Update Order Advance & Remaining Balance
+      if (data.type === 'refund') {
+        order.advancePayment = Math.max(0, (order.advancePayment || 0) - data.amount);
+        order.remainingAmount = Math.min(order.totalAmount, order.totalAmount - order.advancePayment);
+        order.paymentStatus = order.advancePayment === 0 ? 'unpaid' : 'partially_paid';
+      } else {
+        order.advancePayment = (order.advancePayment || 0) + data.amount;
+        order.remainingAmount = Math.max(0, order.totalAmount - order.advancePayment);
+        order.paymentStatus = order.remainingAmount === 0 ? 'paid' : 'partially_paid';
+      }
+
+      if (!order.measurementSnapshot) {
+        order.measurementSnapshot = { qameez: {}, shalwaar: {} };
+      }
+
+      await order.save(session ? { session, validateModifiedOnly: true } : { validateModifiedOnly: true });
+
+      // 3. Audit Log
+      await AuditLog.create(
+        [
+          {
+            action: data.type === 'refund' ? 'PAYMENT_REFUNDED' : 'PAYMENT_RECORDED',
+            performedBy: validUserId,
+            entityType: 'payment',
+            entityId: payment._id.toString(),
+            details: {
+              orderNumber: order.orderNumber,
+              amount: data.amount,
+              method: payment.method,
+              remainingBalance: order.remainingAmount,
+              paymentStatus: order.paymentStatus,
+              transactionReference: txRef,
+            },
+          },
+        ],
+        session ? { session } : {}
+      );
+
+      if (session && useTransaction) {
+        await session.commitTransaction();
+      }
+
+      // 4. Socket.IO Broadcast
+      try {
+        const io = getIO();
+        io.emit('payment:recorded', {
+          orderId: order._id.toString(),
+          orderNumber: order.orderNumber,
+          amount: data.amount,
+          remainingAmount: order.remainingAmount,
+          paymentStatus: order.paymentStatus,
+        });
+      } catch (_e) {}
+
+      return { payment, order };
+    } catch (error) {
+      if (session && useTransaction) {
+        await session.abortTransaction();
+      }
+      throw error;
+    } finally {
+      if (session) {
+        await session.endSession();
+      }
+    }
   }
 
   /**

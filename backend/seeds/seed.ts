@@ -9,11 +9,16 @@ import {
   Payment,
   Notification,
   AuditLog,
+  Counter,
 } from '../models/index.ts';
 
 dotenv.config();
 
 export async function runSeeder(): Promise<void> {
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PROD_SEED !== 'true') {
+    throw new Error('Refusing to execute destructive database seeder in production environment without ALLOW_PROD_SEED=true');
+  }
+
   console.log(chalk.cyan.bold('\n======================================================'));
   console.log(chalk.cyan.bold('  Action Tailor - Pakistani Tailor Shop Data Seeder   '));
   console.log(chalk.cyan.bold('======================================================\n'));
@@ -30,6 +35,7 @@ export async function runSeeder(): Promise<void> {
       Payment.deleteMany({}),
       Notification.deleteMany({}),
       AuditLog.deleteMany({}),
+      Counter.deleteMany({}),
     ]);
     console.log(chalk.green('✓ Collections cleared successfully.\n'));
 
@@ -423,6 +429,13 @@ export async function runSeeder(): Promise<void> {
 
     const orders = await Order.insertMany(ordersData);
     console.log(chalk.green(`✓ Created ${orders.length} Orders across pipeline (pending, cutting, stitching, ready, delivered).\n`));
+
+    // Initialize atomic sequence counter for order numbers
+    await Counter.create({
+      _id: 'orderNumber',
+      seq: 1000 + orders.length,
+    });
+    console.log(chalk.green(`✓ Initialized atomic Counter sequence at ${1000 + orders.length}.\n`));
 
     // ==========================================
     // 6. SEED PAYMENTS

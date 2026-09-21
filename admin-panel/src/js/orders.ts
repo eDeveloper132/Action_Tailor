@@ -1,4 +1,5 @@
 import { renderNavbar, showToast } from '../ui_components/index.ts';
+import { escapeHtml } from '../utils/sanitize.ts';
 import '../utils/api.ts';
 
 let ordersCache: any[] = [];
@@ -137,27 +138,29 @@ function getNextStatus(current: string): string | null {
 function renderOrderRow(order: any): string {
   const next = getNextStatus(order.status);
   const isPaid = order.remainingAmount === 0;
-  const custName = order.customer?.name || 'Customer';
-  const custPhone = order.customer?.phone || '';
+  const custName = escapeHtml(order.customer?.name || 'Customer');
+  const rawPhone = order.customer?.phone || '';
+  const custPhone = escapeHtml(rawPhone);
   const deliveryDate = order.expectedDeliveryDate
     ? new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB')
     : '--';
+  const fabricInfo = order.fabric?.fabricType ? escapeHtml(order.fabric.fabricType) : '';
 
   return `
     <div class="tailor-card p-5 rounded-2xl border border-slate-200 bg-white shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="space-y-1">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-mono font-extrabold text-slate-900 text-base tracking-wider">${order.orderNumber}</span>
+          <span class="font-mono font-extrabold text-slate-900 text-base tracking-wider">${escapeHtml(order.orderNumber)}</span>
           ${getStatusBadge(order.status)}
           <span class="text-xs px-2 py-0.5 rounded font-semibold ${isPaid ? 'payment-paid' : 'payment-partial'}">
-            ${isPaid ? 'Paid / ادا شدہ' : `Due / بقایا: ${order.remainingAmount} PKR`}
+            ${isPaid ? 'Paid / ادا شدہ' : `Due / بقایا: ${Number(order.remainingAmount) || 0} PKR`}
           </span>
         </div>
         <div class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-2">
           <span>${custName}</span>
           ${
             custPhone
-              ? `<a href="https://wa.me/92${custPhone.replace(/\D/g, '').replace(/^0/, '')}" target="_blank" class="text-emerald-600 hover:underline flex items-center gap-1 text-xs font-semibold">
+              ? `<a href="https://wa.me/92${rawPhone.replace(/\D/g, '').replace(/^0/, '')}" target="_blank" class="text-emerald-600 hover:underline flex items-center gap-1 text-xs font-semibold">
                   <span>💬</span> <span>${custPhone}</span>
                 </a>`
               : ''
@@ -166,7 +169,7 @@ function renderOrderRow(order: any): string {
         <div class="text-xs text-slate-500">
           <span class="font-medium text-slate-700">${getGarmentName(order.clothingCategory)}</span> •
           <span>Delivery / متوقع تاریخ: <strong class="text-slate-800">${deliveryDate}</strong></span>
-          ${order.fabric?.fabricType ? ` • <span>${order.fabric.fabricType}</span>` : ''}
+          ${fabricInfo ? ` • <span>${fabricInfo}</span>` : ''}
         </div>
       </div>
 
@@ -340,16 +343,16 @@ function printSlip(orderId: string): void {
         <p style="margin: 2px 0;">Phone: 0300-0000000 • Lahore</p>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <div><strong>Order # / آرڈر نمبر:</strong> ${order.orderNumber}</div>
+        <div><strong>Order # / آرڈر نمبر:</strong> ${escapeHtml(order.orderNumber)}</div>
         <div><strong>Date / تاریخ:</strong> ${new Date(order.orderDate || Date.now()).toLocaleDateString('en-GB')}</div>
       </div>
       <div style="margin-bottom: 8px;">
-        <div><strong>Customer / کسٹمر:</strong> ${order.customer?.name || 'Customer'} (${order.customer?.phone || '--'})</div>
+        <div><strong>Customer / کسٹمر:</strong> ${escapeHtml(order.customer?.name || 'Customer')} (${escapeHtml(order.customer?.phone || '--')})</div>
         <div><strong>Delivery / متوقع تاریخ:</strong> <span style="font-size: 15px; font-weight: bold;">${new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB')}</span></div>
       </div>
       <div style="border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 6px 0; margin-bottom: 8px;">
-        <div><strong>Item / لباس:</strong> ${getGarmentName(order.clothingCategory)}</div>
-        <div><strong>Fabric / کپڑا:</strong> ${order.fabric?.fabricType || 'Customer Cloth'} (${order.fabric?.color || 'Standard'})</div>
+        <div><strong>Item / لباس:</strong> ${escapeHtml(getGarmentName(order.clothingCategory))}</div>
+        <div><strong>Fabric / کپڑا:</strong> ${escapeHtml(order.fabric?.fabricType || 'Customer Cloth')} (${escapeHtml(order.fabric?.color || 'Standard')})</div>
       </div>
       <div style="margin-bottom: 10px;">
         <div style="font-weight: bold; margin-bottom: 4px;">MEASUREMENTS (INCHES) / ناپ (انچ):</div>

@@ -12,6 +12,8 @@ export interface ICustomerProfile extends Document {
   user?: mongoose.Types.ObjectId;
   notes?: string;
   totalOrders: number;
+  isDeleted?: boolean;
+  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,6 +69,14 @@ const CustomerProfileSchema = new Schema<ICustomerProfile>(
       type: Number,
       default: 0,
       min: 0,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    deletedAt: {
+      type: Date,
     },
   },
   {

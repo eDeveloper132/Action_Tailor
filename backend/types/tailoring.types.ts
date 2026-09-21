@@ -167,6 +167,7 @@ export interface QameezMeasurements {
   collar?: number;      // Collar / کالر (e.g. 15.5)
   cuff?: number;        // Cuff / کف
   ghera?: number;       // Daman/Ghera / گھیرا
+  daman?: number;       // Daman / دامن
   armhole?: number;     // Mudha / موڈھا
   bicep?: number;       // Dola / ڈولہ
   frontNeck?: number;   // Gala / گلا

@@ -143,7 +143,7 @@ export class MeasurementService {
     const updated = await MeasurementProfile.findByIdAndUpdate(
       id,
       { $set: data },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
     return updated;
   }

@@ -126,7 +126,7 @@ export class DashboardService {
       if (!customerProfile) {
         customerProfile = await CustomerProfile.create({
           name: user.name || 'Customer',
-          phone: phoneNorm || ('0300' + Math.floor(1000000 + Math.random() * 9000000)),
+          phone: phoneNorm || '03000000000',
           email: user.email,
           user: user._id,
         });

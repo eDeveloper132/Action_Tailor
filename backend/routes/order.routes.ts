@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { OrderController } from '../controllers/order.controller.ts';
-import { authenticate } from '../middlewares/auth.middleware.ts';
-import { requireRole } from '../middlewares/role.middleware.ts';
+import { authenticate, requireRole, validateOrderCreation } from '../middlewares/index.ts';
 
 const router = Router();
 
@@ -14,7 +13,7 @@ router.get('/', OrderController.list);
 router.get('/:id', OrderController.getById);
 
 // Create / book a new order (Staff or above)
-router.post('/', requireRole('admin', 'manager', 'staff'), OrderController.create);
+router.post('/', requireRole('admin', 'manager', 'staff'), validateOrderCreation, OrderController.create);
 
 // Update order status (cutting, stitching, ready, delivered) (Staff or above)
 router.patch('/:id/status', requireRole('admin', 'manager', 'staff'), OrderController.updateStatus);

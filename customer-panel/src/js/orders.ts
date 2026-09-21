@@ -1,4 +1,5 @@
 import { renderNavbar, showToast } from '../ui_components/index.ts';
+import { escapeHtml } from '../utils/sanitize.ts';
 import '../utils/api.ts';
 
 interface OrderItem {
@@ -202,9 +203,9 @@ function renderOrderCard(order: OrderItem): string {
       <div class="flex justify-between items-start flex-wrap gap-3">
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-mono text-lg sm:text-xl font-extrabold text-slate-900">Order # / آرڈر نمبر: ${order.orderNumber}</span>
+            <span class="font-mono text-lg sm:text-xl font-extrabold text-slate-900">Order # / آرڈر نمبر: ${escapeHtml(order.orderNumber)}</span>
             <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              ${getGarmentName(order.clothingCategory)}
+              ${escapeHtml(getGarmentName(order.clothingCategory))}
             </span>
           </div>
           <div class="text-xs text-slate-400 mt-1">
@@ -214,7 +215,7 @@ function renderOrderCard(order: OrderItem): string {
 
         <div class="flex items-center gap-2">
           <span class="text-xs px-3 py-1 rounded-full font-bold ${isPaid ? 'payment-paid' : 'payment-partial'}">
-            ${isPaid ? 'Paid / ادا شدہ' : `Due / بقایا: ${order.remainingAmount} PKR`}
+            ${isPaid ? 'Paid / ادا شدہ' : `Due / بقایا: ${Number(order.remainingAmount) || 0} PKR`}
           </span>
           <button class="btn-print-slip px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs border border-slate-300 font-semibold" data-id="${order._id}">
             🖨 Slip / پرچی
@@ -289,19 +290,19 @@ function printReceipt(orderId: string): void {
         <p style="margin: 2px 0;">Customer Copy / کسٹمر کاپی</p>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-        <div><strong>Order # / آرڈر نمبر:</strong> ${order.orderNumber}</div>
+        <div><strong>Order # / آرڈر نمبر:</strong> ${escapeHtml(order.orderNumber)}</div>
         <div><strong>Expected / متوقع تاریخ:</strong> ${order.expectedDeliveryDate ? new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB') : '--'}</div>
       </div>
       <div style="margin-bottom: 8px;">
-        <div><strong>Item / لباس:</strong> ${getGarmentName(order.clothingCategory)}</div>
-        <div><strong>Fabric / کپڑا:</strong> ${order.fabric?.fabricType || 'Standard'} (${order.fabric?.color || 'Standard'})</div>
-        <div><strong>Status / حالت:</strong> ${getStatusLabel(order.status)}</div>
+        <div><strong>Item / لباس:</strong> ${escapeHtml(getGarmentName(order.clothingCategory))}</div>
+        <div><strong>Fabric / کپڑا:</strong> ${escapeHtml(order.fabric?.fabricType || 'Standard')} (${escapeHtml(order.fabric?.color || 'Standard')})</div>
+        <div><strong>Status / حالت:</strong> ${escapeHtml(getStatusLabel(order.status))}</div>
       </div>
       <div style="border-top: 1px dashed #000; padding-top: 6px;">
-        <div style="display: flex; justify-content: space-between;"><span>Total / کل رقم:</span> <strong>${order.totalAmount} PKR</strong></div>
-        <div style="display: flex; justify-content: space-between;"><span>Advance / پیشگی رقم:</span> <span>${order.advancePayment || 0} PKR</span></div>
+        <div style="display: flex; justify-content: space-between;"><span>Total / کل رقم:</span> <strong>${Number(order.totalAmount) || 0} PKR</strong></div>
+        <div style="display: flex; justify-content: space-between;"><span>Advance / پیشگی رقم:</span> <span>${Number(order.advancePayment) || 0} PKR</span></div>
         <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid #000; margin-top: 4px;">
-          <span>Remaining / بقایا رقم:</span> <span>${order.remainingAmount} PKR</span>
+          <span>Remaining / بقایا رقم:</span> <span>${Number(order.remainingAmount) || 0} PKR</span>
         </div>
       </div>
     </div>
