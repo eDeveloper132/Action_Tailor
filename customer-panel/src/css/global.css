@@ -136,3 +136,15 @@ a:hover {
   color: var(--text-subtle);
 }
 
+/* Mobile-First touch ergonomics & anti-zoom rules */
+@media (max-width: 640px) {
+  .btn, button, [role="button"], a.btn {
+    min-height: 44px;
+    padding: 0.65rem 1rem;
+  }
+  .form-input, input[type="text"], input[type="tel"], input[type="email"], input[type="password"], input[type="number"], select, textarea {
+    font-size: 16px !important; /* Prevents iOS/Android auto-zoom on focus */
+    min-height: 44px;
+  }
+}
+

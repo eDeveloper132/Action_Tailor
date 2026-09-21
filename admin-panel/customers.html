@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Customers / کسٹمرز - Action Tailor</title>
 
-  <!-- Tailwind CSS CDN & Configuration -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/tailwind-config.js"></script>
+  <!-- Pre-compiled Static Tailwind CSS (Zero Runtime JS) -->
+  <link rel="stylesheet" href="/src/css/tailwind-compiled.css">
 
   <!-- Centralized & View-Specific Custom CSS -->
   <link rel="stylesheet" href="/src/css/global.css">
@@ -54,6 +53,21 @@
     <div id="customersGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div class="col-span-full text-center py-12 text-slate-400 text-sm bg-white rounded-2xl border border-dashed border-slate-200">
         Loading / لوڈ ہو رہا ہے...
+      </div>
+    </div>
+
+    <!-- Customers Pagination Bar -->
+    <div id="customersPagination" class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
+      <div class="text-xs text-slate-600" id="customersPageInfo">
+        Showing page 1 / صفحہ 1
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnPrevCustPage" class="px-4 py-2.5 min-h-[40px] text-xs font-bold rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all" disabled>
+          ← Previous / پچھلا
+        </button>
+        <button id="btnNextCustPage" class="px-4 py-2.5 min-h-[40px] text-xs font-bold rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all" disabled>
+          Next / اگلا →
+        </button>
       </div>
     </div>
   </main>

@@ -21,6 +21,26 @@ export class CustomerService {
     }
 
     const normPhone = normalizePakistaniPhone(trimmed);
+    const isNumeric = /^[\d\s+\-()]+$/.test(trimmed);
+
+    // Fast path: If search query is numeric phone, search indexed phone field first
+    if (isNumeric && normPhone && normPhone.length >= 4) {
+      const phoneMatches = await CustomerProfile.find({
+        $or: [
+          { phone: normPhone },
+          { phone: new RegExp('^' + normPhone) },
+          { whatsapp: normPhone },
+        ],
+      })
+        .sort({ updatedAt: -1 })
+        .limit(limit)
+        .lean() as unknown as ICustomerProfile[];
+
+      if (phoneMatches.length > 0) {
+        return phoneMatches;
+      }
+    }
+
     const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(escaped, 'i');
 
@@ -33,7 +53,7 @@ export class CustomerService {
 
     if (normPhone && normPhone.length >= 3) {
       orConditions.unshift({ phone: normPhone });
-      orConditions.push({ phone: new RegExp(normPhone, 'i') });
+      orConditions.push({ phone: new RegExp('^' + normPhone) });
       orConditions.push({ whatsapp: normPhone });
     }
 

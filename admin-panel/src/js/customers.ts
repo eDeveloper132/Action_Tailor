@@ -3,6 +3,9 @@ import '../utils/api.ts';
 
 let customersCache: any[] = [];
 let currentViewingCustomer: any = null;
+let currentCustPage = 1;
+let totalCustPages = 1;
+const CUST_PAGE_LIMIT = 15;
 
 async function initCustomersPage(): Promise<void> {
   renderNavbar('navbarMount', {
@@ -13,20 +16,31 @@ async function initCustomersPage(): Promise<void> {
   });
 
   setupModalHandlers();
+  setupPaginationListeners();
   setupSearchListener();
-  await loadCustomers();
+  await loadCustomers('', 1);
 }
 
-async function loadCustomers(q: string = ''): Promise<void> {
+async function loadCustomers(q: string = '', page = 1): Promise<void> {
   const container = document.getElementById('customersGridContainer');
   if (!container) return;
 
   try {
-    const url = q.trim()
-      ? `/api/customers/search?q=${encodeURIComponent(q.trim())}`
-      : '/api/customers?limit=100';
+    const isSearch = !!q.trim();
+    const url = isSearch
+      ? `/api/customers/search?q=${encodeURIComponent(q.trim())}&limit=30`
+      : `/api/customers?page=${page}&limit=${CUST_PAGE_LIMIT}`;
+
     const res = await (window as any).ActionTailor.apiFetch(url);
     customersCache = Array.isArray(res.data) ? res.data : res.data?.customers || [];
+
+    if (!isSearch) {
+      totalCustPages = res.data?.pages || 1;
+      currentCustPage = res.data?.currentPage || page;
+      updateCustPaginationUI();
+    } else {
+      hideCustPaginationUI();
+    }
 
     if (customersCache.length === 0) {
       container.innerHTML = `
@@ -42,6 +56,39 @@ async function loadCustomers(q: string = ''): Promise<void> {
   } catch (err: any) {
     container.innerHTML = `<div class="text-rose-500 p-4 text-sm">Error: ${err.message}</div>`;
   }
+}
+
+function updateCustPaginationUI(): void {
+  const pagBar = document.getElementById('customersPagination');
+  const pageInfo = document.getElementById('customersPageInfo');
+  const btnPrev = document.getElementById('btnPrevCustPage') as HTMLButtonElement | null;
+  const btnNext = document.getElementById('btnNextCustPage') as HTMLButtonElement | null;
+
+  if (pagBar) pagBar.style.display = 'flex';
+  if (pageInfo) pageInfo.textContent = `Page ${currentCustPage} of ${totalCustPages} / صفحہ ${currentCustPage} از ${totalCustPages}`;
+  if (btnPrev) btnPrev.disabled = currentCustPage <= 1;
+  if (btnNext) btnNext.disabled = currentCustPage >= totalCustPages;
+}
+
+function hideCustPaginationUI(): void {
+  const pagBar = document.getElementById('customersPagination');
+  if (pagBar) pagBar.style.display = 'none';
+}
+
+function setupPaginationListeners(): void {
+  document.getElementById('btnPrevCustPage')?.addEventListener('click', () => {
+    if (currentCustPage > 1) {
+      const q = (document.getElementById('customerSearchInput') as HTMLInputElement)?.value || '';
+      loadCustomers(q, currentCustPage - 1);
+    }
+  });
+
+  document.getElementById('btnNextCustPage')?.addEventListener('click', () => {
+    if (currentCustPage < totalCustPages) {
+      const q = (document.getElementById('customerSearchInput') as HTMLInputElement)?.value || '';
+      loadCustomers(q, currentCustPage + 1);
+    }
+  });
 }
 
 function renderCustomerCard(c: any): string {

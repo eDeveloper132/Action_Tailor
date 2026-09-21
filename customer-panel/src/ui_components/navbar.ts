@@ -72,7 +72,7 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
     `;
   } else {
     linksHtml = `
-      <div style="display: flex; align-items: center; gap: 0.35rem; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+      <div class="hidden sm:flex items-center gap-1 text-xs">
         <a href="/index.html" style="${getLinkStyle('dashboard')}">Dashboard / ڈیش بورڈ</a>
         <a href="/orders.html" style="${getLinkStyle('orders')}">My Orders / میرے آرڈرز</a>
         <a href="/measurements.html" style="${getLinkStyle('measurements')}">My Measurements / میرے ناپ</a>
@@ -82,7 +82,7 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
   }
 
   nav.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 1rem;">
       <a href="/index.html" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; font-size: 1.125rem; font-weight: 800; color: #0f172a;">
         <span style="color: #059669; font-size: 1.25rem;">${logoIcon}</span>
         <span>${brandName}</span>
@@ -99,22 +99,22 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 2.25rem;
-            height: 2.25rem;
+            width: 2.5rem;
+            height: 2.5rem;
             border-radius: 9999px;
             background-color: #f8fafc;
             border: 1px solid #e2e8f0;
             color: #475569;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
             transition: all 0.15s ease;
           ">
             🔔
             <span id="navNotifBadge" style="
               display: none;
               position: absolute;
-              top: -3px;
-              right: -3px;
+              top: -2px;
+              right: -2px;
               background-color: #ef4444;
               color: #ffffff;
               font-size: 0.65rem;
@@ -162,12 +162,50 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
       ` : ''}
 
       ${showAuthButton ? `
-        <button id="uiNavAuthBtn" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 600; border-radius: 0.5rem; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.15s ease;">
+        <button id="uiNavAuthBtn" style="padding: 0.45rem 0.85rem; min-height: 40px; font-size: 0.75rem; font-weight: 600; border-radius: 0.625rem; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.15s ease;">
           ${isAuthenticated ? 'Logout / لاگ آؤٹ' : 'Login / لاگ ان کریں'}
         </button>
       ` : ''}
     </div>
   `;
+
+  // Render Mobile Bottom Tab Bar if Authenticated
+  let bottomBar: HTMLElement | null = null;
+  if (isAuthenticated) {
+    bottomBar = document.createElement('nav');
+    bottomBar.className = 'sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg px-2 py-1 flex justify-around items-center no-print';
+    bottomBar.style.boxShadow = '0 -2px 10px rgba(0, 0, 0, 0.05)';
+
+    const tabs = [
+      { id: 'dashboard', href: '/index.html', icon: '🏠', en: 'Dashboard', ur: 'ڈیش بورڈ' },
+      { id: 'orders', href: '/orders.html', icon: '📦', en: 'Orders', ur: 'آرڈرز' },
+      { id: 'measurements', href: '/measurements.html', icon: '📏', en: 'Measurements', ur: 'ناپ' },
+      { id: 'profile', href: '/profile.html', icon: '👤', en: 'Profile', ur: 'پروفائل' },
+    ];
+
+    bottomBar.innerHTML = tabs.map((tab) => {
+      const isActive = activeLink === tab.id;
+      return `
+        <a href="${tab.href}" style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-width: 64px;
+          min-height: 48px;
+          padding: 0.25rem 0.5rem;
+          border-radius: 0.75rem;
+          text-decoration: none;
+          background-color: ${isActive ? '#ecfdf5' : 'transparent'};
+          color: ${isActive ? '#059669' : '#64748b'};
+          transition: all 0.15s ease;
+        ">
+          <span style="font-size: 1.15rem; line-height: 1;">${tab.icon}</span>
+          <span style="font-size: 0.65rem; font-weight: ${isActive ? '700' : '600'}; margin-top: 0.15rem; white-space: nowrap;">${tab.ur}</span>
+        </a>
+      `;
+    }).join('');
+  }
 
   // Sign out handler
   const authBtn = nav.querySelector('#uiNavAuthBtn') as HTMLButtonElement | null;
@@ -293,15 +331,26 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
 
     if (typeof (window as any).io !== 'undefined') {
       try {
-        const socket = (window as any).io();
-        socket.on('notification:new', () => loadNotifications());
-        socket.on('order:status_changed', () => loadNotifications());
-        socket.on('order:ready', () => loadNotifications());
+        const socket = (window as any).io({ reconnectionAttempts: 5, timeout: 5000 });
+        let notifDebounce: any;
+        const throttledLoad = () => {
+          clearTimeout(notifDebounce);
+          notifDebounce = setTimeout(() => loadNotifications(), 500);
+        };
+        socket.on('notification:new', throttledLoad);
+        socket.on('order:status_changed', throttledLoad);
+        socket.on('order:ready', throttledLoad);
       } catch (_e) {}
     }
   }
 
   container.innerHTML = '';
   container.appendChild(nav);
+  if (bottomBar) {
+    // Remove any previously mounted bottom bar to avoid duplicates
+    document.querySelectorAll('.customer-mobile-bottom-nav').forEach((el) => el.remove());
+    bottomBar.classList.add('customer-mobile-bottom-nav');
+    document.body.appendChild(bottomBar);
+  }
   return nav;
 };

@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Action Tailor / ڈیش بورڈ</title>
 
-  <!-- Tailwind CSS CDN & Configuration -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/tailwind-config.js"></script>
-
-  <!-- Socket.IO for Live Suit Progress Updates -->
+  <!-- Pre-compiled Static Tailwind CSS (Zero Runtime JS) -->
+  <link rel="stylesheet" href="/src/css/tailwind-compiled.css">
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
   <!-- Centralized Bright Theme & View-Specific Custom CSS -->
@@ -20,8 +17,8 @@
   <!-- Dynamic Mount for Customer Navigation Bar -->
   <div id="navbarMount" class="no-print"></div>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 no-print space-y-8">
+  <!-- Main Container (Mobile-First with pb-24 padding for bottom bar) -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 sm:pb-8 no-print space-y-6">
     
     <!-- Top Customer Welcome Card -->
     <div class="tailor-card p-6 sm:p-8 rounded-2xl border border-slate-200 bg-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">

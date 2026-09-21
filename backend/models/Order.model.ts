@@ -221,9 +221,12 @@ OrderSchema.pre<IOrder>('save', function () {
   }
 });
 
-// Indexes for operational queries
+// Indexes for operational queries and fast paginated sorts
+OrderSchema.index({ createdAt: -1 });
 OrderSchema.index({ status: 1, expectedDeliveryDate: 1 });
+OrderSchema.index({ status: 1, createdAt: -1 });
 OrderSchema.index({ customer: 1, createdAt: -1 });
+OrderSchema.index({ customer: 1, status: 1, createdAt: -1 });
 
 export const Order: Model<IOrder> =
   mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);

@@ -62,16 +62,20 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
   };
 
   let linksHtml = '';
+  let mobileLinksHtml = '';
 
   if (!isAuthenticated) {
     linksHtml = `
-      <div style="display: flex; gap: 0.75rem; font-size: 0.875rem;">
+      <div class="flex gap-2 text-sm">
         <a href="/signin.html" style="${getLinkStyle('signin')}">Login / لاگ ان کریں</a>
       </div>
     `;
+    mobileLinksHtml = `
+      <a href="/signin.html" class="block w-full py-3 px-4 text-sm font-semibold text-emerald-700 bg-emerald-50 rounded-xl">Login / لاگ ان کریں</a>
+    `;
   } else {
     linksHtml = `
-      <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8125rem; overflow-x: auto; max-width: 100%;">
+      <div class="hidden md:flex items-center gap-1 text-xs">
         <a href="/index.html" style="${getLinkStyle('dashboard')}">Dashboard / ڈیش بورڈ</a>
         <a href="/orders.html" style="${getLinkStyle('orders')}">Orders / آرڈرز</a>
         <a href="/new-order.html" style="${getLinkStyle('new-order')}">New Order / نیا آرڈر</a>
@@ -80,49 +84,97 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
         <a href="/profile.html" style="${getLinkStyle('profile')}">Profile / پروفائل</a>
       </div>
     `;
+
+    const mobileLinkItems = [
+      { id: 'dashboard', href: '/index.html', label: 'Dashboard / ڈیش بورڈ', icon: '⚡' },
+      { id: 'orders', href: '/orders.html', label: 'Orders / آرڈرز', icon: '📋' },
+      { id: 'new-order', href: '/new-order.html', label: 'New Order / نیا آرڈر', icon: '✂' },
+      { id: 'customers', href: '/customers.html', label: 'Customers / کسٹمرز', icon: '👥' },
+      { id: 'measurements', href: '/measurements.html', label: 'Measurements / ناپ', icon: '📏' },
+      { id: 'profile', href: '/profile.html', label: 'Profile / پروفائل', icon: '👤' },
+    ];
+
+    mobileLinksHtml = `
+      <div class="flex flex-col gap-1.5 p-3 bg-white border-t border-slate-200">
+        ${mobileLinkItems.map((item) => {
+          const isActive = activeLink === item.id;
+          return `
+            <a href="${item.href}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+              isActive ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-700 hover:bg-slate-50'
+            }">
+              <span>${item.icon}</span>
+              <span>${item.label}</span>
+            </a>
+          `;
+        }).join('')}
+      </div>
+    `;
   }
 
   nav.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;">
-      <a href="/index.html" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; font-size: 1.15rem; font-weight: 800; color: #0f172a;">
-        <span style="color: #059669; font-size: 1.25rem;">${logoIcon}</span>
-        <span>${brandName}</span>
-      </a>
-      ${linksHtml}
-    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <div style="display: flex; align-items: center; gap: 1.25rem;">
+        <a href="/index.html" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; font-size: 1.15rem; font-weight: 800; color: #0f172a;">
+          <span style="color: #059669; font-size: 1.25rem;">${logoIcon}</span>
+          <span>${brandName}</span>
+        </a>
+        ${linksHtml}
+      </div>
 
-    <div style="display: flex; align-items: center; gap: 0.65rem;">
-      ${isAuthenticated ? `
-        <!-- Notifications Bell -->
-        <div class="relative" style="position: relative;">
-          <button id="uiNavNotificationBtn" style="padding: 0.4rem 0.6rem; border-radius: 0.5rem; background: #f8fafc; border: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; font-size: 0.875rem; position: relative;" title="Notifications / نوٹیفکیشنز">
-            <span>🔔</span>
-            <span id="uiNavNotificationBadge" style="display: none; background: #ef4444; color: #ffffff; font-size: 0.65rem; font-weight: 700; border-radius: 9999px; padding: 0.1rem 0.35rem; line-height: 1;">0</span>
-          </button>
-          
-          <!-- Dropdown Panel -->
-          <div id="uiNavNotificationDropdown" style="display: none; position: absolute; right: 0; top: 115%; width: 320px; max-height: 380px; overflow-y: auto; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 1050; padding: 0.75rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
-              <span style="font-size: 0.75rem; font-weight: 700; color: #0f172a; text-transform: uppercase;">Notifications / نوٹیفکیشنز</span>
-              <span id="uiNavNotificationRefresh" style="font-size: 0.7rem; color: #059669; cursor: pointer; font-weight: 600;">Refresh / ریفریش کریں 🔄</span>
-            </div>
-            <div id="uiNavNotificationList" style="display: flex; flex-direction: column; gap: 0.5rem;">
-              <div style="text-align: center; color: #94a3b8; font-size: 0.75rem; padding: 1rem 0;">Loading / لوڈ ہو رہا ہے...</div>
+      <div style="display: flex; align-items: center; gap: 0.65rem;">
+        ${isAuthenticated ? `
+          <!-- Notifications Bell -->
+          <div class="relative" style="position: relative;">
+            <button id="uiNavNotificationBtn" style="min-width: 40px; min-height: 40px; border-radius: 0.625rem; background: #f8fafc; border: 1px solid #e2e8f0; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.25rem; font-size: 0.95rem; position: relative;" title="Notifications / نوٹیفکیشنز">
+              <span>🔔</span>
+              <span id="uiNavNotificationBadge" style="display: none; position: absolute; top: -2px; right: -2px; background: #ef4444; color: #ffffff; font-size: 0.65rem; font-weight: 700; border-radius: 9999px; padding: 0.1rem 0.35rem; line-height: 1;">0</span>
+            </button>
+            
+            <!-- Dropdown Panel -->
+            <div id="uiNavNotificationDropdown" style="display: none; position: absolute; right: 0; top: 115%; width: 320px; max-height: 380px; overflow-y: auto; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); z-index: 1050; padding: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.75rem; font-weight: 700; color: #0f172a; text-transform: uppercase;">Notifications / نوٹیفکیشنز</span>
+                <span id="uiNavNotificationRefresh" style="font-size: 0.7rem; color: #059669; cursor: pointer; font-weight: 600;">Refresh / ریفریش کریں 🔄</span>
+              </div>
+              <div id="uiNavNotificationList" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="text-align: center; color: #94a3b8; font-size: 0.75rem; padding: 1rem 0;">Loading / لوڈ ہو رہا ہے...</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <span style="font-size: 0.75rem; background: #f0fdf4; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 600;">
-          ${user?.name || 'Staff'} (${user?.role || 'staff'})
-        </span>
-      ` : ''}
-      ${showAuthButton ? `
-        <button id="uiNavAuthBtn" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; font-weight: 600; border-radius: 0.5rem; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.15s ease;">
-          ${isAuthenticated ? 'Logout / لاگ آؤٹ' : 'Login / لاگ ان کریں'}
-        </button>
-      ` : ''}
+          <span class="hidden sm:inline-block" style="font-size: 0.75rem; background: #f0fdf4; color: #047857; border: 1px solid #a7f3d0; padding: 0.25rem 0.65rem; border-radius: 9999px; font-weight: 600;">
+            ${user?.name || 'Staff'} (${user?.role || 'staff'})
+          </span>
+        ` : ''}
+        ${showAuthButton ? `
+          <button id="uiNavAuthBtn" style="padding: 0.45rem 0.85rem; min-height: 40px; font-size: 0.75rem; font-weight: 600; border-radius: 0.625rem; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.15s ease;">
+            ${isAuthenticated ? 'Logout / لاگ آؤٹ' : 'Login / لاگ ان کریں'}
+          </button>
+        ` : ''}
+
+        ${isAuthenticated ? `
+          <!-- Mobile Hamburger Toggle -->
+          <button id="uiNavMobileToggle" class="md:hidden flex items-center justify-center rounded-xl bg-slate-100 border border-slate-300 text-slate-700" style="min-width: 40px; min-height: 40px; font-size: 1.25rem;" title="Menu / مینو">
+            ☰
+          </button>
+        ` : ''}
+      </div>
+    </div>
+
+    <!-- Collapsible Mobile Menu Drawer -->
+    <div id="uiNavMobileMenu" class="hidden md:hidden w-full absolute left-0 top-full shadow-lg border-b border-slate-200 z-50">
+      ${mobileLinksHtml}
     </div>
   `;
+
+  // Attach mobile menu toggle
+  const mobileToggle = nav.querySelector('#uiNavMobileToggle') as HTMLButtonElement | null;
+  const mobileMenu = nav.querySelector('#uiNavMobileMenu') as HTMLDivElement | null;
+  if (mobileToggle && mobileMenu) {
+    mobileToggle.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  }
 
   const authBtn = nav.querySelector('#uiNavAuthBtn') as HTMLButtonElement | null;
   if (authBtn) {

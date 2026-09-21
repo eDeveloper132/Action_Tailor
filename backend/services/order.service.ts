@@ -16,6 +16,7 @@ import {
   type MeasurementData,
   type GarmentDesignOptions,
   normalizeClothingCategory,
+  normalizePakistaniPhone,
 } from '../types/index.ts';
 
 export interface OrderFilterOptions {
@@ -204,11 +205,21 @@ export class OrderService {
     if (search && search.trim()) {
       const trimmed = search.trim();
       const orderNumRegex = new RegExp(trimmed, 'i');
+      const normPhone = normalizePakistaniPhone(trimmed);
+
+      const custOrConditions: any[] = [
+        { name: new RegExp(trimmed, 'i') },
+        { phone: new RegExp(trimmed, 'i') },
+      ];
+      if (normPhone && normPhone.length >= 3) {
+        custOrConditions.unshift({ phone: normPhone });
+        custOrConditions.push({ phone: new RegExp('^' + normPhone) });
+      }
 
       // Check if searching by customer name/phone
       const matchingCustomers = await CustomerProfile.find({
-        $or: [{ name: new RegExp(trimmed, 'i') }, { phone: new RegExp(trimmed, 'i') }],
-      }).select('_id');
+        $or: custOrConditions,
+      }).select('_id').limit(50);
 
       const customerIds = matchingCustomers.map((c) => c._id);
 
@@ -220,7 +231,7 @@ export class OrderService {
     const [orders, total] = await Promise.all([
       Order.find(filter)
         .populate('customer', 'name phone whatsapp address city')
-        .sort({ expectedDeliveryDate: 1, createdAt: -1 })
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
@@ -230,8 +241,9 @@ export class OrderService {
     return {
       orders: orders as unknown as IOrder[],
       total,
-      pages: Math.ceil(total / limit),
-    };
+      pages: Math.ceil(total / limit) || 1,
+      currentPage: page,
+    } as any;
   }
 
   /**

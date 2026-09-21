@@ -19,13 +19,29 @@ export class DashboardService {
 
     const [
       todayOrdersCount,
-      allOrders,
+      statusAgg,
       totalCustomers,
       upcomingDeliveries,
       recentOrders,
     ] = await Promise.all([
       Order.countDocuments({ createdAt: { $gte: today } }),
-      Order.find().select('status remainingAmount').lean(),
+      Order.aggregate<{ _id: string; count: number; remainingDue: number }>([
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 },
+            remainingDue: {
+              $sum: {
+                $cond: [
+                  { $ne: ['$status', 'cancelled'] },
+                  { $ifNull: ['$remainingAmount', 0] },
+                  0,
+                ],
+              },
+            },
+          },
+        },
+      ]),
       CustomerProfile.countDocuments(),
       Order.find({
         status: { $in: ['pending', 'confirmed', 'cutting', 'stitching', 'quality_check', 'ready'] },
@@ -42,7 +58,7 @@ export class DashboardService {
         .lean(),
     ]);
 
-    // Aggregate status counts and remaining balance
+    // Aggregate status counts and remaining balance from lean aggregation results
     const statusCounts: Record<string, number> = {
       pending: 0,
       confirmed: 0,
@@ -57,13 +73,11 @@ export class DashboardService {
 
     let totalRemainingPayments = 0;
 
-    for (const order of allOrders) {
-      if (statusCounts[order.status] !== undefined) {
-        statusCounts[order.status]++;
+    for (const row of statusAgg) {
+      if (statusCounts[row._id] !== undefined) {
+        statusCounts[row._id] = row.count;
       }
-      if (order.status !== 'cancelled' && order.remainingAmount) {
-        totalRemainingPayments += order.remainingAmount;
-      }
+      totalRemainingPayments += row.remainingDue || 0;
     }
 
     return {

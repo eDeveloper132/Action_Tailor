@@ -14,7 +14,8 @@
     "dev:backend": "npm --workspace=action-tailor-backend run dev",
     "dev:admin": "npm --workspace=action-tailor-admin run dev",
     "dev:customer": "npm --workspace=action-tailor-customer run dev",
-    "build": "npm --workspace=action-tailor-backend run typecheck && npm --workspace=action-tailor-admin run build && npm --workspace=action-tailor-customer run build",
+    "build": "npm run build:css && npm --workspace=action-tailor-backend run typecheck && npm --workspace=action-tailor-admin run build && npm --workspace=action-tailor-customer run build",
+    "build:css": "tailwindcss -c ./admin-panel/tailwind.config.cjs -i ./admin-panel/src/css/tailwind-input.css -o ./admin-panel/src/css/tailwind-compiled.css --minify && tailwindcss -c ./customer-panel/tailwind.config.cjs -i ./customer-panel/src/css/tailwind-input.css -o ./customer-panel/src/css/tailwind-compiled.css --minify",
     "build:backend": "npm --workspace=action-tailor-backend run typecheck",
     "build:admin": "npm --workspace=action-tailor-admin run build",
     "build:customer": "npm --workspace=action-tailor-customer run build",
@@ -22,6 +23,7 @@
     "seed": "npm --workspace=action-tailor-backend run seed"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "tailwindcss": "^3.4.17"
   }
 }

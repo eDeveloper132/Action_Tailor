@@ -2,6 +2,9 @@ import { renderNavbar, showToast } from '../ui_components/index.ts';
 import '../utils/api.ts';
 
 let ordersCache: any[] = [];
+let currentPage = 1;
+let totalPages = 1;
+const PAGE_LIMIT = 20;
 
 async function initOrdersPage(): Promise<void> {
   renderNavbar('navbarMount', {
@@ -12,11 +15,12 @@ async function initOrdersPage(): Promise<void> {
   });
 
   setupEventListeners();
+  setupPaginationListeners();
   setupSocketIO();
-  await loadOrders();
+  await loadOrders(1);
 }
 
-async function loadOrders(): Promise<void> {
+async function loadOrders(page = 1): Promise<void> {
   const container = document.getElementById('ordersContainer');
   if (!container) return;
 
@@ -24,13 +28,17 @@ async function loadOrders(): Promise<void> {
     const search = (document.getElementById('orderSearchInput') as HTMLInputElement)?.value || '';
     const status = (document.getElementById('statusFilterSelect') as HTMLSelectElement)?.value || '';
 
-    let url = '/api/orders?limit=100';
+    let url = `/api/orders?page=${page}&limit=${PAGE_LIMIT}`;
     if (search) url += `&search=${encodeURIComponent(search)}`;
     if (status) url += `&status=${encodeURIComponent(status)}`;
 
     const res = await (window as any).ActionTailor.apiFetch(url);
     const orders = res.data?.orders || [];
     ordersCache = orders;
+    totalPages = res.data?.pages || 1;
+    currentPage = res.data?.currentPage || page;
+
+    updatePaginationUI();
 
     if (orders.length === 0) {
       container.innerHTML = `
@@ -46,6 +54,36 @@ async function loadOrders(): Promise<void> {
   } catch (err: any) {
     container.innerHTML = `<div class="text-rose-500 p-4 text-sm">Error loading orders: ${err.message}</div>`;
   }
+}
+
+function updatePaginationUI(): void {
+  const pageInfo = document.getElementById('ordersPageInfo');
+  const btnPrev = document.getElementById('btnPrevPage') as HTMLButtonElement | null;
+  const btnNext = document.getElementById('btnNextPage') as HTMLButtonElement | null;
+
+  if (pageInfo) {
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages} / صفحہ ${currentPage} از ${totalPages}`;
+  }
+  if (btnPrev) {
+    btnPrev.disabled = currentPage <= 1;
+  }
+  if (btnNext) {
+    btnNext.disabled = currentPage >= totalPages;
+  }
+}
+
+function setupPaginationListeners(): void {
+  document.getElementById('btnPrevPage')?.addEventListener('click', () => {
+    if (currentPage > 1) {
+      loadOrders(currentPage - 1);
+    }
+  });
+
+  document.getElementById('btnNextPage')?.addEventListener('click', () => {
+    if (currentPage < totalPages) {
+      loadOrders(currentPage + 1);
+    }
+  });
 }
 
 function getGarmentName(category: string): string {
@@ -246,17 +284,19 @@ function setupEventListeners(): void {
 function setupSocketIO(): void {
   if (typeof (window as any).io !== 'undefined') {
     try {
-      const socket = (window as any).io();
+      const socket = (window as any).io({ reconnectionAttempts: 5, timeout: 5000 });
+      let reloadTimer: any;
+      const throttledReload = () => {
+        clearTimeout(reloadTimer);
+        reloadTimer = setTimeout(() => loadOrders(currentPage), 500);
+      };
+
       socket.on('order:created', (d: any) => {
         showToast(`New Order #${d.orderNumber} Booked! / نیا آرڈر بک ہو گیا!`, 'info');
-        loadOrders();
+        throttledReload();
       });
-      socket.on('payment:recorded', () => {
-        loadOrders();
-      });
-      socket.on('order:status_changed', () => {
-        loadOrders();
-      });
+      socket.on('payment:recorded', throttledReload);
+      socket.on('order:status_changed', throttledReload);
     } catch (_e) {}
   }
 }
