@@ -22,6 +22,13 @@ function getGarmentDisplay(cat: string): string {
 }
 
 async function initNewOrderStudio(): Promise<void> {
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  if (!user || user.role === 'customer') {
+    window.location.href = '/signin.html';
+    return;
+  }
+
   renderNavbar('navbarMount', {
     brandName: 'Action Tailor',
     logoIcon: '⚡',

@@ -38,6 +38,11 @@ interface MeasurementProfile {
 }
 
 async function initMeasurementsPage(): Promise<void> {
+  if (!localStorage.getItem('token')) {
+    window.location.href = '/signin.html';
+    return;
+  }
+
   renderNavbar('navbarMount', {
     brandName: 'Action Tailor • Customer Portal',
     logoIcon: '✂',

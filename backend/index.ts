@@ -15,9 +15,14 @@ import orderRoutes from './routes/order.routes.ts';
 import paymentRoutes from './routes/payment.routes.ts';
 import dashboardRoutes from './routes/dashboard.routes.ts';
 import notificationRoutes from './routes/notification.routes.ts';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { requestLogger, notFoundHandler, errorHandler } from './middlewares/index.ts';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config(); // fallback to cwd
 
 const app = express();
 const server = http.createServer(app);

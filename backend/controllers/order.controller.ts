@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import mongoose from 'mongoose';
 import type { AuthRequest } from '../middlewares/auth.middleware.ts';
 import { OrderService } from '../services/order.service.ts';
 import type { ApiResponse, OrderStatus } from '../types/index.ts';
@@ -39,6 +40,10 @@ export class OrderController {
   static async getById(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ status: 'error', message: 'Invalid order ID format / غلط آرڈر نمبر' });
+        return;
+      }
       const order = await OrderService.getOrderById(id);
       if (!order) {
         res.status(404).json({ status: 'error', message: 'Order not found / آرڈر نہیں ملا' });
@@ -80,6 +85,10 @@ export class OrderController {
   static async updateStatus(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ status: 'error', message: 'Invalid order ID format / غلط آرڈر نمبر' });
+        return;
+      }
       const { status, notes } = req.body;
 
       if (!status) {

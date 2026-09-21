@@ -73,6 +73,11 @@ function getStatusBadgeClass(status: string): string {
 }
 
 async function initOrdersPage(): Promise<void> {
+  if (!localStorage.getItem('token')) {
+    window.location.href = '/signin.html';
+    return;
+  }
+
   renderNavbar('navbarMount', {
     brandName: 'Action Tailor • Customer Portal',
     logoIcon: '✂',

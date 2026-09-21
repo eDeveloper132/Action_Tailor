@@ -23,6 +23,22 @@ export const errorHandler = (
 ): void => {
   console.error(chalk.red('[Server Error]'), err);
 
+  if (err.name === 'CastError') {
+    res.status(400).json({
+      error: 'CastError',
+      message: 'Invalid ID format provided / غلط آئی ڈی فارمیٹ',
+    });
+    return;
+  }
+
+  if (err.name === 'ValidationError') {
+    res.status(400).json({
+      error: 'ValidationError',
+      message: err.message,
+    });
+    return;
+  }
+
   const statusCode = (err as any).statusCode || (err as any).status || 500;
 
   res.status(statusCode).json({

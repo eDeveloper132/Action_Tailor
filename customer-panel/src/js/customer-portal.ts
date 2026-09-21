@@ -5,6 +5,11 @@ let portalData: any = null;
 let activeOrdersList: any[] = [];
 
 async function initCustomerPortal(): Promise<void> {
+  if (!localStorage.getItem('token')) {
+    window.location.href = '/signin.html';
+    return;
+  }
+
   // Render customer-centric Navbar
   renderNavbar('navbarMount', {
     brandName: 'Action Tailor • Customer Portal',

@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import mongoose from 'mongoose';
 import type { AuthRequest } from '../middlewares/auth.middleware.ts';
 import { CustomerService } from '../services/customer.service.ts';
 import type { ApiResponse } from '../types/index.ts';
@@ -44,6 +45,10 @@ export class CustomerController {
   static async getById(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ status: 'error', message: 'Invalid customer ID format / غلط گاہک نمبر' });
+        return;
+      }
 
       // IDOR Protection: Customers may only view their own profile
       if (req.user && req.user.role === 'customer') {
@@ -84,6 +89,10 @@ export class CustomerController {
   static async update(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ status: 'error', message: 'Invalid customer ID format / غلط گاہک نمبر' });
+        return;
+      }
       const updated = await CustomerService.updateCustomer(id, req.body);
       if (!updated) {
         res.status(404).json({ status: 'error', message: 'Customer not found' });
@@ -102,6 +111,10 @@ export class CustomerController {
   static async delete(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ status: 'error', message: 'Invalid customer ID format / غلط گاہک نمبر' });
+        return;
+      }
       const success = await CustomerService.deleteCustomer(id);
       if (!success) {
         res.status(404).json({ status: 'error', message: 'Customer not found' });

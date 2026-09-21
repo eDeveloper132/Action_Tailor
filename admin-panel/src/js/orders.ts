@@ -7,6 +7,13 @@ let totalPages = 1;
 const PAGE_LIMIT = 20;
 
 async function initOrdersPage(): Promise<void> {
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  if (!user || user.role === 'customer') {
+    window.location.href = '/signin.html';
+    return;
+  }
+
   renderNavbar('navbarMount', {
     brandName: 'Action Tailor',
     logoIcon: '⚡',

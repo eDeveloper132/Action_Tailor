@@ -2,6 +2,11 @@ import { renderNavbar, showToast } from '../ui_components/index.ts';
 import '../utils/api.ts';
 
 async function initProfilePage(): Promise<void> {
+  if (!localStorage.getItem('token')) {
+    window.location.href = '/signin.html';
+    return;
+  }
+
   renderNavbar('navbarMount', {
     brandName: 'Action Tailor / کسٹمر پورٹل',
     logoIcon: '✂',

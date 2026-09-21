@@ -4,6 +4,13 @@ import '../utils/api.ts';
 let ordersCache: any[] = [];
 
 async function initAdminPortal(): Promise<void> {
+  const userStr = localStorage.getItem('user');
+  const userCached = userStr ? JSON.parse(userStr) : null;
+  if (!userCached || userCached.role === 'customer') {
+    window.location.href = '/signin.html';
+    return;
+  }
+
   // Mount reusable responsive navbar
   renderNavbar('navbarMount', {
     brandName: 'Action Tailor • Admin Desk',

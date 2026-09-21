@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import mongoose from 'mongoose';
 import type { AuthRequest } from '../middlewares/auth.middleware.ts';
 import { PaymentService } from '../services/payment.service.ts';
 import type { ApiResponse } from '../types/index.ts';
@@ -43,6 +44,11 @@ export class PaymentController {
       const orderId = Array.isArray(req.params.orderId)
         ? req.params.orderId[0]
         : req.params.orderId;
+
+      if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
+        res.status(400).json({ status: 'error', message: 'Invalid order ID format / غلط آرڈر نمبر' });
+        return;
+      }
 
       // IDOR Protection: If requester is a customer, verify order belongs to them
       if (req.user && req.user.role === 'customer') {

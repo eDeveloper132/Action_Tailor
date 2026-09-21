@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import mongoose from 'mongoose';
 import type { AuthRequest } from '../middlewares/auth.middleware.ts';
 import { MeasurementService } from '../services/measurement.service.ts';
 import type { ApiResponse } from '../types/index.ts';
@@ -9,6 +10,11 @@ export class MeasurementController {
       const customerId = Array.isArray(req.params.customerId)
         ? req.params.customerId[0]
         : req.params.customerId;
+
+      if (!customerId || !mongoose.Types.ObjectId.isValid(customerId)) {
+        res.status(400).json({ status: 'error', message: 'Invalid customer ID format / غلط گاہک نمبر' });
+        return;
+      }
 
       // IDOR Protection: Customer can only view their own measurements
       if (req.user && req.user.role === 'customer') {
@@ -38,6 +44,11 @@ export class MeasurementController {
         ? req.params.clothingCategory[0]
         : req.params.clothingCategory;
 
+      if (!customerId || !mongoose.Types.ObjectId.isValid(customerId)) {
+        res.status(400).json({ status: 'error', message: 'Invalid customer ID format / غلط گاہک نمبر' });
+        return;
+      }
+
       // IDOR Protection: Customer can only view their own measurements
       if (req.user && req.user.role === 'customer') {
         const userCustId = (req.user as any).customerProfile?.toString();
@@ -62,7 +73,11 @@ export class MeasurementController {
 
   static async saveGarmentMeasurement(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
-      const profile = await MeasurementService.upsertProfileForCustomerAndGarment(req.body);
+      const payload = {
+        ...req.body,
+        customer: req.body.customer || req.body.customerId,
+      };
+      const profile = await MeasurementService.upsertProfileForCustomerAndGarment(payload);
       res.json({
         status: 'success',
         message: 'Measurement profile updated / ناپ اپڈیٹ ہو گیا ہے',
@@ -76,6 +91,10 @@ export class MeasurementController {
   static async getById(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ status: 'error', message: 'Invalid measurement ID format / غلط ناپ نمبر' });
+        return;
+      }
       const profile = await MeasurementService.getProfileById(id);
       if (!profile) {
         res.status(404).json({ status: 'error', message: 'Measurement profile not found / ناپ نہیں ملا' });
@@ -117,6 +136,10 @@ export class MeasurementController {
   static async update(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ status: 'error', message: 'Invalid measurement ID format / غلط ناپ نمبر' });
+        return;
+      }
       const updated = await MeasurementService.updateProfile(id, req.body);
       if (!updated) {
         res.status(404).json({ status: 'error', message: 'Measurement profile not found' });
@@ -135,6 +158,10 @@ export class MeasurementController {
   static async delete(req: AuthRequest, res: Response<ApiResponse>): Promise<void> {
     try {
       const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+        res.status(400).json({ status: 'error', message: 'Invalid measurement ID format / غلط ناپ نمبر' });
+        return;
+      }
       const success = await MeasurementService.deleteProfile(id);
       if (!success) {
         res.status(404).json({ status: 'error', message: 'Measurement profile not found' });
