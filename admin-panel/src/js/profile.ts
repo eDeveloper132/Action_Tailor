@@ -2,6 +2,15 @@ import { renderNavbar, showToast } from '../ui_components/index.ts';
 import '../utils/api.ts';
 
 async function initProfilePage(): Promise<void> {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  if (!token || !user || user.role === 'customer') {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/signin.html';
+    return;
+  }
   renderNavbar('navbarMount', {
     brandName: 'Action Tailor',
     logoIcon: '⚡',

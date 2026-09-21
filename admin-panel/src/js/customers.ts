@@ -8,9 +8,12 @@ let totalCustPages = 1;
 const CUST_PAGE_LIMIT = 15;
 
 async function initCustomersPage(): Promise<void> {
+  const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
-  if (!user || user.role === 'customer') {
+  if (!token || !user || user.role === 'customer') {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/signin.html';
     return;
   }

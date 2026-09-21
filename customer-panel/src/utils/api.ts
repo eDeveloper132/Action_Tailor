@@ -6,6 +6,7 @@
 export const API_BASE_URL =
   (import.meta as any).env?.VITE_API_URL ||
   (typeof window !== 'undefined' && (window as any).ACTION_TAILOR_API_URL) ||
+  (typeof window !== 'undefined' && localStorage.getItem('api_url')) ||
   (typeof window !== 'undefined' &&
    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
    window.location.port !== '5000'
@@ -91,7 +92,13 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
           }
         }
         const errorMsg =
-          data?.message || data?.error || (response.status === 404 ? 'Resource not found' : `Request failed with status ${response.status}`);
+          data?.message ||
+          data?.error ||
+          (response.status === 404
+            ? typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+              ? 'Backend API not reachable (404). Please ensure the backend is running and VITE_API_URL is configured.'
+              : 'Resource not found'
+            : `Request failed with status ${response.status}`);
         throw new Error(errorMsg);
       }
 

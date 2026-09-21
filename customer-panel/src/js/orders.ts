@@ -73,7 +73,11 @@ function getStatusBadgeClass(status: string): string {
 }
 
 async function initOrdersPage(): Promise<void> {
-  if (!localStorage.getItem('token')) {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  if (!token || !userStr) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/signin.html';
     return;
   }

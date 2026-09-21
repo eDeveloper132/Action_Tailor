@@ -7,9 +7,12 @@ let totalPages = 1;
 const PAGE_LIMIT = 20;
 
 async function initOrdersPage(): Promise<void> {
+  const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
-  if (!user || user.role === 'customer') {
+  if (!token || !user || user.role === 'customer') {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/signin.html';
     return;
   }

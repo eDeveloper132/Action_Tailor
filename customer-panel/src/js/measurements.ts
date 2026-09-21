@@ -38,7 +38,11 @@ interface MeasurementProfile {
 }
 
 async function initMeasurementsPage(): Promise<void> {
-  if (!localStorage.getItem('token')) {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  if (!token || !userStr) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/signin.html';
     return;
   }
