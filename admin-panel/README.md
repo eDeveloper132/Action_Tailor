@@ -9,7 +9,7 @@
 This application is dedicated exclusively to **tailor shop operations**. It does NOT contain customer dashboard views, preserving complete operational focus and business security:
 
 - **Roles Supported**: `ADMIN` (Shop Owner/Master Tailor), `MANAGER`, `STAFF` (Karigar/Cutter).
-- **Default Port**: `http://localhost:3001`
+- **Default Port**: [localhost](http://localhost:3001/) (Production: [https://action-tailor-f8mx.vercel.app](https://action-tailor-f8mx.vercel.app/))
 - **Bilingual Interface**: Seamless `English / اردو` typography across all workflows.
 
 ---

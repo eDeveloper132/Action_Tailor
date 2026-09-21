@@ -1,6 +1,21 @@
 import { showToast, setButtonLoading } from '../ui_components/index.ts';
 import '../utils/api.ts';
 
+export const getCustomerPortalUrl = (): string => {
+  if ((import.meta as any).env?.VITE_CUSTOMER_PORTAL_URL) {
+    return (import.meta as any).env.VITE_CUSTOMER_PORTAL_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://action-tailor-ut7n.vercel.app/';
+  }
+  return 'http://localhost:3002/';
+};
+
+const customerPortalLink = document.getElementById('customerPortalLink') as HTMLAnchorElement | null;
+if (customerPortalLink) {
+  customerPortalLink.href = getCustomerPortalUrl();
+}
+
 const form = document.getElementById('signinForm') as HTMLFormElement | null;
 const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 
@@ -28,7 +43,7 @@ if (form && submitBtn) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setButtonLoading(submitBtn, false);
-        const customerPortalUrl = (import.meta as any).env?.VITE_CUSTOMER_PORTAL_URL || 'http://localhost:3002';
+        const customerPortalUrl = getCustomerPortalUrl();
         showToast(
           `Access Denied / رسائی کی اجازت نہیں: Customer accounts cannot access the Master Tailor Desk. Please log in through the Customer Portal at ${customerPortalUrl}.`,
           'error',

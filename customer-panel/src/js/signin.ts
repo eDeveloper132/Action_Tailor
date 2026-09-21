@@ -1,6 +1,21 @@
 import { showToast, setButtonLoading } from '../ui_components/index.ts';
 import '../utils/api.ts';
 
+export const getAdminPortalUrl = (): string => {
+  if ((import.meta as any).env?.VITE_ADMIN_PORTAL_URL) {
+    return (import.meta as any).env.VITE_ADMIN_PORTAL_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://action-tailor-f8mx.vercel.app/';
+  }
+  return 'http://localhost:3001/';
+};
+
+const adminPortalLink = document.getElementById('adminPortalLink') as HTMLAnchorElement | null;
+if (adminPortalLink) {
+  adminPortalLink.href = getAdminPortalUrl();
+}
+
 const form = document.getElementById('signinForm') as HTMLFormElement | null;
 const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 
@@ -29,7 +44,7 @@ if (form && submitBtn) {
       }
 
       if (user?.role === 'admin' || user?.role === 'staff') {
-        const adminPortalUrl = (import.meta as any).env?.VITE_ADMIN_PORTAL_URL || 'http://localhost:3001';
+        const adminPortalUrl = getAdminPortalUrl();
         showToast('Staff account detected / سٹاف اکاؤنٹ شناخت ہو گیا', 'info');
         setTimeout(() => {
           window.location.href = adminPortalUrl;

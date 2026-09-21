@@ -9,7 +9,7 @@
 This application is dedicated exclusively to **customers**. It provides a clear, transparent window into their personal tailoring orders without exposing internal shop operations:
 
 - **Target Users**: Customers of Action Tailor.
-- **Default Port**: `http://localhost:3002`
+- **Default Port**: [localhost](http://localhost:3002/) (Production: [https://action-tailor-ut7n.vercel.app](https://action-tailor-ut7n.vercel.app/))
 - **Bilingual Interface**: Seamless `English / اردو` typography across all views.
 
 ### 🛡️ Privacy & Isolation Guardrails

@@ -92,7 +92,7 @@ npm run seed
 Start the backend API development server:
 ```bash
 npm run dev
-# Server will run on http://localhost:5000
+# Server will run on [localhost](http://localhost:5000/)
 ```
 
 ---
@@ -103,7 +103,8 @@ npm run dev
 cd admin-panel
 npm install
 npm run dev
-# Development server will run on http://localhost:3001
+# Development server will run on [localhost](http://localhost:3001/)
+# Production deployment: [https://action-tailor-f8mx.vercel.app](https://action-tailor-f8mx.vercel.app/)
 ```
 
 ---
@@ -114,7 +115,8 @@ npm run dev
 cd customer-panel
 npm install
 npm run dev
-# Development server will run on http://localhost:3002
+# Development server will run on [localhost](http://localhost:3002/)
+# Production deployment: [https://action-tailor-ut7n.vercel.app](https://action-tailor-ut7n.vercel.app/)
 ```
 
 ---
@@ -125,11 +127,11 @@ After running `npm run seed` in the `backend/` folder, the following test accoun
 
 | Role / عہدہ | Name / نام | Email / ای میل | Password / پاس ورڈ | Target Application |
 |---|---|---|---|---|
-| **ADMIN (Master Tailor)** | Ustad Aslam / استاد اسلم | `admin@actiontailor.pk` | `Password123` | Admin Panel (`:3001`) |
-| **MANAGER** | Manager Farhan / منیجر فرحان | `manager@actiontailor.pk` | `Password123` | Admin Panel (`:3001`) |
-| **STAFF (Karigar/Cutter)** | Karigar Rasheed / کاریگر رشید | `staff@actiontailor.pk` | `Password123` | Admin Panel (`:3001`) |
-| **CUSTOMER** | Tariq Mehmood / طارق محمود | `tariq@gmail.com` | `Password123` | Customer Panel (`:3002`) |
-| **CUSTOMER** | Zubair Ahmed / زبیر احمد | `zubair@gmail.com` | `Password123` | Customer Panel (`:3002`) |
+| **ADMIN (Master Tailor)** | Ustad Aslam / استاد اسلم | `admin@actiontailor.pk` | `Password123` | Admin Panel ([localhost](http://localhost:3001/)) |
+| **MANAGER** | Manager Farhan / منیجر فرحان | `manager@actiontailor.pk` | `Password123` | Admin Panel ([localhost](http://localhost:3001/)) |
+| **STAFF (Karigar/Cutter)** | Karigar Rasheed / کاریگر رشید | `staff@actiontailor.pk` | `Password123` | Admin Panel ([localhost](http://localhost:3001/)) |
+| **CUSTOMER** | Tariq Mehmood / طارق محمود | `tariq@gmail.com` | `Password123` | Customer Panel ([localhost](http://localhost:3002/)) |
+| **CUSTOMER** | Zubair Ahmed / زبیر احمد | `zubair@gmail.com` | `Password123` | Customer Panel ([localhost](http://localhost:3002/)) |
 
 ---
 

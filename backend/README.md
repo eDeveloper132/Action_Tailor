@@ -73,8 +73,8 @@ Create `.env` inside the `backend/` directory:
 | `NODE_ENV` | `development` | Node environment (`development` / `production`) |
 | `MONGO_URI` | `mongodb://localhost:27017/action_tailor` | MongoDB connection string |
 | `CORS_ORIGIN` | `http://localhost:3001,http://localhost:3002` | Allowed CORS origins for frontend apps |
-| `ADMIN_FRONTEND_URL` | `http://localhost:3001` | URL of the Admin/Staff frontend |
-| `CUSTOMER_FRONTEND_URL` | `http://localhost:3002` | URL of the Customer frontend |
+| `ADMIN_FRONTEND_URL` | [localhost](http://localhost:3001/) | URL of the Admin/Staff frontend (Prod: `https://action-tailor-f8mx.vercel.app/`) |
+| `CUSTOMER_FRONTEND_URL` | [localhost](http://localhost:3002/) | URL of the Customer frontend (Prod: `https://action-tailor-ut7n.vercel.app/`) |
 | `JWT_SECRET` | `secret_key_change_in_production` | Secret key used to sign JWT tokens |
 | `JWT_EXPIRES_IN` | `7d` | Token validity duration |
 
