@@ -8,12 +8,9 @@ let totalPages = 1;
 const PAGE_LIMIT = 20;
 
 async function initOrdersPage(): Promise<void> {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
-  if (!token || !user || user.role === 'customer') {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const user = await (window as any).ActionTailor.getCurrentUser();
+  if (!user || user.role === 'customer') {
+    (window as any).ActionTailor.clearSession();
     window.location.href = '/signin.html';
     return;
   }
@@ -361,7 +358,7 @@ function printSlip(orderId: string): void {
             <th>Length / لمبائی</th><th>Shoulder / کندھا</th><th>Chest / چھاتی</th><th>Sleeve / آستین</th><th>Collar / کالر</th><th>Daman / دامن</th>
           </tr>
           <tr style="text-align: center;">
-            <td>${q.length || '--'}</td><td>${q.shoulder || '--'}</td><td>${q.chest || '--'}</td><td>${q.sleeve || '--'}</td><td>${q.collar || '--'}</td><td>${q.daman || q.ghera || '--'}</td>
+            <td>${escapeHtml(q.length || '--')}</td><td>${escapeHtml(q.shoulder || '--')}</td><td>${escapeHtml(q.chest || '--')}</td><td>${escapeHtml(q.sleeve || '--')}</td><td>${escapeHtml(q.collar || '--')}</td><td>${escapeHtml(q.daman || q.ghera || '--')}</td>
           </tr>
         </table>
         <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 4px;" border="1">
@@ -369,15 +366,15 @@ function printSlip(orderId: string): void {
             <th>Length / لمبائی</th><th>Paincha / پانچہ</th><th>Aasan / آسن</th><th>Ghera / گھیرا</th>
           </tr>
           <tr style="text-align: center;">
-            <td>${s.length || '--'}</td><td>${s.paincha || '--'}</td><td>${s.aasan || '--'}</td><td>${s.ghera || s.waist || '--'}</td>
+            <td>${escapeHtml(s.length || '--')}</td><td>${escapeHtml(s.paincha || '--')}</td><td>${escapeHtml(s.aasan || '--')}</td><td>${escapeHtml(s.ghera || s.waist || '--')}</td>
           </tr>
         </table>
       </div>
       <div style="border-top: 1px dashed #000; padding-top: 6px;">
-        <div style="display: flex; justify-content: space-between;"><span>Total / کل رقم:</span> <strong>${order.totalAmount} PKR</strong></div>
-        <div style="display: flex; justify-content: space-between;"><span>Advance / پیشگی رقم:</span> <span>${order.advancePayment || 0} PKR</span></div>
+        <div style="display: flex; justify-content: space-between;"><span>Total / کل رقم:</span> <strong>${escapeHtml(order.totalAmount)} PKR</strong></div>
+        <div style="display: flex; justify-content: space-between;"><span>Advance / پیشگی رقم:</span> <span>${escapeHtml(order.advancePayment || 0)} PKR</span></div>
         <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; border-top: 1px solid #000; margin-top: 4px;">
-          <span>Remaining / بقایا رقم:</span> <span>${order.remainingAmount} PKR</span>
+          <span>Remaining / بقایا رقم:</span> <span>${escapeHtml(order.remainingAmount)} PKR</span>
         </div>
       </div>
     </div>

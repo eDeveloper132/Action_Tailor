@@ -46,6 +46,16 @@ export class PaymentService {
       );
     }
 
+    // Refund validation: refund cannot exceed net amount already paid
+    if (data.type === 'refund') {
+      const netPaid = order.advancePayment || 0;
+      if (data.amount > netPaid) {
+        throw new Error(
+          `Refund amount (Rs. ${data.amount}) cannot exceed total amount paid so far (Rs. ${netPaid}) / واپسی کی رقم ادا شدہ رقم سے زیادہ نہیں ہو سکتی`
+        );
+      }
+    }
+
     const validUserId = (data.receivedByUserId && mongoose.Types.ObjectId.isValid(data.receivedByUserId))
       ? data.receivedByUserId
       : undefined;
@@ -72,6 +82,7 @@ export class PaymentService {
             type: data.type || (order.advancePayment === 0 ? 'advance' : 'partial'),
             method: data.method || 'cash',
             transactionReference: txRef,
+            idempotencyKey: txRef,
             receivedBy: validUserId,
             notes: data.notes?.trim(),
           },
@@ -84,7 +95,7 @@ export class PaymentService {
       if (data.type === 'refund') {
         order.advancePayment = Math.max(0, (order.advancePayment || 0) - data.amount);
         order.remainingAmount = Math.min(order.totalAmount, order.totalAmount - order.advancePayment);
-        order.paymentStatus = order.advancePayment === 0 ? 'unpaid' : 'partially_paid';
+        order.paymentStatus = order.advancePayment === 0 ? 'unpaid' : (order.remainingAmount === 0 ? 'paid' : 'partially_paid');
       } else {
         order.advancePayment = (order.advancePayment || 0) + data.amount;
         order.remainingAmount = Math.max(0, order.totalAmount - order.advancePayment);
@@ -112,6 +123,7 @@ export class PaymentService {
               remainingBalance: order.remainingAmount,
               paymentStatus: order.paymentStatus,
               transactionReference: txRef,
+              idempotencyKey: txRef,
             },
           },
         ],
@@ -122,23 +134,48 @@ export class PaymentService {
         await session.commitTransaction();
       }
 
-      // 4. Socket.IO Broadcast
+      // 4. Scoped Socket.IO Emission
       try {
         const io = getIO();
-        io.emit('payment:recorded', {
+        const customerRoom = `customer:${order.customer.toString()}`;
+        io.to('staff').emit('payment:recorded', {
           orderId: order._id.toString(),
           orderNumber: order.orderNumber,
           amount: data.amount,
+          type: payment.type,
+          remainingAmount: order.remainingAmount,
+          paymentStatus: order.paymentStatus,
+        });
+        io.to(customerRoom).emit('payment:recorded', {
+          orderId: order._id.toString(),
+          orderNumber: order.orderNumber,
+          amount: data.amount,
+          type: payment.type,
           remainingAmount: order.remainingAmount,
           paymentStatus: order.paymentStatus,
         });
       } catch (_e) {}
 
       return { payment, order };
-    } catch (error) {
+    } catch (error: any) {
       if (session && useTransaction) {
-        await session.abortTransaction();
+        try {
+          await session.abortTransaction();
+        } catch (_abortErr) {}
       }
+
+      // Database-enforced idempotency duplicate key recovery (code 11000)
+      if (error?.code === 11000 && txRef) {
+        const existing = await Payment.findOne({
+          order: order._id,
+          $or: [{ idempotencyKey: txRef }, { transactionReference: txRef }],
+        });
+        if (existing) {
+          const freshOrder = await Order.findById(order._id);
+          return { payment: existing, order: freshOrder || order };
+        }
+      }
+
       throw error;
     } finally {
       if (session) {

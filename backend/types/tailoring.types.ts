@@ -229,6 +229,18 @@ export interface OrderStatusHistoryEntry {
   notes?: string;
 }
 
+export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  pending: ['confirmed', 'cutting', 'on_hold', 'cancelled'],
+  confirmed: ['cutting', 'on_hold', 'cancelled'],
+  cutting: ['stitching', 'on_hold', 'cancelled'],
+  stitching: ['quality_check', 'ready', 'on_hold', 'cancelled'],
+  quality_check: ['ready', 'stitching', 'on_hold', 'cancelled'],
+  ready: ['delivered', 'on_hold', 'cancelled'],
+  on_hold: ['pending', 'confirmed', 'cutting', 'stitching', 'quality_check', 'ready', 'cancelled'],
+  delivered: [],
+  cancelled: [],
+};
+
 // ==========================================
 // 6. Payment Types
 // ==========================================

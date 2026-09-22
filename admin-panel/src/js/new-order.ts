@@ -1,4 +1,6 @@
 import { renderNavbar, showToast } from '../ui_components/index.ts';
+import { escapeHtml } from '../utils/sanitize.ts';
+import { formatLocalDateInput } from '../utils/date.ts';
 import '../utils/api.ts';
 
 let selectedCategory = 'shalwaar_qameez';
@@ -22,12 +24,9 @@ function getGarmentDisplay(cat: string): string {
 }
 
 async function initNewOrderStudio(): Promise<void> {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
-  if (!token || !user || user.role === 'customer') {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const user = await (window as any).ActionTailor.getCurrentUser();
+  if (!user || user.role === 'customer') {
+    (window as any).ActionTailor.clearSession();
     window.location.href = '/signin.html';
     return;
   }
@@ -63,7 +62,7 @@ async function initNewOrderStudio(): Promise<void> {
 
 function setDatePreset(days: number): void {
   const target = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-  const formatted = target.toISOString().split('T')[0];
+  const formatted = formatLocalDateInput(target);
   const dateInput = document.getElementById('orderDeliveryDateInput') as HTMLInputElement;
   if (dateInput) dateInput.value = formatted;
 }
@@ -155,7 +154,7 @@ function renderSearchResults(list: any[], query: string): void {
   if (list.length === 0) {
     resultsDropdown.innerHTML = `
       <div class="p-3 text-xs text-slate-500 flex items-center justify-between">
-        <span>No customer found / کوئی کسٹمر نہیں ملا ("<strong>${query}</strong>")</span>
+        <span>No customer found / کوئی کسٹمر نہیں ملا ("<strong>${escapeHtml(query)}</strong>")</span>
         <button type="button" id="btnQuickAddFromSearch" class="text-xs font-bold text-emerald-700 hover:underline">
           + Add Customer / کسٹمر بنائیں
         </button>
@@ -173,17 +172,17 @@ function renderSearchResults(list: any[], query: string): void {
   resultsDropdown.innerHTML = list
     .map(
       (c: any) => `
-    <div class="cust-search-row p-3 hover:bg-emerald-50 cursor-pointer flex justify-between items-center text-xs transition-colors" data-id="${c._id}">
+    <div class="cust-search-row p-3 hover:bg-emerald-50 cursor-pointer flex justify-between items-center text-xs transition-colors" data-id="${escapeHtml(c._id)}">
       <div>
         <div class="font-extrabold text-slate-900 text-sm flex items-center gap-2">
-          <span>${c.name}</span>
-          <span class="font-mono text-emerald-700 font-bold text-xs">📞 ${c.phone}</span>
+          <span>${escapeHtml(c.name)}</span>
+          <span class="font-mono text-emerald-700 font-bold text-xs">📞 ${escapeHtml(c.phone)}</span>
         </div>
-        <div class="text-[11px] text-slate-500 mt-0.5">${c.address || c.city || 'Lahore'}</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(c.address || c.city || 'Lahore')}</div>
       </div>
       <div class="text-right shrink-0">
         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-          ${c.totalOrders || 0} Suits / سوٹ
+          ${escapeHtml(c.totalOrders || 0)} Suits / سوٹ
         </span>
       </div>
     </div>
@@ -216,7 +215,7 @@ async function selectCustomerAndLoad(customer: any): Promise<void> {
 
   // Synchronize hidden select
   if (selectCustomer) {
-    selectCustomer.innerHTML = `<option value="${customer._id}" selected>${customer.name}</option>`;
+    selectCustomer.innerHTML = `<option value="${escapeHtml(customer._id)}" selected>${escapeHtml(customer.name)}</option>`;
     selectCustomer.value = customer._id;
   }
 

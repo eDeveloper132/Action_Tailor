@@ -3,6 +3,8 @@
  * Minimal Customer Navigation: Dashboard, My Orders, My Measurements, Profile, Notifications, Logout
  */
 
+import { escapeHtml } from '../utils/sanitize.ts';
+
 export interface NavbarOptions {
   brandName?: string;
   logoIcon?: string;
@@ -19,10 +21,9 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
     throw new Error('Navbar container element not found');
   }
 
-  const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!user;
 
   const {
     brandName = 'Action Tailor / کسٹمر پورٹل',
@@ -289,7 +290,7 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
           }
 
           notifList.innerHTML = notifications.slice(0, 10).map((n: any) => `
-            <div class="nav-notif-item" data-id="${n._id}" data-read="${n.isRead}" style="
+            <div class="nav-notif-item" data-id="${escapeHtml(n._id)}" data-read="${n.isRead}" style="
               padding: 0.65rem 0.85rem;
               border-bottom: 1px solid #f8fafc;
               background-color: ${n.isRead ? '#ffffff' : '#f0fdf4'};
@@ -297,10 +298,10 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
               transition: background-color 0.15s;
             ">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
-                <span style="font-size: 0.75rem; font-weight: 700; color: #0f172a;">${n.title || 'Notification'}</span>
+                <span style="font-size: 0.75rem; font-weight: 700; color: #0f172a;">${escapeHtml(n.title || 'Notification')}</span>
                 <span style="font-size: 0.65rem; color: #94a3b8; white-space: nowrap;">${new Date(n.createdAt).toLocaleDateString('en-GB')}</span>
               </div>
-              <p style="font-size: 0.7rem; color: #475569; margin-top: 0.25rem; line-height: 1.35;">${n.message || ''}</p>
+              <p style="font-size: 0.7rem; color: #475569; margin-top: 0.25rem; line-height: 1.35;">${escapeHtml(n.message || '')}</p>
             </div>
           `).join('');
 

@@ -2,12 +2,9 @@ import { renderNavbar, showToast } from '../ui_components/index.ts';
 import '../utils/api.ts';
 
 async function initProfilePage(): Promise<void> {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
-  if (!token || !user || user.role === 'customer') {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const user = await (window as any).ActionTailor.getCurrentUser();
+  if (!user || user.role === 'customer') {
+    (window as any).ActionTailor.clearSession();
     window.location.href = '/signin.html';
     return;
   }
@@ -19,12 +16,7 @@ async function initProfilePage(): Promise<void> {
   });
 
   document.getElementById('btnSignOutProfile')?.addEventListener('click', async () => {
-    try {
-      await (window as any).ActionTailor.apiFetch('/api/auth/signout', { method: 'POST' });
-    } catch (_e) {}
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/signin.html';
+    await (window as any).ActionTailor.signOut();
   });
 
   try {

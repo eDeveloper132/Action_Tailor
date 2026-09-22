@@ -25,6 +25,21 @@ type AppSocket = Socket<
 
 let io: AppSocketServer | null = null;
 
+import { verifyToken, AUTH_COOKIE_NAME } from '../utils/jwt.ts';
+
+function parseCookies(cookieHeader?: string): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieHeader) return cookies;
+  const items = cookieHeader.split(';');
+  for (const item of items) {
+    const [name, ...rest] = item.split('=');
+    if (name) {
+      cookies[name.trim()] = decodeURIComponent(rest.join('=').trim());
+    }
+  }
+  return cookies;
+}
+
 export const initSocketServer = (httpServer: HttpServer): AppSocketServer => {
   io = new SocketIOServer<
     ClientToServerEvents,
@@ -53,8 +68,56 @@ export const initSocketServer = (httpServer: HttpServer): AppSocketServer => {
     },
   });
 
+  // Handshake authentication middleware
+  io.use((socket, next) => {
+    try {
+      const cookies = parseCookies(socket.handshake.headers.cookie);
+      const token =
+        cookies[AUTH_COOKIE_NAME] ||
+        (socket.handshake.auth?.token as string | undefined) ||
+        (typeof socket.handshake.headers.authorization === 'string'
+          ? socket.handshake.headers.authorization.replace(/^Bearer\s+/i, '').trim()
+          : undefined);
+
+      if (token) {
+        const decoded = verifyToken(token);
+        if (decoded) {
+          socket.data.user = decoded;
+          socket.data.userId = decoded.userId;
+        }
+      }
+      return next();
+    } catch (_err) {
+      return next();
+    }
+  });
+
   io.on('connection', (socket: AppSocket) => {
-    console.log(chalk.cyan(`⚡ Socket connected: ${socket.id}`));
+    const user = socket.data.user;
+
+    if (user) {
+      console.log(
+        chalk.cyan(`⚡ Authenticated socket connected: ${socket.id} (user: ${user.userId}, role: ${user.role || 'customer'})`)
+      );
+
+      // Join staff rooms
+      if (user.role && ['admin', 'manager', 'staff'].includes(user.role)) {
+        socket.join('staff');
+        if (user.role === 'admin') socket.join('admin');
+        if (user.role === 'manager') socket.join('manager');
+      }
+
+      // Join customer room
+      if (user.customerProfile) {
+        socket.join(`customer:${user.customerProfile}`);
+      }
+
+      // Join user-specific room
+      socket.join(`user:${user.userId}`);
+    } else {
+      console.log(chalk.gray(`⚡ Public/Guest socket connected: ${socket.id}`));
+      socket.join('public');
+    }
 
     // Typed ping/pong event
     socket.on('ping', (data: PingPayload) => {
@@ -66,7 +129,7 @@ export const initSocketServer = (httpServer: HttpServer): AppSocketServer => {
     });
   });
 
-  console.log(chalk.blue('✓ Socket.IO server initialized with multi-origin CORS'));
+  console.log(chalk.blue('✓ Socket.IO server initialized with multi-origin CORS & handshake auth'));
   return io;
 };
 

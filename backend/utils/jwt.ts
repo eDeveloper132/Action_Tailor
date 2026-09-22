@@ -29,7 +29,6 @@ export const generateToken = (
   };
   return jwt.sign(payload, JWT_SECRET, options);
 };
-
 /**
  * Verify and decode a JWT token
  */
@@ -41,4 +40,59 @@ export const verifyToken = (token: string): JwtUserPayload | null => {
     return null;
   }
 };
+
+export const AUTH_COOKIE_NAME = process.env.AUTH_COOKIE_NAME || 'token';
+
+/**
+ * Parses duration string (e.g., '7d', '24h', '60m') to milliseconds
+ */
+export function parseDurationMs(duration: string | number): number {
+  if (typeof duration === 'number') return duration;
+  const match = duration.match(/^(\d+)([dhms])?$/);
+  if (!match) return 7 * 24 * 60 * 60 * 1000;
+  const val = parseInt(match[1], 10);
+  const unit = match[2] || 's';
+  switch (unit) {
+    case 'd':
+      return val * 24 * 60 * 60 * 1000;
+    case 'h':
+      return val * 60 * 60 * 1000;
+    case 'm':
+      return val * 60 * 1000;
+    case 's':
+      return val * 1000;
+    default:
+      return val * 1000;
+  }
+}
+
+/**
+ * Returns environment-driven, secure cookie options
+ */
+export function getAuthCookieOptions() {
+  const isProd = process.env.NODE_ENV === 'production';
+  const maxAgeMs = process.env.AUTH_COOKIE_MAX_AGE
+    ? parseInt(process.env.AUTH_COOKIE_MAX_AGE, 10)
+    : parseDurationMs(JWT_EXPIRES_IN);
+
+  const rawSameSite = (process.env.AUTH_COOKIE_SAME_SITE || 'lax').toLowerCase();
+  const sameSite: 'lax' | 'strict' | 'none' =
+    rawSameSite === 'none' || rawSameSite === 'strict' ? (rawSameSite as any) : 'lax';
+
+  const secure =
+    process.env.AUTH_COOKIE_SECURE !== undefined
+      ? process.env.AUTH_COOKIE_SECURE === 'true'
+      : isProd || sameSite === 'none';
+
+  const domain = process.env.AUTH_COOKIE_DOMAIN || undefined;
+
+  return {
+    httpOnly: true,
+    secure,
+    sameSite,
+    maxAge: maxAgeMs,
+    domain,
+    path: '/',
+  };
+}
 

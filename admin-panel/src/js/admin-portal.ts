@@ -4,13 +4,10 @@ import '../utils/api.ts';
 let ordersCache: any[] = [];
 
 async function initAdminPortal(): Promise<void> {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
-  const userCached = userStr ? JSON.parse(userStr) : null;
+  const user = await (window as any).ActionTailor.getCurrentUser();
 
-  if (!token || !userCached || userCached.role === 'customer') {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  if (!user || user.role === 'customer') {
+    (window as any).ActionTailor.clearSession();
     window.location.href = '/signin.html';
     return;
   }
@@ -28,24 +25,11 @@ async function initAdminPortal(): Promise<void> {
   setupSocketIO();
 
   const titleEl = document.getElementById('adminDeskTitle');
-  if (titleEl && userCached) {
-    titleEl.textContent = `Master Tailor Desk • ${userCached.name || 'استاد جی'}`;
+  if (titleEl && user.name) {
+    titleEl.textContent = `Master Tailor Desk • ${user.name}`;
   }
 
   try {
-    const meRes = await (window as any).ActionTailor.apiFetch('/api/auth/me').catch(() => null);
-    if (meRes && meRes.data) {
-      const user = meRes.data;
-      if (user.role === 'customer') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/signin.html';
-        return;
-      }
-      if (titleEl && user.name) {
-        titleEl.textContent = `Master Tailor Desk • ${user.name}`;
-      }
-    }
 
     await loadMetrics();
     await loadOrders();

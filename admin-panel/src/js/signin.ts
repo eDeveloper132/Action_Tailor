@@ -1,4 +1,5 @@
 import { showToast, setButtonLoading } from '../ui_components/index.ts';
+import { getSafeRedirectUrl } from '../utils/redirect.ts';
 import '../utils/api.ts';
 
 export const getCustomerPortalUrl = (): string => {
@@ -15,6 +16,18 @@ const customerPortalLink = document.getElementById('customerPortalLink') as HTML
 if (customerPortalLink) {
   customerPortalLink.href = getCustomerPortalUrl();
 }
+
+// If already authenticated as staff, redirect immediately
+(async () => {
+  try {
+    const user = await (window as any).ActionTailor?.getCurrentUser();
+    if (user && user.role !== 'customer') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTarget = getSafeRedirectUrl(urlParams.get('redirect'), '/index.html');
+      window.location.href = redirectTarget;
+    }
+  } catch (_err) {}
+})();
 
 const form = document.getElementById('signinForm') as HTMLFormElement | null;
 const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
@@ -40,8 +53,7 @@ if (form && submitBtn) {
 
       // Role check: Only admin and staff may log into the Admin Desk
       if (user?.role === 'customer') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        await (window as any).ActionTailor.signOut();
         setButtonLoading(submitBtn, false);
         const customerPortalUrl = getCustomerPortalUrl();
         showToast(
@@ -52,15 +64,16 @@ if (form && submitBtn) {
         return;
       }
 
-      if (res.data && res.data.token) {
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
       }
 
       showToast(`Welcome / خوش آمدید، ${user?.name || ''}! Redirecting...`, 'success', { title: 'Welcome / خوش آمدید' });
 
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTarget = getSafeRedirectUrl(urlParams.get('redirect'), '/index.html');
       setTimeout(() => {
-        window.location.href = '/index.html';
+        window.location.href = redirectTarget;
       }, 700);
     } catch (err: any) {
       setButtonLoading(submitBtn, false);

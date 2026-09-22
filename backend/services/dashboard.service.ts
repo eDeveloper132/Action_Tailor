@@ -14,19 +14,21 @@ export class DashboardService {
     totalCustomers: number;
     recentOrders: any[];
   }> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
 
-    const threeDaysLater = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const startOfTomorrow = new Date(startOfToday.getTime() + 24 * 60 * 60 * 1000);
+    const dayAfterTomorrow = new Date(startOfToday.getTime() + 48 * 60 * 60 * 1000);
+    const threeDaysLater = new Date(startOfToday.getTime() + 4 * 24 * 60 * 60 * 1000 - 1);
 
     const [
       todayOrdersCount,
       statusAgg,
       totalCustomers,
-      upcomingDeliveries,
+      rawDeliveries,
       recentOrders,
     ] = await Promise.all([
-      Order.countDocuments({ createdAt: { $gte: today } }),
+      Order.countDocuments({ createdAt: { $gte: startOfToday } }),
       Order.aggregate<{ _id: string; count: number; remainingDue: number }>([
         {
           $group: {
@@ -44,14 +46,14 @@ export class DashboardService {
           },
         },
       ]),
-      CustomerProfile.countDocuments(),
+      CustomerProfile.countDocuments({ isDeleted: { $ne: true } }),
       Order.find({
-        status: { $in: ['pending', 'confirmed', 'cutting', 'stitching', 'quality_check', 'ready'] },
+        status: { $in: ['pending', 'confirmed', 'cutting', 'stitching', 'quality_check', 'ready', 'on_hold'] },
         expectedDeliveryDate: { $lte: threeDaysLater },
       })
         .populate('customer', 'name phone whatsapp')
         .sort({ expectedDeliveryDate: 1 })
-        .limit(10)
+        .limit(25)
         .lean(),
       Order.find()
         .populate('customer', 'name phone whatsapp')
@@ -59,6 +61,24 @@ export class DashboardService {
         .limit(6)
         .lean(),
     ]);
+
+    const upcomingDeliveries = rawDeliveries.map((ord: any) => {
+      const time = new Date(ord.expectedDeliveryDate).getTime();
+      let deliveryCategory: 'overdue' | 'today' | 'tomorrow' | 'upcoming' = 'upcoming';
+      if (time < startOfToday.getTime()) {
+        deliveryCategory = 'overdue';
+      } else if (time < startOfTomorrow.getTime()) {
+        deliveryCategory = 'today';
+      } else if (time < dayAfterTomorrow.getTime()) {
+        deliveryCategory = 'tomorrow';
+      } else {
+        deliveryCategory = 'upcoming';
+      }
+      return {
+        ...ord,
+        deliveryCategory,
+      };
+    });
 
     // Aggregate status counts and remaining balance from lean aggregation results
     const statusCounts: Record<string, number> = {

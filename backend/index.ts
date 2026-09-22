@@ -28,6 +28,10 @@ dotenv.config(); // fallback to cwd
 const app = express();
 const server = http.createServer(app);
 
+if (process.env.VERCEL || process.env.TRUST_PROXY || process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 const ADMIN_FRONTEND_URL = process.env.ADMIN_FRONTEND_URL || 'http://localhost:3001';
 const CUSTOMER_FRONTEND_URL = process.env.CUSTOMER_FRONTEND_URL || 'http://localhost:3002';

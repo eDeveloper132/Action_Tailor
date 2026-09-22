@@ -8,6 +8,7 @@ export interface IPayment extends Document {
   type: PaymentType;
   method: PaymentMethod;
   transactionReference?: string;
+  idempotencyKey?: string;
   receivedBy?: mongoose.Types.ObjectId;
   notes?: string;
   createdAt: Date;
@@ -49,6 +50,11 @@ const PaymentSchema = new Schema<IPayment>(
       type: String,
       trim: true,
     },
+    idempotencyKey: {
+      type: String,
+      trim: true,
+      index: true,
+    },
     receivedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -64,6 +70,7 @@ const PaymentSchema = new Schema<IPayment>(
 );
 
 PaymentSchema.index({ order: 1, createdAt: -1 });
+PaymentSchema.index({ order: 1, idempotencyKey: 1 }, { unique: true, sparse: true });
 
 export const Payment: Model<IPayment> =
   mongoose.models.Payment || mongoose.model<IPayment>('Payment', PaymentSchema);

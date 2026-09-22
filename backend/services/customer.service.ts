@@ -1,5 +1,7 @@
 import { CustomerProfile, type ICustomerProfile, MeasurementProfile, Order } from '../models/index.ts';
 import { normalizePakistaniPhone } from '../types/tailoring.types.ts';
+import { escapeRegExp } from '../utils/regex.ts';
+import { parsePagination } from '../utils/pagination.ts';
 
 export interface CustomerFilterOptions {
   query?: string;
@@ -12,7 +14,7 @@ export class CustomerService {
    * Search customers by phone or name with fast indexing
    */
   static async searchCustomers(query: string, limit = 20): Promise<ICustomerProfile[]> {
-    const trimmed = query.trim();
+    const trimmed = (query || '').trim().slice(0, 100);
     if (!trimmed) {
       return CustomerProfile.find({ isDeleted: { $ne: true } })
         .sort({ updatedAt: -1 })
@@ -25,11 +27,12 @@ export class CustomerService {
 
     // Fast path: If search query is numeric phone, search indexed phone field first
     if (isNumeric && normPhone && normPhone.length >= 4) {
+      const escapedPhone = escapeRegExp(normPhone);
       const phoneMatches = await CustomerProfile.find({
         isDeleted: { $ne: true },
         $or: [
           { phone: normPhone },
-          { phone: new RegExp('^' + normPhone) },
+          { phone: new RegExp('^' + escapedPhone) },
           { whatsapp: normPhone },
         ],
       })
@@ -42,7 +45,7 @@ export class CustomerService {
       }
     }
 
-    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escaped = escapeRegExp(trimmed);
     const regex = new RegExp(escaped, 'i');
 
     const orConditions: any[] = [
@@ -53,8 +56,9 @@ export class CustomerService {
     ];
 
     if (normPhone && normPhone.length >= 3) {
+      const escapedPhone = escapeRegExp(normPhone);
       orConditions.unshift({ phone: normPhone });
-      orConditions.push({ phone: new RegExp('^' + normPhone) });
+      orConditions.push({ phone: new RegExp('^' + escapedPhone) });
       orConditions.push({ whatsapp: normPhone });
     }
 
@@ -70,18 +74,23 @@ export class CustomerService {
   /**
    * Paginated list of customers
    */
-  static async listCustomers(page = 1, limit = 20): Promise<{ customers: ICustomerProfile[]; total: number; pages: number }> {
-    const skip = (page - 1) * limit;
+  static async listCustomers(
+    page = 1,
+    limit = 20
+  ): Promise<{ customers: ICustomerProfile[]; total: number; pages: number; page: number; limit: number }> {
+    const { page: resolvedPage, limit: resolvedLimit, skip } = parsePagination({ page, limit }, 20);
     const filter = { isDeleted: { $ne: true } };
     const [customers, total] = await Promise.all([
-      CustomerProfile.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      CustomerProfile.find(filter).sort({ createdAt: -1 }).skip(skip).limit(resolvedLimit).lean(),
       CustomerProfile.countDocuments(filter),
     ]);
 
     return {
       customers: customers as unknown as ICustomerProfile[],
       total,
-      pages: Math.ceil(total / limit) || 1,
+      pages: Math.ceil(total / resolvedLimit) || 1,
+      page: resolvedPage,
+      limit: resolvedLimit,
     };
   }
 

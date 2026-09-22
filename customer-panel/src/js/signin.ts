@@ -1,4 +1,5 @@
 import { showToast, setButtonLoading } from '../ui_components/index.ts';
+import { getSafeRedirectUrl } from '../utils/redirect.ts';
 import '../utils/api.ts';
 
 export const getAdminPortalUrl = (): string => {
@@ -15,6 +16,18 @@ const adminPortalLink = document.getElementById('adminPortalLink') as HTMLAnchor
 if (adminPortalLink) {
   adminPortalLink.href = getAdminPortalUrl();
 }
+
+// If already authenticated as customer, redirect immediately
+(async () => {
+  try {
+    const user = await (window as any).ActionTailor?.getCurrentUser();
+    if (user && user.role === 'customer') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTarget = getSafeRedirectUrl(urlParams.get('redirect'), '/index.html');
+      window.location.href = redirectTarget;
+    }
+  } catch (_err) {}
+})();
 
 const form = document.getElementById('signinForm') as HTMLFormElement | null;
 const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
@@ -38,12 +51,11 @@ if (form && submitBtn) {
 
       const user = res.data?.user;
 
-      if (res.data && res.data.token) {
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
       }
 
-      if (user?.role === 'admin' || user?.role === 'staff') {
+      if (user?.role === 'admin' || user?.role === 'staff' || user?.role === 'manager') {
         const adminPortalUrl = getAdminPortalUrl();
         showToast('Staff account detected / سٹاف اکاؤنٹ شناخت ہو گیا', 'info');
         setTimeout(() => {
@@ -55,9 +67,9 @@ if (form && submitBtn) {
       showToast('Signed in successfully! / لاگ ان کامیاب!', 'success');
 
       const urlParams = new URLSearchParams(window.location.search);
-      const redirect = urlParams.get('redirect') || '/index.html';
+      const redirectTarget = getSafeRedirectUrl(urlParams.get('redirect'), '/index.html');
       setTimeout(() => {
-        window.location.href = redirect;
+        window.location.href = redirectTarget;
       }, 700);
     } catch (err: any) {
       setButtonLoading(submitBtn, false);

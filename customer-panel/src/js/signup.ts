@@ -1,4 +1,5 @@
 import { showToast, setButtonLoading } from '../ui_components/index.ts';
+import { getSafeRedirectUrl } from '../utils/redirect.ts';
 import '../utils/api.ts';
 
 const form = document.getElementById('signupForm') as HTMLFormElement | null;
@@ -195,14 +196,15 @@ if (form && submitBtn) {
         body: JSON.stringify({ fullname, email, password }),
       });
 
-      if (res.data && res.data.token) {
-        localStorage.setItem('token', res.data.token);
+      if (res.data && res.data.user) {
         localStorage.setItem('user', JSON.stringify(res.data.user));
       }
 
       showToast('Account created successfully! / اکاؤنٹ کامیابی سے بن گیا!', 'success');
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTarget = getSafeRedirectUrl(urlParams.get('redirect'), '/index.html');
       setTimeout(() => {
-        window.location.href = '/index.html';
+        window.location.href = redirectTarget;
       }, 1000);
     } catch (err: any) {
       setButtonLoading(submitBtn, false);

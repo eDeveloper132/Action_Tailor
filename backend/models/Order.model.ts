@@ -29,6 +29,7 @@ export interface IOrder extends Document {
   remainingAmount: number;
   paymentStatus: PaymentStatus;
   status: OrderStatus;
+  previousOperationalStatus?: OrderStatus;
   statusHistory: OrderStatusHistoryEntry[];
   orderDate: Date;
   expectedDeliveryDate: Date;
@@ -168,6 +169,17 @@ const OrderSchema = new Schema<IOrder>(
       ],
       default: 'pending',
       index: true,
+    },
+    previousOperationalStatus: {
+      type: String,
+      enum: [
+        'pending',
+        'confirmed',
+        'cutting',
+        'stitching',
+        'quality_check',
+        'ready',
+      ],
     },
     statusHistory: [
       {

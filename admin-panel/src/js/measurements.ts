@@ -1,16 +1,14 @@
 import { renderNavbar, showToast } from '../ui_components/index.ts';
+import { escapeHtml } from '../utils/sanitize.ts';
 import '../utils/api.ts';
 
 let customersList: any[] = [];
 let profilesCache: any[] = [];
 
 async function initMeasurementsPage(): Promise<void> {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
-  if (!token || !user || user.role === 'customer') {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const user = await (window as any).ActionTailor.getCurrentUser();
+  if (!user || user.role === 'customer') {
+    (window as any).ActionTailor.clearSession();
     window.location.href = '/signin.html';
     return;
   }
@@ -44,7 +42,7 @@ async function loadCustomers(selectedId: string = ''): Promise<void> {
     customersList = res.data?.customers || [];
 
     const optionsHtml = customersList
-      .map((c: any) => `<option value="${c._id}" ${c._id === selectedId ? 'selected' : ''}>${c.name} (${c.phone})</option>`)
+      .map((c: any) => `<option value="${escapeHtml(c._id)}" ${c._id === selectedId ? 'selected' : ''}>${escapeHtml(c.name)} (${escapeHtml(c.phone)})</option>`)
       .join('');
 
     if (filterSelect) {
@@ -108,9 +106,9 @@ function renderProfileCard(p: any): string {
     <div class="tailor-card p-5 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3">
       <div class="flex justify-between items-start">
         <div>
-          <h3 class="font-bold text-slate-900 text-base">${p.title}</h3>
+          <h3 class="font-bold text-slate-900 text-base">${escapeHtml(p.title)}</h3>
           <div class="text-xs text-emerald-700 font-semibold mt-0.5">
-            👤 ${customerName} • ${p.clothingCategory?.replace('_', ' ').toUpperCase() || 'SUIT'}
+            👤 ${escapeHtml(customerName)} • ${escapeHtml(p.clothingCategory?.replace('_', ' ').toUpperCase() || 'SUIT')}
           </div>
         </div>
         ${
@@ -123,28 +121,28 @@ function renderProfileCard(p: any): string {
       <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
         <div class="font-bold text-slate-600 text-[11px] uppercase tracking-wider">Upper Garment / قمیض (Inches / انچ)</div>
         <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-slate-800">
-          <div><span class="text-slate-400 block text-[10px]">Length / لمبائی</span><strong>${q.length || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Shoulder / کندھا</span><strong>${q.shoulder || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Chest / چھاتی</span><strong>${q.chest || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Sleeve / آستین</span><strong>${q.sleeve || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Collar / کالر</span><strong>${q.collar || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Daman / دامن</span><strong>${q.ghera || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Length / لمبائی</span><strong>${escapeHtml(q.length || '--')}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Shoulder / کندھا</span><strong>${escapeHtml(q.shoulder || '--')}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Chest / چھاتی</span><strong>${escapeHtml(q.chest || '--')}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Sleeve / آستین</span><strong>${escapeHtml(q.sleeve || '--')}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Collar / کالر</span><strong>${escapeHtml(q.collar || '--')}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Daman / دامن</span><strong>${escapeHtml(q.ghera || '--')}"</strong></div>
         </div>
 
         <div class="font-bold text-slate-600 text-[11px] uppercase tracking-wider pt-2 border-t border-slate-200">Lower Garment / شلوار (Inches / انچ)</div>
         <div class="grid grid-cols-3 sm:grid-cols-4 gap-2 text-slate-800">
-          <div><span class="text-slate-400 block text-[10px]">Length / لمبائی</span><strong>${s.length || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Paincha / پائنچہ</span><strong>${s.paincha || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Aasan / آسن</span><strong>${s.aasan || '--'}"</strong></div>
-          <div><span class="text-slate-400 block text-[10px]">Daman / دامن</span><strong>${s.ghera || s.waist || '--'}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Length / لمبائی</span><strong>${escapeHtml(s.length || '--')}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Paincha / پائنچہ</span><strong>${escapeHtml(s.paincha || '--')}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Aasan / آسن</span><strong>${escapeHtml(s.aasan || '--')}"</strong></div>
+          <div><span class="text-slate-400 block text-[10px]">Daman / دامن</span><strong>${escapeHtml(s.ghera || s.waist || '--')}"</strong></div>
         </div>
       </div>
 
       <div class="pt-1 flex items-center justify-between">
-        <button class="text-xs text-slate-500 hover:text-slate-900 font-semibold btn-edit-profile" data-id="${p._id}">
+        <button class="text-xs text-slate-500 hover:text-slate-900 font-semibold btn-edit-profile" data-id="${escapeHtml(p._id)}">
           Edit / ترمیم کریں
         </button>
-        <a href="/new-order.html?customerId=${p.customer}&profileId=${p._id}" class="text-xs font-bold text-emerald-600 hover:text-emerald-800">
+        <a href="/new-order.html?customerId=${encodeURIComponent(p.customer)}&profileId=${encodeURIComponent(p._id)}" class="text-xs font-bold text-emerald-600 hover:text-emerald-800">
           New Order / نیا آرڈر ➔
         </a>
       </div>

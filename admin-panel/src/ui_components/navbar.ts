@@ -4,6 +4,8 @@
  * Includes Notifications Bell & Dropdown Feed
  */
 
+import { escapeHtml } from '../utils/sanitize.ts';
+
 export interface NavbarOptions {
   brandName?: string;
   logoIcon?: string;
@@ -20,10 +22,9 @@ export const renderNavbar = (containerElement: HTMLElement | string, options: Na
     throw new Error('Navbar container element not found');
   }
 
-  const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!user;
 
   const {
     brandName = 'Action Tailor / ماسٹر ٹیلر',
@@ -237,12 +238,12 @@ async function setupNotificationBell(nav: HTMLElement): Promise<void> {
       }
 
       notifList.innerHTML = items.slice(0, 15).map((n: any) => `
-        <div style="padding: 0.5rem; border-radius: 0.5rem; background: ${n.isRead ? '#f8fafc' : '#f0fdf4'}; border: 1px solid ${n.isRead ? '#e2e8f0' : '#bbf7d0'}; font-size: 0.75rem; cursor: pointer;" class="nav-notif-item" data-id="${n._id}">
+        <div style="padding: 0.5rem; border-radius: 0.5rem; background: ${n.isRead ? '#f8fafc' : '#f0fdf4'}; border: 1px solid ${n.isRead ? '#e2e8f0' : '#bbf7d0'}; font-size: 0.75rem; cursor: pointer;" class="nav-notif-item" data-id="${escapeHtml(n._id)}">
           <div style="font-weight: 700; color: #0f172a; display: flex; justify-content: space-between;">
-            <span>${n.title}</span>
+            <span>${escapeHtml(n.title)}</span>
             <span style="font-size: 0.65rem; color: #64748b;">${new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
-          <div style="color: #475569; margin-top: 0.2rem; font-size: 0.7rem;">${n.message}</div>
+          <div style="color: #475569; margin-top: 0.2rem; font-size: 0.7rem;">${escapeHtml(n.message)}</div>
         </div>
       `).join('');
 

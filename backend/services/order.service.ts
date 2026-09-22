@@ -16,9 +16,12 @@ import {
   type ClothingCategory,
   type MeasurementData,
   type GarmentDesignOptions,
+  ORDER_STATUS_TRANSITIONS,
   normalizeClothingCategory,
   normalizePakistaniPhone,
 } from '../types/index.ts';
+import { escapeRegExp } from '../utils/regex.ts';
+import { parsePagination } from '../utils/pagination.ts';
 
 export interface OrderFilterOptions {
   status?: OrderStatus;
@@ -108,11 +111,16 @@ export class OrderService {
     // 1. Resolve Measurement Snapshot
     let snapshot: MeasurementData | undefined = data.customMeasurements;
 
-    if (!snapshot && data.measurementProfileId) {
+    if (data.measurementProfileId) {
       const profile = await MeasurementProfile.findById(data.measurementProfileId);
-      if (profile) {
-        snapshot = profile.measurements;
+      if (!profile) {
+        throw new Error('Specified measurement profile not found / منتخب شدہ ناپ کا پروفائل نہیں ملا');
       }
+      const profileCustId = (profile.customer as any)?._id?.toString() || profile.customer?.toString();
+      if (profileCustId !== data.customer.toString()) {
+        throw new Error('Measurement profile does not belong to the selected customer / ناپ کا پروفائل منتخب گاہک کا نہیں ہے');
+      }
+      snapshot = profile.measurements;
     }
 
     if (!snapshot) {
@@ -233,13 +241,18 @@ export class OrderService {
         // outside the multi-document transaction to prevent cross-transaction WriteConflict
         await CustomerProfile.findByIdAndUpdate(data.customer, { $inc: { totalOrders: 1 } });
 
-        // Broadcast Real-Time Event via Socket.IO
+        // Target Real-Time Events via Scoped Socket.IO Rooms
         try {
           const io = getIO();
-          io.emit('order:created', {
+          io.to('staff').emit('order:created', {
             orderId: newOrder._id.toString(),
             orderNumber: newOrder.orderNumber,
             customer: data.customer,
+            totalAmount: newOrder.totalAmount,
+          });
+          io.to(`customer:${data.customer}`).emit('order:created', {
+            orderId: newOrder._id.toString(),
+            orderNumber: newOrder.orderNumber,
             totalAmount: newOrder.totalAmount,
           });
         } catch (_err) {}
@@ -279,8 +292,10 @@ export class OrderService {
    */
   static async listOrders(
     options: OrderFilterOptions = {}
-  ): Promise<{ orders: IOrder[]; total: number; pages: number }> {
-    const { status, customerId, search, page = 1, limit = 20 } = options;
+  ): Promise<{ orders: IOrder[]; total: number; pages: number; page: number; limit: number }> {
+    const { status, customerId, search, page, limit } = options;
+    const { page: resolvedPage, limit: resolvedLimit, skip } = parsePagination({ page, limit }, 20);
+
     const filter: Record<string, any> = {};
 
     if (status) {
@@ -292,22 +307,25 @@ export class OrderService {
     }
 
     if (search && search.trim()) {
-      const trimmed = search.trim();
-      const orderNumRegex = new RegExp(trimmed, 'i');
+      const trimmed = search.trim().slice(0, 100);
+      const escaped = escapeRegExp(trimmed);
+      const orderNumRegex = new RegExp(escaped, 'i');
       const normPhone = normalizePakistaniPhone(trimmed);
 
       const custOrConditions: any[] = [
-        { name: new RegExp(trimmed, 'i') },
-        { phone: new RegExp(trimmed, 'i') },
+        { name: new RegExp(escaped, 'i') },
+        { phone: new RegExp(escaped, 'i') },
       ];
       if (normPhone && normPhone.length >= 3) {
-        custOrConditions.unshift({ phone: normPhone });
-        custOrConditions.push({ phone: new RegExp('^' + normPhone) });
+        const escapedPhone = escapeRegExp(normPhone);
+        custOrConditions.unshift({ phone: escapedPhone });
+        custOrConditions.push({ phone: new RegExp('^' + escapedPhone) });
       }
 
-      // Check if searching by customer name/phone
+      // Check if searching by customer name/phone (ignoring soft-deleted)
       const matchingCustomers = await CustomerProfile.find({
         $or: custOrConditions,
+        isDeleted: { $ne: true },
       }).select('_id').limit(50);
 
       const customerIds = matchingCustomers.map((c) => c._id);
@@ -315,14 +333,12 @@ export class OrderService {
       filter.$or = [{ orderNumber: orderNumRegex }, { customer: { $in: customerIds } }];
     }
 
-    const skip = (page - 1) * limit;
-
     const [orders, total] = await Promise.all([
       Order.find(filter)
         .populate('customer', 'name phone whatsapp address city')
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit)
+        .limit(resolvedLimit)
         .lean(),
       Order.countDocuments(filter),
     ]);
@@ -330,9 +346,10 @@ export class OrderService {
     return {
       orders: orders as unknown as IOrder[],
       total,
-      pages: Math.ceil(total / limit) || 1,
-      currentPage: page,
-    } as any;
+      pages: Math.ceil(total / resolvedLimit) || 1,
+      page: resolvedPage,
+      limit: resolvedLimit,
+    };
   }
 
   /**
@@ -364,23 +381,20 @@ export class OrderService {
     const oldStatus = order.status;
 
     if (oldStatus !== newStatus) {
-      const ALLOWED_TRANSITIONS: Record<string, string[]> = {
-        pending: ['confirmed', 'cutting', 'cancelled'],
-        confirmed: ['cutting', 'cancelled'],
-        cutting: ['stitching', 'cancelled'],
-        stitching: ['quality_check', 'ready', 'cancelled'],
-        quality_check: ['ready', 'stitching', 'cancelled'],
-        ready: ['delivered', 'cancelled'],
-        delivered: [],
-        cancelled: [],
-      };
+      let allowed = ORDER_STATUS_TRANSITIONS[oldStatus] || [];
+      if (oldStatus === 'on_hold' && order.previousOperationalStatus) {
+        allowed = Array.from(new Set([...allowed, order.previousOperationalStatus]));
+      }
 
-      const allowed = ALLOWED_TRANSITIONS[oldStatus] || [];
       if (!allowed.includes(newStatus)) {
         throw new Error(
           `Cannot transition order status from "${oldStatus}" to "${newStatus}". Allowed: [${allowed.join(', ')}] / اس حالت میں تبدیلی ممکن نہیں ہے`
         );
       }
+    }
+
+    if (newStatus === 'on_hold' && oldStatus !== 'on_hold') {
+      order.previousOperationalStatus = oldStatus;
     }
 
     order.status = newStatus;
@@ -423,22 +437,34 @@ export class OrderService {
       });
     }
 
-    // Broadcast Real-Time Event via Socket.IO
+    // Target Real-Time Events via Scoped Socket.IO Rooms
     try {
       const io = getIO();
-      io.emit('order:status_changed', {
+      const customerRoom = `customer:${order.customer.toString()}`;
+
+      io.to('staff').emit('order:status_changed', {
         orderId: order._id.toString(),
         orderNumber: order.orderNumber,
         newStatus,
         customerId: order.customer.toString(),
       });
 
+      io.to(customerRoom).emit('order:status_changed', {
+        orderId: order._id.toString(),
+        orderNumber: order.orderNumber,
+        newStatus,
+      });
+
       if (newStatus === 'ready') {
-        io.emit('order:ready', {
+        io.to('staff').emit('order:ready', {
           orderId: order._id.toString(),
           orderNumber: order.orderNumber,
           customerName: customer?.name || '',
           customerPhone: customer?.phone || '',
+        });
+        io.to(customerRoom).emit('order:ready', {
+          orderId: order._id.toString(),
+          orderNumber: order.orderNumber,
         });
       }
     } catch (_err) {}

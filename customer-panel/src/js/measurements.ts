@@ -1,4 +1,5 @@
 import { renderNavbar, showToast } from '../ui_components/index.ts';
+import { escapeHtml } from '../utils/sanitize.ts';
 import '../utils/api.ts';
 
 interface MeasurementProfile {
@@ -38,11 +39,9 @@ interface MeasurementProfile {
 }
 
 async function initMeasurementsPage(): Promise<void> {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
-  if (!token || !userStr) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const user = await (window as any).ActionTailor.getCurrentUser();
+  if (!user) {
+    (window as any).ActionTailor.clearSession();
     window.location.href = '/signin.html';
     return;
   }
@@ -101,7 +100,7 @@ function renderProfileCard(profile: MeasurementProfile): string {
       <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-3">
         <div>
           <div class="flex items-center gap-2">
-            <h2 class="text-base sm:text-lg font-bold text-slate-900">${profile.title || 'Standard Fit / معیاری ناپ'}</h2>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">${escapeHtml(profile.title || 'Standard Fit / معیاری ناپ')}</h2>
             ${profile.isDefault ? `
               <span class="text-[11px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                 Default / پرائمری
@@ -109,12 +108,12 @@ function renderProfileCard(profile: MeasurementProfile): string {
             ` : ''}
           </div>
           <div class="text-xs text-slate-400 mt-0.5">
-            Recorded On / تاریخ: ${formattedDate}
+            Recorded On / تاریخ: ${escapeHtml(formattedDate)}
           </div>
         </div>
 
         <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-emerald-800 font-bold border border-slate-200">
-          ${unitLabel}
+          ${escapeHtml(unitLabel)}
         </span>
       </div>
 

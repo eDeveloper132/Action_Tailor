@@ -51,6 +51,7 @@ export interface InterServerEvents {
 export interface SocketData {
   userId?: string;
   sessionId?: string;
+  user?: JwtUserPayload;
 }
 
 // ==========================================
@@ -77,12 +78,13 @@ export interface JwtUserPayload {
 }
 
 export interface AuthResponse {
-  token: string;
+  token?: string;
   user: {
     userId: string;
     email: string;
     name?: string;
     role?: string;
+    customerProfile?: string;
   };
 }
 

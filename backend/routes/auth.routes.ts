@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 import mongoose from 'mongoose';
-import { generateToken } from '../utils/jwt.ts';
+import { generateToken, AUTH_COOKIE_NAME, getAuthCookieOptions } from '../utils/jwt.ts';
 import { authenticate, type AuthRequest, authRateLimiter, validateSignin, validateSignup } from '../middlewares/index.ts';
 import { User, CustomerProfile } from '../models/index.ts';
 import type { ApiResponse, AuthResponse, JwtUserPayload } from '../types/index.ts';
@@ -70,18 +70,12 @@ router.post('/signin', authRateLimiter, validateSignin, async (req: Request, res
 
     const token = generateToken(tokenPayload);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie(AUTH_COOKIE_NAME, token, getAuthCookieOptions());
 
     res.json({
       status: 'success',
       message: 'Authenticated successfully / لاگ ان کامیاب',
       data: {
-        token,
         user: tokenPayload,
       },
     });
@@ -172,18 +166,12 @@ router.post('/signup', authRateLimiter, validateSignup, async (req: Request, res
 
     const token = generateToken(tokenPayload);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie(AUTH_COOKIE_NAME, token, getAuthCookieOptions());
 
     res.status(201).json({
       status: 'success',
       message: 'Account created successfully / اکاؤنٹ کامیابی سے بن گیا ہے',
       data: {
-        token,
         user: tokenPayload,
       },
     });
@@ -204,15 +192,19 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response<ApiRespon
     if (mongoose.connection.readyState >= 1 && req.user?.userId) {
       const user = await User.findById(req.user.userId).populate('customerProfile');
       if (user) {
+        const userPayload = {
+          userId: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          customerProfile: user.customerProfile,
+        };
         res.json({
           status: 'success',
           data: {
-            userId: user._id,
-            name: user.name,
-            email: user.email,
-            phone: user.phone,
-            role: user.role,
-            customerProfile: user.customerProfile,
+            user: userPayload,
+            ...userPayload,
           },
         });
         return;
@@ -221,7 +213,10 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response<ApiRespon
 
     res.json({
       status: 'success',
-      data: req.user,
+      data: {
+        user: req.user,
+        ...req.user,
+      },
     });
   } catch (err: any) {
     res.status(500).json({
@@ -232,17 +227,22 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response<ApiRespon
 });
 
 /**
- * POST or GET /api/auth/signout
+ * POST /api/auth/signout
  * Clears authentication cookie
  */
-const signOutHandler = (_req: Request, res: Response<ApiResponse>) => {
-  res.clearCookie('token');
+router.post('/signout', (_req: Request, res: Response<ApiResponse>) => {
+  const cookieOpts = getAuthCookieOptions();
+  res.clearCookie(AUTH_COOKIE_NAME, {
+    httpOnly: cookieOpts.httpOnly,
+    secure: cookieOpts.secure,
+    sameSite: cookieOpts.sameSite,
+    domain: cookieOpts.domain,
+    path: cookieOpts.path,
+  });
   res.json({
     status: 'success',
     message: 'Signed out successfully / لاگ آؤٹ ہو گیا ہے',
   });
-};
-
-router.post('/signout', signOutHandler);
+});
 
 export default router;

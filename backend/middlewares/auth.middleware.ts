@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../utils/jwt.ts';
+import { verifyToken, AUTH_COOKIE_NAME } from '../utils/jwt.ts';
 import type { JwtUserPayload } from '../types/index.ts';
 
 import mongoose from 'mongoose';
@@ -12,21 +12,32 @@ export interface AuthRequest extends Request {
 
 /**
  * Authentication Middleware
- * Validates JWT from Authorization header, HTTP-only cookies, or query string.
- * Supports both HTML views (redirect to /signin) and API endpoints (401 JSON).
+ * Validates JWT from secure HTTP-only cookies, or fallback Authorization Bearer header.
+ * Prohibits tokens in query strings.
  */
 export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  let token: string | undefined;
-
-  // 1. Check Authorization Bearer header
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.split(' ')[1];
+  // Prohibit query-string token authentication
+  if (req.query && (req.query as any).token) {
+    res.status(400).json({
+      status: 'error',
+      message: 'Token in query string is prohibited for security / یو آر ایل میں ٹوکن بھیجنا منع ہے',
+    });
+    return;
   }
 
-  // 2. Check cookies if available
-  if (!token && (req as any).cookies) {
-    token = (req as any).cookies.token || (req as any).cookies.jwt;
+  let token: string | undefined;
+
+  // 1. Check secure HTTP-only cookie first (primary browser mechanism)
+  if ((req as any).cookies) {
+    token = (req as any).cookies[AUTH_COOKIE_NAME] || (req as any).cookies.token;
+  }
+
+  // 2. Check Authorization Bearer header (for non-browser CLI or integration clients)
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    }
   }
 
   if (!token) {
@@ -91,11 +102,15 @@ const handleUnauthenticated = (req: Request, res: Response, message = 'Authentic
 export const optionalAuth = (req: AuthRequest, _res: Response, next: NextFunction): void => {
   let token: string | undefined;
 
-  const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.split(' ')[1];
-  } else if ((req as any).cookies) {
-    token = (req as any).cookies.token || (req as any).cookies.jwt;
+  if ((req as any).cookies) {
+    token = (req as any).cookies[AUTH_COOKIE_NAME] || (req as any).cookies.token;
+  }
+
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    }
   }
 
   if (token) {

@@ -74,11 +74,9 @@ function getStatusBadgeClass(status: string): string {
 }
 
 async function initOrdersPage(): Promise<void> {
-  const token = localStorage.getItem('token');
-  const userStr = localStorage.getItem('user');
-  if (!token || !userStr) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const user = await (window as any).ActionTailor.getCurrentUser();
+  if (!user) {
+    (window as any).ActionTailor.clearSession();
     window.location.href = '/signin.html';
     return;
   }
